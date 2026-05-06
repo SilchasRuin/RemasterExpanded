@@ -15,9 +15,4 @@ RPG Fantasy Skill Icons https://assetstore.unity.com/packages/2d/gui/icons/free-
 Universal icon Bronze https://assetstore.unity.com/packages/2d/gui/icons/universal-bronze-icon-pack-120654
 RPG Icons https://assetstore.unity.com/packages/2d/gui/icons/rpg-icons-89109
 Painterly Spell Icons 1 https://opengameart.org/content/painterly-spell-icons-part-1
-
-
-
-
-
-
+<a href="https://www.textstudio.com/">Font generator</a>
