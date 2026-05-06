@@ -1,0 +1,138 @@
+﻿using Dawnsbury.Audio;
+using Dawnsbury.Core;
+using Dawnsbury.Core.CharacterBuilder.Feats;
+using Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Archetypes;
+using Dawnsbury.Core.CombatActions;
+using Dawnsbury.Core.Creatures;
+using Dawnsbury.Core.Mechanics;
+using Dawnsbury.Core.Mechanics.Enumerations;
+using Dawnsbury.Core.Mechanics.Targeting;
+using Dawnsbury.Core.Mechanics.Treasure;
+using Dawnsbury.Core.Possibilities;
+using Dawnsbury.Mods.DawnniExpanded;
+using Microsoft.Xna.Framework;
+using static RemasterExpanded.ModData;
+
+namespace RemasterExpanded.MyArchetypes;
+#nullable enable
+public class AlchemistArchetype
+{
+    public static IEnumerable<Feat> LoadFeats()
+    {
+        yield return ArchetypeFeats.CreateAgnosticArchetypeDedication(ModData.MTraits.AlchemistArchetype,  "You enjoy tinkering with alchemical formulas and substances in your spare time, and your studies have progressed beyond mere experimentation.", 
+                "You become trained in alchemical bombs and Crafting; if you were already trained in Crafting, you instead become trained in a skill of your choice.\n\nYou gain the Quick Alchemy benefits, creating up to 4 versatile vials during your daily preparations.")
+            .WithDemandsAbility14(Ability.Intelligence).WithOnSheet(sheet =>
+            {
+                sheet.TrainInThisOrSubstitute(Skill.Crafting);
+                sheet.SetProficiency(Trait.Bomb, Proficiency.Trained);
+            })
+            .WithOnCreature(creature => creature.AddQEffect(new QEffect("Quick Alchemy", "You can quickly create alchemical items.")
+            {
+                ProvideActionIntoPossibilitySection = (_, possibilitySection1) =>
+                {
+                    if (possibilitySection1.PossibilitySectionId != PossibilitySectionId.MainActions)
+                        return null;
+                    int alchemyLevel = creature.Level;
+                    PossibilitySection possibilitySection2 = new("Mutagens");
+                    PossibilitySection possibilitySection3 = new("Elixirs");
+                    PossibilitySection possibilitySection4 = new("Bombs");
+                    foreach (Item alchemyItem in Items.ShopItems.Where( item => item.HasTrait(Trait.Elixir) && item.Level <= alchemyLevel && !item.HasTrait(TraitMutagens.MutagenTrait)))
+                        possibilitySection3.AddPossibility(CreateAlchemyPossibilityItem(alchemyItem, creature));
+                    foreach (Item alchemyItem in Items.ShopItems.Where(item => item.Level <= alchemyLevel && item.HasTrait(TraitMutagens.MutagenTrait)))
+                        possibilitySection2.AddPossibility(CreateAlchemyPossibilityItem(alchemyItem, creature));
+                    foreach (Item alchemyItem in Items.ShopItems.Where(item => item.Level <= alchemyLevel && item.HasTrait(Trait.Bomb)))
+                        possibilitySection4.AddPossibility(CreateAlchemyPossibilityItem(alchemyItem, creature));
+                    foreach (Item vial in VersatileVials().Where(item => item.Level <= alchemyLevel)) 
+                        possibilitySection4.AddPossibility(CreateAlchemyPossibilityItem(vial, creature));
+                    return new SubmenuPossibility(IllustrationName.InvisibilityPotion, "Quick Alchemy")
+                    {
+                        Subsections = 
+                        {
+                            possibilitySection3,
+                            possibilitySection2,
+                            possibilitySection4
+                        }
+                    };
+                },
+                StartOfYourPrimaryTurn = (_, _) =>
+                {
+                    foreach (Creature cr in creature.Battle.AllCreatures)
+                    {
+                        List<Item> items = [];
+                        items.AddRange(cr.HeldItems.Where(item => item.HasTrait(ArchetypeAlchemist.InfusedTrait) && item.Tag is Creature source && source == creature));
+                        items.AddRange(cr.CarriedItems.Where(item => item.HasTrait(ArchetypeAlchemist.InfusedTrait) && item.Tag is Creature source && source == creature));
+                        if (items.Count == 0) continue;
+                        foreach (Item item in items)
+                        {
+                            cr.HeldItems.Remove(item);
+                            cr.CarriedItems.Remove(item);
+                            cr.Overhead(item.Name+" has expired!", Color.White);
+                            cr.Battle.Log(item.Name+" has expired!");
+                        }
+                    }
+                    return Task.CompletedTask;
+                },
+                StateCheck = effect =>
+                {
+                    var newDescription = $"You can quickly create alchemical items. You have {(creature.HasFeat(ModData.MFeatNames.VoluminousVials) ? 5 : 4) - creature.PersistentUsedUpResources.UsedUpActions.Count(x => x == "Used Versatile Vial.")} versatile vials left.";
+                    if (effect.Description != newDescription)
+                        effect.Description = newDescription;
+                }
+            }));
+        yield return new TrueFeat(ModData.MFeatNames.VoluminousVials, 6, "Your dabbling in alchemy has improved.", "Your number of versatile vials per day increases to 5.", [])
+            .WithAvailableAsArchetypeFeat(ModData.MTraits.AlchemistArchetype)
+            .WithPrerequisite(values => values.GetProficiency(Trait.Crafting) >= Proficiency.Expert, "You must be expert in Crafting.");
+    }
+    public static ActionPossibility CreateAlchemyPossibilityItem(Item alchemyItem, Creature creature)
+    {
+        return new ActionPossibility(new CombatAction(creature, alchemyItem.Illustration, "Make " + alchemyItem.Name, [Trait.Basic, Trait.Manipulate], 
+            "{i}Spend one action and 1 versatile vial to make this item{/i}. The item only lasts until the start of your next turn.\n\n" + alchemyItem.Description, Target.Self()
+                .WithAdditionalRestriction(a =>
+                {
+                    if (!a.HasFreeHand)
+                        return "You need a free hand to use quick alchemy.";
+                    return a.PersistentUsedUpResources.UsedUpActions.Count(x => x == "Used Versatile Vial.") >=
+                           (a.HasFeat(ModData.MFeatNames.VoluminousVials) ? 5 : 4) ? "You have no versatile vials left." : null;
+                })).WithSoundEffect(SfxName.PotionUse2).WithActionCost(1)
+            .WithEffectOnSelf((_, caster) =>
+            {
+                alchemyItem.Traits.Add(Trait.EncounterEphemeral);
+                alchemyItem.Traits.Add(ArchetypeAlchemist.InfusedTrait);
+                alchemyItem.Tag = caster;
+                caster.PersistentUsedUpResources.UsedUpActions.Add("Used Versatile Vial.");
+                caster.AddHeldItem(alchemyItem);
+                string overheadString = (caster.HasFeat(ModData.MFeatNames.VoluminousVials) ? 5 : 4) -
+                                        caster.PersistentUsedUpResources.UsedUpActions.Count(x =>
+                                            x == "Used Versatile Vial.") +
+                                        " versatile vials left.";
+                caster.Overhead(overheadString, Color.White);
+                return Task.CompletedTask;
+            }), PossibilitySize.Half);
+    }
+    public static IEnumerable<Item> VersatileVials()
+    {
+        Item vial = new Item(IllustrationName.BarkskinPotion, "versatile vial (lesser)",
+                Trait.Bomb, Trait.Consumable, Trait.Splash, Trait.Acid, Trait.Thrown, Trait.Martial,
+                Trait.Alchemical)
+            .WithDescription(
+                "This tiny glass flask contains volatile chemicals that can be used offensively in a pinch.")
+            .WithWeaponProperties(new WeaponProperties("1d6", DamageKind.Acid).WithRangeIncrement(4)
+                .WithAdditionalSplashDamage(1));
+        vial.Level = 1;
+        yield return vial;
+        Item vialModerate = new Item(IllustrationName.BarkskinPotion, "versatile vial (moderate)",
+                Trait.Bomb, Trait.Consumable, Trait.Splash, Trait.Acid, Trait.Thrown, Trait.Martial,
+                Trait.Alchemical)
+            .WithDescription(
+                "This tiny glass flask contains volatile chemicals that can be used offensively in a pinch.")
+            .WithWeaponProperties(new WeaponProperties("1d6", DamageKind.Acid).WithRangeIncrement(4)
+                .WithAdditionalSplashDamage(2))
+            .WithAdditionalWeaponProperties(properties =>
+            {
+                properties.DamageDieCount = 2;
+                properties.ItemBonus = 1;
+            });
+        vialModerate.Level = 4;
+        yield return vialModerate;
+    }
+}

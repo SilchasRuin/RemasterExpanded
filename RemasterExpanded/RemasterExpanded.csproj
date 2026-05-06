@@ -1,0 +1,57 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Dawnsbury.Mods.RemasterExpanded</AssemblyName>
+    <Platforms>x64</Platforms>
+    <NoWarn>1998;NETSDK1206;NU1901;NU1902;NU1903;NU1904;VSTHRD200; CS0618</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.14.15">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Common">
+      <HintPath>D:\SteamLibrary\steamapps\common\Dawnsbury Days\Data\Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Dawnsbury Days">
+      <HintPath>D:\SteamLibrary\steamapps\common\Dawnsbury Days\Data\Dawnsbury Days.dll</HintPath>
+    </Reference>
+    <Reference Include="Dawnsbury.Mods.LoresAndWeaknesses">
+      <HintPath>D:\SteamLibrary\steamapps\workshop\content\2693730\3710730920\CustomModsV3\Dawnsbury.Mods.LoresAndWeaknesses.dll</HintPath>
+    </Reference>
+    <Reference Include="Dawnsbury.Mods.Remaster.FeatsDb">
+      <HintPath>D:\SteamLibrary\steamapps\workshop\content\2693730\3223870401\CustomMods\Dawnsbury.Mods.Remaster.FeatsDb.dll</HintPath>
+    </Reference>
+    <Reference Include="Dawnsbury.Mods.Remaster.Spellbook">
+      <HintPath>D:\SteamLibrary\steamapps\workshop\content\2693730\3223762737\CustomMods\Dawnsbury.Mods.Remaster.Spellbook.dll</HintPath>
+    </Reference>
+    <Reference Include="ExplorationActivities">
+      <HintPath>..\..\Debug\ExplorationActivities\bin\Debug\net10.0-windows\ExplorationActivities.dll</HintPath>
+    </Reference>
+    <Reference Include="MonoGame.Framework">
+      <HintPath>D:\SteamLibrary\steamapps\common\Dawnsbury Days\Data\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="PsychicExpanded">
+      <HintPath>..\..\ClassLibrary1\PsychicExpanded\bin\Debug\net10.0-windows\PsychicExpanded.dll</HintPath>
+    </Reference>
+    <Reference Include="SpellsAndSpellhearts">
+      <HintPath>D:\SteamLibrary\steamapps\common\Dawnsbury Days\CustomMods\SpellsAndSpellhearts.dll</HintPath>
+    </Reference>
+    <Reference Include="SpiritDamage">
+      <HintPath>..\..\SpiritDamage\SpiritDamage\bin\Debug\net10.0-windows\SpiritDamage.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" />
+    <PackageReference Include="System.Text.Json" Version="10.0.5" />
+  </ItemGroup>
+
+</Project>

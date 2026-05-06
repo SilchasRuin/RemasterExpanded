@@ -1,0 +1,212 @@
+﻿using Dawnsbury.Core;
+using Dawnsbury.Core.CharacterBuilder.Feats;
+using Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Archetypes;
+using Dawnsbury.Core.CombatActions;
+using Dawnsbury.Core.Creatures;
+using Dawnsbury.Core.Creatures.Parts;
+using Dawnsbury.Core.Mechanics;
+using Dawnsbury.Core.Mechanics.Core;
+using Dawnsbury.Core.Mechanics.Enumerations;
+using Dawnsbury.Core.Mechanics.Rules;
+using Dawnsbury.Core.Mechanics.Targeting;
+using Dawnsbury.Core.Mechanics.Targeting.Targets;
+using Dawnsbury.Core.Mechanics.Treasure;
+using Dawnsbury.Core.Possibilities;
+using Dawnsbury.Display.Illustrations;
+using Dawnsbury.Modding;
+using Dawnsbury.Mods.Phoenix;
+using static RemasterExpanded.ModData;
+
+namespace RemasterExpanded.MyArchetypes;
+
+public class DualWeaponWarrior
+{
+    public static IEnumerable<Feat> LoadFeats()
+    {
+        yield return ArchetypeFeats.CreateAgnosticArchetypeDedication(MTraits.DualWeaponWarriorArchetype,
+            "You're exceptional in your use of two weapons.", "You gain the Double Slice fighter feat.")
+            .WithRulesBlockForCombatAction(creature => new CombatAction(creature, IllustrationName.Swords, "Double Slice",
+                [Trait.Fighter],
+                "Make two Strikes against the same target, one with each of your two melee weapons, each using your current multiple attack penalty.\n\nIf the second Strike is made with a non-agile weapon it takes a –2 penalty. Combine the damage for the purposes of weakness and resistance. This counts as two attacks when calculating your multiple attack penalty.",
+                Target.ReachWithBothWeapons()).WithActionCost(2))
+            .WithOnSheet(sheet => sheet.GrantFeat(FeatName.DoubleSlice));
+        
+        TrueFeat dualThrower = new TrueFeat(MFeatNames.DualThrower, 4, "You know how to throw two weapons as easily as strike with them.",
+            "Whenever a feat you gained from the dual-weapon warrior archetype allows you to make a melee Strike, you can instead make a ranged Strike with a thrown weapon or a one-handed ranged weapon you are wielding (weapons that need “1+” hand, such as longbows, don't qualify). Any effects from these feats that apply to one-handed melee weapons or melee Strikes also apply to one-handed ranged weapons and ranged Strikes.",
+            []).WithAvailableAsArchetypeFeat(MTraits.DualWeaponWarriorArchetype);
+        DualThrowerLogic(dualThrower);
+        yield return dualThrower;
+
+        yield return ArchetypeFeats.DuplicateFeatAsArchetypeFeat(FeatName.QuickDraw, MTraits.DualWeaponWarriorArchetype, 4);
+
+        if (ModManager.TryParse("SwashTrait", out Trait _))
+        {
+            yield return ArchetypeFeats.DuplicateFeatAsArchetypeFeat(AddSwash.TwinParry.FeatName, MTraits.DualWeaponWarriorArchetype, 6);
+        }
+        
+        TrueFeat flensingSlice = new TrueFeat(MFeatNames.FlensingSlice, 8,  "When you hit with both attacks with Double Slice, you flense the target, making it bleed and creating a weak spot.", 
+            "{b}Requirements{/b} Your last action was Double Slice or Double Throw and both attacks hit the target.\n\nThe target takes 1d8 persistent bleed damage per weapon damage die of whichever of the weapons you used that has the most weapon damage dice (maximum 4d8 for a major striking weapon). In addition, until the start of your next turn the target is off-guard, and its resistances to any physical damage types are reduced by 5.", []).WithAvailableAsArchetypeFeat(MTraits.DualWeaponWarriorArchetype);
+        FlensingSliceLogic(flensingSlice);
+        yield return flensingSlice;
+    } 
+    
+    //logics
+    public static void DualThrowerLogic(TrueFeat dualThrower)
+    {
+        dualThrower.WithPermanentQEffect("You can use double slice and other Dual Weapon Warrior actions with ranged weapons.",
+            qf =>
+            {
+                qf.ProvideMainAction = _ =>
+                {
+                    if (qf.Owner.HeldItems.Count(itm =>
+                            itm.HasTrait(Trait.Weapon)) != 2)
+                        return null;
+                    Target strike1 = qf.Owner.CreateStrike(qf.Owner.HeldItems[0]).Target;
+                    Target strike2 = qf.Owner.CreateStrike(qf.Owner.HeldItems[1]).Target;
+                    if (qf.Owner.HeldItems[0].WeaponProperties?.Throwable ?? false)
+                    {
+                        strike1 = StrikeRules.CreateStrike(qf.Owner, qf.Owner.HeldItems[0], RangeKind.Ranged, -1, true).Target;
+                    }
+                    if (qf.Owner.HeldItems[1].WeaponProperties?.Throwable ?? false)
+                    {
+                        strike2 = StrikeRules.CreateStrike(qf.Owner, qf.Owner.HeldItems[1], RangeKind.Ranged, -1, true).Target;
+                    }
+                    return new ActionPossibility(new CombatAction(qf.Owner, new SideBySideIllustration(IllustrationName.Throw, IllustrationName.Throw),
+                                "Double Throw", [Trait.Basic, Trait.AlwaysHits, Trait.IsHostile],
+                                "Make two Strikes against the same target, one with each of your two weapons, each using your current multiple attack penalty.\n\nIf the second Strike is made with a non-agile weapon it takes a –2 penalty. Combine the damage for the purposes of weakness and resistance. This counts as two attacks when calculating your multiple attack penalty.\n" +
+                                "{b}Special{/b} If the weapons used can be thrown, they will be thrown.",
+                                (strike1 as CreatureTarget)!.WithAdditionalConditionOnTargetCreature(
+                                    (a, b) =>
+                                    {
+                                        if (!strike2.CanBeginToUse(a))
+                                            return Usability.NotUsable("You must be able to make a strike.");
+                                        return ((CreatureTarget)strike2).IsLegalTarget(a, b)
+                                            ? Usability.Usable
+                                            : Usability.NotUsableOnThisCreature(
+                                                "The target must be in range of both weapons.");
+                                    })).WithActionCost(2)
+                            .WithEffectOnChosenTargets(async (slice, fighter, targets) =>
+                            {
+                                int map = fighter.Actions.AttackedThisManyTimesThisTurn;
+                                Creature? enemy = targets.ChosenCreature;
+                                if (enemy == null)
+                                {
+                                    slice.RevertRequested = true;
+                                    return;
+                                }
+                                QEffect qPenalty = new("Double Slice penalty",
+                                    "[this condition has no description]",
+                                    ExpirationCondition.Never, fighter, IllustrationName.None)
+                                {
+                                    BonusToAttackRolls = (_, ca, _) =>
+                                        !ca.HasTrait(Trait.Agile)
+                                            ? new Bonus(-2, BonusType.Untyped, "Double Slice penalty")
+                                            : null
+                                };
+                                Item first = fighter.HeldItems[0];
+                                Item second = fighter.HeldItems[1];
+                                bool firstThrown = first.WeaponProperties?.Throwable ?? false;
+                                bool secondThrown = second.WeaponProperties?.Throwable ?? false;
+                                CombatAction throw1 = StrikeRules.CreateStrike(qf.Owner, first, RangeKind.Ranged, map, true).WithActionCost(0);
+                                CombatAction throw2 = StrikeRules.CreateStrike(qf.Owner, second, RangeKind.Ranged, map, true).WithActionCost(0);
+                                if (!firstThrown)
+                                    await fighter.MakeStrike(enemy, first, map);
+                                else
+                                {
+                                    await fighter.Battle.GameLoop.FullCast(throw1,
+                                        ChosenTargets.CreateSingleTarget(enemy));
+                                }
+                                fighter.AddQEffect(qPenalty);
+                                if (!secondThrown)
+                                    await fighter.MakeStrike(enemy, second, map);
+                                else
+                                {
+                                    await fighter.Battle.GameLoop.FullCast(throw2,
+                                        ChosenTargets.CreateSingleTarget(enemy));
+                                }
+                                fighter.RemoveAllQEffects(qfr => qfr == qPenalty);
+                            }).WithTargetingTooltip(
+                                (power, _, _) =>
+                                    power.Description))
+                        .WithPossibilityGroup("Abilities");
+                };
+            });
+    }
+
+    public static void FlensingSliceLogic(TrueFeat feat)
+    {
+        feat.WithActionCost(1).WithPermanentQEffect(null, qf =>
+        {
+            Creature self = qf.Owner;
+            qf.YouBeginAction = (_, action) =>
+            {
+                if (action.Name != "Double Slice" && action.Name != "Double Throw") return Task.CompletedTask;
+                List<Item> weapons = self.HeldItems.ToList();
+                self.AddQEffect(new QEffect(ExpirationCondition.ExpiresAtEndOfYourTurn)
+                {
+                    AfterYouTakeActionAgainstTarget = (effect, combatAction, _, result) =>
+                    {
+                        if (!combatAction.HasTrait(Trait.Strike) || result <= CheckResult.Failure) return Task.CompletedTask;
+                        effect.Value += 1;
+                        return Task.CompletedTask;
+                    },
+                    Id = MQEffectIds.FlenseCounter,
+                    Tag = action
+                });
+                self.AddQEffect(new QEffect(ExpirationCondition.ExpiresAtEndOfYourTurn)
+                {
+                    Id = MQEffectIds.FlenseWeapons,
+                    Tag = weapons
+                });
+                return Task.CompletedTask;
+            };
+            qf.ProvideMainAction = _ =>
+            {
+                if (self.FindQEffect(MQEffectIds.FlenseCounter)?.Value != 2) return null;
+                if (self.FindQEffect(MQEffectIds.FlenseCounter)?.Tag is not CombatAction doubleSlice) return null;
+                if (self.Actions.ActionHistoryThisTurn.Last() != doubleSlice) return null;
+                if (doubleSlice.Target is not CreatureTarget slice) return null;
+                if (self.FindQEffect(MQEffectIds.FlenseWeapons)?.Tag is not List<Item> weapons) return null;
+                if (weapons.Count(weapon => weapon.WeaponProperties != null) < 2) return null;
+                int dice = weapons.MaxBy(weapon => weapon.WeaponProperties?.DamageDieCount)?.WeaponProperties?.DamageDieCount ?? 1;
+                return new ActionPossibility(new CombatAction(self, MIllustrations.FlensingSlice,
+                        "Flensing Slice", [Trait.Archetype, Trait.Basic],
+                        $"{{b}}Requirements{{/b}} Your last action was Double Slice or Double Throw and both attacks hit the target.\nThe target takes {dice}d8 persistent bleed damage. In addition, until the start of your next turn the target is off-guard, and its resistances to any physical damage types are reduced by 5.",
+                        slice.WithAdditionalConditionOnTargetCreature((_, enemy) =>
+                            enemy != doubleSlice.ChosenTargets.ChosenCreature
+                                ? Usability.NotUsableOnThisCreature(
+                                    "Flensing Slice can only be used on the target of Double Slice.")
+                                : Usability.Usable))
+                    .WithActionCost(1).WithEffectOnChosenTargets((creature, targets) =>
+                    {
+                        Creature? enemy = targets.ChosenCreature;
+                        if (enemy == null) return Task.CompletedTask;
+                        enemy.AddQEffect(QEffect.PersistentDamage(dice + "d8", DamageKind.Bleed));
+                        QEffect offGuard = QEffect.FlatFooted("Flensed")
+                            .WithExpirationAtStartOfSourcesTurn(creature, 1);
+                        offGuard.StateCheck = effect =>
+                        {
+                            Creature owner = effect.Owner;
+                            foreach (Resistance resistance in owner.WeaknessAndResistance.Resistances.Where(resist =>
+                                         resist.DamageKind.IsPhysical()))
+                            {
+                                if (resistance.Value >= 5)
+                                    resistance.Value -= 5;
+                                else
+                                {
+                                    resistance.Value = 0;
+                                }
+                            }
+                        };
+                        offGuard.Description = offGuard.Description?.Replace(".", " and your resistances to any physical damage types are reduced by 5.");
+                        offGuard.Name = "Flensed";
+                        offGuard.Illustration = MIllustrations.FlensingSlice;
+                        enemy.AddQEffect(offGuard);
+                        return Task.CompletedTask;
+                    })
+                ).WithPossibilityGroup("Abilities"); 
+            };
+
+        });
+    }
+}
