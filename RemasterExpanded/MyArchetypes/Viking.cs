@@ -30,7 +30,7 @@ public class Viking
     public static IEnumerable<Feat> VikingFeats()
     {
         Feat vikingDedication = ArchetypeFeats.CreateAgnosticArchetypeDedication(MTraits.Viking, "Vikings spend long periods of time at sea, only to leap from their boats at a moment's notice, charge through the surf, and take their enemies by storm.", 
-            "You gain the Additional Lore general feat for Maritime Lore and Warfare Lore.\nYou ignore difficult terrain from shallow water. In addition, while underwater, you gain a 10 foot bonus to your Speed.")
+            "You gain the Additional Lore general feat for Maritime Lore and Warfare Lore. If you were already trained in Warfare or Maritime Lore, you also become trained in a lore skill of your choice.\nYou ignore difficult terrain from shallow water. In addition, while underwater, you gain a 10 foot bonus to your Speed.")
             .WithPermanentQEffect("You ignore difficult terrain from shallow water. In addition, while underwater, you gain a 10 foot bonus to your Speed.", qf =>
             {
                 qf.Id = QEffectId.IgnoresShallowWater;
@@ -40,13 +40,13 @@ public class Viking
             {
                 if (values.GetProficiency(RemasterLore.MaritimeLore.Trait) >= Proficiency.Trained)
                 {
-                    values.TrainInThisOrSubstitute(RemasterLore.MaritimeLore);
+                    values.TrainInThisOrSubstitute(RemasterLore.MaritimeLore, true);
                 }
                 Lores.GrantAdditionalLore(values, RemasterLore.MaritimeLore);
                 if (Lores.AllPublicLores.FirstOrDefault(lore => lore.Name == "Warfare Lore") is not { } wLore) return;
                 if (values.GetProficiency(wLore.Trait) >= Proficiency.Trained)
                 {
-                    values.TrainInThisOrSubstitute(wLore);
+                    values.TrainInThisOrSubstitute(wLore, true);
                 }
                 Lores.GrantAdditionalLore(values, wLore);
             });

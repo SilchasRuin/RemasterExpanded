@@ -26,15 +26,15 @@ public class VikingGuard
     public static IEnumerable<Feat> VikingGuardFeats()
     {
         Feat vikingGuardDedication = ArchetypeFeats.CreateAgnosticArchetypeDedication(MTraits.VikingGuard, "The elite bodyguards of the High Crown, the Viking Guards are masters of defending their charges.",
-            "You gain the Additional Lore skill feat for Warfare Lore. If you were already trained in Warfare Lore, you also become trained in a different skill of your choice. You gain the Designate Ally action and can take the Protect Ally exploration activity to use it as a free action at the beginning of an encounter.");
+            "You gain the Additional Lore skill feat for Warfare Lore. If you were already trained in Warfare Lore, you also become trained in a lore skill of your choice. You gain the Designate Ally action and can take the Protect Ally exploration activity to use it as a free action at the beginning of an encounter.");
         vikingGuardDedication.WithRulesBlockForCombatAction(cr => new CombatAction(cr, IllustrationName.Shield, "Designate Ally", [],
                 "Choose an ally you can see, who becomes your designated ally. Until the end of the encounter, whenever your designated ally is adjacent to you and you're conscious, they gain a +2 circumstance bonus to AC and Reflex saving throws. You can have only one designated ally at a time, and if you designate a new ally, the previous ally loses any benefits.", Target.RangedFriend(200)))
             .WithOnSheet(values =>
             {
-                if (Lores.AllPublicLores.FirstOrDefault(lore => lore.Name == "Warfare Lore") is not { } wLore) return;
+                if (Lores.GetRegisteredLore("Warfare Lore", null) is not { } wLore) return;
                 if (values.GetProficiency(wLore.Trait) >= Proficiency.Trained)
                 {
-                    Lores.TrainInThisOrSubstitute(values, wLore);
+                    Lores.TrainInThisOrSubstitute(values, wLore, true);
                 }
                 Lores.GrantAdditionalLore(values, wLore);
             })

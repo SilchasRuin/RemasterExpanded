@@ -94,10 +94,10 @@ public class BlackJacket
                 values.GrantFeat(values.GetProficiency(Trait.Intimidation) < Proficiency.Trained
                     ? FeatName.Intimidation
                     : FeatName.ExpertIntimidation);
-                if (Lores.AllPublicLores.FirstOrDefault(lore => lore.Name == "Warfare Lore") is not { } wLore) return;
+                if (Lores.GetRegisteredLore("Warfare Lore", null) is not { } wLore) return;
                 if (values.GetProficiency(wLore.Trait) >= Proficiency.Trained)
                 {
-                    values.TrainInThisOrSubstitute(wLore);
+                    values.TrainInThisOrSubstitute(wLore, true);
                 }
                 Lores.GrantAdditionalLore(values, wLore);
             })

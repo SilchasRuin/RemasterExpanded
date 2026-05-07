@@ -26,7 +26,7 @@ public class Pirate
     public static IEnumerable<Feat> PirateFeats()
     {
         Feat pirateDedication = ArchetypeFeats.CreateAgnosticArchetypeDedication(MTraits.Pirate, "As a pirate, you sail the seas in search of enemy ships to plunder and great adventures to embark on.", 
-            "You gain the Additional Lore skill feat for Maritime Lore. You gain a +2 circumstance bonus to Acrobatics checks to Balance and Reflex saves to avoid falling prone due to uneven ground. Additionally, you gain the Boarding Assault action.");
+            "You gain the Additional Lore skill feat for Maritime Lore.  If you were already trained in Maritime Lore, you also become trained in a lore skill of your choice. You gain a +2 circumstance bonus to Acrobatics checks to Balance and Reflex saves to avoid falling prone due to uneven ground. Additionally, you gain the Boarding Assault action.");
         pirateDedication.WithRulesBlockForCombatAction(cr => new CombatAction(cr, IllustrationName.FleetStep,
                 "Boarding Assault", [Trait.Flourish],
                 "Stride twice, you may then Strike.", Target.Self()).WithActionCost(2))
@@ -34,7 +34,7 @@ public class Pirate
             {
                 if (values.GetProficiency(RemasterLore.MaritimeLore.Trait) >= Proficiency.Trained)
                 {
-                    values.TrainInThisOrSubstitute(RemasterLore.MaritimeLore);
+                    values.TrainInThisOrSubstitute(RemasterLore.MaritimeLore, true);
                 }
                 Lores.GrantAdditionalLore(values, RemasterLore.MaritimeLore);
             })
