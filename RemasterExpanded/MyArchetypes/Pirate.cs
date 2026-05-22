@@ -160,6 +160,7 @@ public class Pirate
                                     [
                                         new CancelOption(true)
                                     ];
+                                    target.RegeneratePossibilities();
                                     CombatAction? moveAction = Possibilities.Create(target)
                                         .Filter(ap =>
                                         {

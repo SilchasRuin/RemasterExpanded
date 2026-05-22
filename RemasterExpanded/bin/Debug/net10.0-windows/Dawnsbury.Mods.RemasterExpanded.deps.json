@@ -1,0 +1,802 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "Dawnsbury.Mods.RemasterExpanded/1.0.0": {
+        "dependencies": {
+          "Lib.Harmony": "2.4.2",
+          "System.Text.Json": "10.0.5",
+          "Common": "1.0.0.0",
+          "Dawnsbury Days": "4.26.0.0",
+          "Dawnsbury.Mods.DawnniExpanded": "1.0.0.0",
+          "Dawnsbury.Mods.LoresAndWeaknesses": "1.0.0.0",
+          "Dawnsbury.Mods.Remaster.FeatsDb": "1.0.0.0",
+          "Dawnsbury.Mods.Remaster.Spellbook": "1.0.0.0",
+          "ExplorationActivities": "1.0.0.0",
+          "MonoGame.Framework": "3.8.4.1",
+          "PsychicExpanded": "1.0.0.0",
+          "SpellsAndSpellhearts": "1.0.0.0",
+          "SpiritDamage": "1.0.0.0"
+        },
+        "runtime": {
+          "Dawnsbury.Mods.RemasterExpanded.dll": {}
+        }
+      },
+      "Lib.Harmony/2.4.2": {
+        "runtime": {
+          "lib/net10.0/0Harmony.dll": {
+            "assemblyVersion": "2.4.2.0",
+            "fileVersion": "2.4.2.0"
+          }
+        }
+      },
+      "System.Text.Json/10.0.5": {
+        "runtime": {
+          "lib/net10.0/System.Text.Json.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.526.15411"
+          }
+        }
+      },
+      "Common/1.0.0.0": {
+        "runtime": {
+          "Common.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Dawnsbury Days/4.26.0.0": {
+        "runtime": {
+          "Dawnsbury Days.dll": {
+            "assemblyVersion": "4.26.0.0",
+            "fileVersion": "4.26.0.0"
+          }
+        }
+      },
+      "Dawnsbury.Mods.DawnniExpanded/1.0.0.0": {
+        "runtime": {
+          "Dawnsbury.Mods.DawnniExpanded.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Dawnsbury.Mods.LoresAndWeaknesses/1.0.0.0": {
+        "runtime": {
+          "Dawnsbury.Mods.LoresAndWeaknesses.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Dawnsbury.Mods.Remaster.FeatsDb/1.0.0.0": {
+        "runtime": {
+          "Dawnsbury.Mods.Remaster.FeatsDb.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Dawnsbury.Mods.Remaster.Spellbook/1.0.0.0": {
+        "runtime": {
+          "Dawnsbury.Mods.Remaster.Spellbook.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "ExplorationActivities/1.0.0.0": {
+        "runtime": {
+          "ExplorationActivities.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "MonoGame.Framework/3.8.4.1": {
+        "runtime": {
+          "MonoGame.Framework.dll": {
+            "assemblyVersion": "3.8.4.1",
+            "fileVersion": "3.8.4.1"
+          }
+        }
+      },
+      "PsychicExpanded/1.0.0.0": {
+        "runtime": {
+          "PsychicExpanded.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "SpellsAndSpellhearts/1.0.0.0": {
+        "runtime": {
+          "SpellsAndSpellhearts.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "SpiritDamage/1.0.0.0": {
+        "runtime": {
+          "SpiritDamage.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "MonoGame.Extended/5.3.1.0": {
+        "runtime": {
+          "MonoGame.Extended.dll": {
+            "assemblyVersion": "5.3.1.0",
+            "fileVersion": "5.3.1.0"
+          }
+        }
+      },
+      "System.Windows.Forms/10.0.0.0": {
+        "runtime": {
+          "System.Windows.Forms.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        },
+        "resources": {
+          "cs/System.Windows.Forms.resources.dll": {
+            "locale": "cs"
+          },
+          "de/System.Windows.Forms.resources.dll": {
+            "locale": "de"
+          },
+          "es/System.Windows.Forms.resources.dll": {
+            "locale": "es"
+          },
+          "fr/System.Windows.Forms.resources.dll": {
+            "locale": "fr"
+          },
+          "it/System.Windows.Forms.resources.dll": {
+            "locale": "it"
+          },
+          "ja/System.Windows.Forms.resources.dll": {
+            "locale": "ja"
+          },
+          "ko/System.Windows.Forms.resources.dll": {
+            "locale": "ko"
+          },
+          "pl/System.Windows.Forms.resources.dll": {
+            "locale": "pl"
+          },
+          "pt-BR/System.Windows.Forms.resources.dll": {
+            "locale": "pt-BR"
+          },
+          "ru/System.Windows.Forms.resources.dll": {
+            "locale": "ru"
+          },
+          "tr/System.Windows.Forms.resources.dll": {
+            "locale": "tr"
+          },
+          "zh-Hans/System.Windows.Forms.resources.dll": {
+            "locale": "zh-Hans"
+          },
+          "zh-Hant/System.Windows.Forms.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      },
+      "Steamworks.NET/2025.163.0.0": {
+        "runtime": {
+          "Steamworks.NET.dll": {
+            "assemblyVersion": "2025.163.0.0",
+            "fileVersion": "2025.163.0.0"
+          }
+        }
+      },
+      "TiledLib/5.0.0.0": {
+        "runtime": {
+          "TiledLib.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.0.0"
+          }
+        }
+      },
+      "Newtonsoft.Json/13.0.0.0": {
+        "runtime": {
+          "Newtonsoft.Json.dll": {
+            "assemblyVersion": "13.0.0.0",
+            "fileVersion": "13.0.4.30916"
+          }
+        }
+      },
+      "Humanizer/2.14.0.0": {
+        "runtime": {
+          "Humanizer.dll": {
+            "assemblyVersion": "2.14.0.0",
+            "fileVersion": "2.14.1.48190"
+          }
+        }
+      },
+      "PriorityQueue/5.0.0.0": {
+        "runtime": {
+          "PriorityQueue.dll": {
+            "assemblyVersion": "5.0.0.0",
+            "fileVersion": "5.0.0.0"
+          }
+        }
+      },
+      "System.Windows.Forms.Design/10.0.0.0": {
+        "runtime": {
+          "System.Windows.Forms.Design.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        },
+        "resources": {
+          "cs/System.Windows.Forms.Design.resources.dll": {
+            "locale": "cs"
+          },
+          "de/System.Windows.Forms.Design.resources.dll": {
+            "locale": "de"
+          },
+          "es/System.Windows.Forms.Design.resources.dll": {
+            "locale": "es"
+          },
+          "fr/System.Windows.Forms.Design.resources.dll": {
+            "locale": "fr"
+          },
+          "it/System.Windows.Forms.Design.resources.dll": {
+            "locale": "it"
+          },
+          "ja/System.Windows.Forms.Design.resources.dll": {
+            "locale": "ja"
+          },
+          "ko/System.Windows.Forms.Design.resources.dll": {
+            "locale": "ko"
+          },
+          "pl/System.Windows.Forms.Design.resources.dll": {
+            "locale": "pl"
+          },
+          "pt-BR/System.Windows.Forms.Design.resources.dll": {
+            "locale": "pt-BR"
+          },
+          "ru/System.Windows.Forms.Design.resources.dll": {
+            "locale": "ru"
+          },
+          "tr/System.Windows.Forms.Design.resources.dll": {
+            "locale": "tr"
+          },
+          "zh-Hans/System.Windows.Forms.Design.resources.dll": {
+            "locale": "zh-Hans"
+          },
+          "zh-Hant/System.Windows.Forms.Design.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      },
+      "ink-engine-runtime/1.1.1.0": {
+        "runtime": {
+          "ink-engine-runtime.dll": {
+            "assemblyVersion": "1.1.1.0",
+            "fileVersion": "1.1.1.0"
+          }
+        }
+      },
+      "FmodForFoxes/3.1.0.0": {
+        "runtime": {
+          "FmodForFoxes.dll": {
+            "assemblyVersion": "3.1.0.0",
+            "fileVersion": "3.1.0.0"
+          }
+        }
+      },
+      "MoreLinq/4.4.0.0": {
+        "runtime": {
+          "MoreLinq.dll": {
+            "assemblyVersion": "4.4.0.0",
+            "fileVersion": "4.4.0.0"
+          }
+        }
+      },
+      "System.Drawing.Common/10.0.0.0": {
+        "runtime": {
+          "System.Drawing.Common.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
+      "FmodForFoxes.Desktop/3.1.0.0": {
+        "runtime": {
+          "FmodForFoxes.Desktop.dll": {
+            "assemblyVersion": "3.1.0.0",
+            "fileVersion": "3.1.0.0"
+          }
+        }
+      },
+      "MedallionTopologicalSort/1.0.0.0": {
+        "runtime": {
+          "MedallionTopologicalSort.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "SharpDX.DXGI/4.0.1.0": {
+        "runtime": {
+          "SharpDX.DXGI.dll": {
+            "assemblyVersion": "4.0.1.0",
+            "fileVersion": "4.0.1.0"
+          }
+        }
+      },
+      "SharpDX/4.0.1.0": {
+        "runtime": {
+          "SharpDX.dll": {
+            "assemblyVersion": "4.0.1.0",
+            "fileVersion": "4.0.1.0"
+          }
+        }
+      },
+      "SharpDX.Direct3D11/4.0.1.0": {
+        "runtime": {
+          "SharpDX.Direct3D11.dll": {
+            "assemblyVersion": "4.0.1.0",
+            "fileVersion": "4.0.1.0"
+          }
+        }
+      },
+      "System.Windows.Forms.Primitives/10.0.0.0": {
+        "runtime": {
+          "System.Windows.Forms.Primitives.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        },
+        "resources": {
+          "cs/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "cs"
+          },
+          "de/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "de"
+          },
+          "es/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "es"
+          },
+          "fr/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "fr"
+          },
+          "it/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "it"
+          },
+          "ja/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "ja"
+          },
+          "ko/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "ko"
+          },
+          "pl/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "pl"
+          },
+          "pt-BR/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "pt-BR"
+          },
+          "ru/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "ru"
+          },
+          "tr/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "tr"
+          },
+          "zh-Hans/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "zh-Hans"
+          },
+          "zh-Hant/System.Windows.Forms.Primitives.resources.dll": {
+            "locale": "zh-Hant"
+          }
+        }
+      },
+      "SharpDX.MediaFoundation/4.0.1.0": {
+        "runtime": {
+          "SharpDX.MediaFoundation.dll": {
+            "assemblyVersion": "4.0.1.0",
+            "fileVersion": "4.0.1.0"
+          }
+        }
+      },
+      "SharpDX.XInput/4.0.1.0": {
+        "runtime": {
+          "SharpDX.XInput.dll": {
+            "assemblyVersion": "4.0.1.0",
+            "fileVersion": "4.0.1.0"
+          }
+        }
+      },
+      "SharpDX.XAudio2/4.0.1.0": {
+        "runtime": {
+          "SharpDX.XAudio2.dll": {
+            "assemblyVersion": "4.0.1.0",
+            "fileVersion": "4.0.1.0"
+          }
+        }
+      },
+      "RemasterExpanded/1.0.0.0": {
+        "runtime": {
+          "RemasterExpanded.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "System.Private.Windows.Core/10.0.0.0": {
+        "runtime": {
+          "System.Private.Windows.Core.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
+      "Accessibility/4.0.0.0": {
+        "runtime": {
+          "Accessibility.dll": {
+            "assemblyVersion": "4.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
+      "System.Private.Windows.GdiPlus/10.0.0.0": {
+        "runtime": {
+          "System.Private.Windows.GdiPlus.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
+      "Microsoft.Win32.SystemEvents/10.0.0.0": {
+        "runtime": {
+          "Microsoft.Win32.SystemEvents.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
+      "System.Configuration.ConfigurationManager/10.0.0.0": {
+        "runtime": {
+          "System.Configuration.ConfigurationManager.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
+      "System.Formats.Nrbf/10.0.0.0": {
+        "runtime": {
+          "System.Formats.Nrbf.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
+      "System.Windows.Extensions/10.0.0.0": {
+        "runtime": {
+          "System.Windows.Extensions.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
+      "System.CodeDom/10.0.0.0": {
+        "runtime": {
+          "System.CodeDom.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
+      "SharpDX.Direct3D9/4.0.1.0": {
+        "runtime": {
+          "SharpDX.Direct3D9.dll": {
+            "assemblyVersion": "4.0.1.0",
+            "fileVersion": "4.0.1.0"
+          }
+        }
+      },
+      "SharpDX.Mathematics/4.0.1.0": {
+        "runtime": {
+          "SharpDX.Mathematics.dll": {
+            "assemblyVersion": "4.0.1.0",
+            "fileVersion": "4.0.1.0"
+          }
+        }
+      },
+      "MorePsychicConscious/1.0.0.0": {
+        "runtime": {
+          "MorePsychicConscious.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Dawnsbury.Mods.Classes.Witch/1.0.0.0": {
+        "runtime": {
+          "Dawnsbury.Mods.Classes.Witch.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "System.Diagnostics.EventLog/10.0.0.0": {
+        "runtime": {
+          "System.Diagnostics.EventLog.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
+      "System.Security.Cryptography.ProtectedData/10.0.0.0": {
+        "runtime": {
+          "System.Security.Cryptography.ProtectedData.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Dawnsbury.Mods.RemasterExpanded/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Lib.Harmony/2.4.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-D2X9ojVjqbqdqWVK3VQETrEb56yVoXxtEp6tP5UvW0PP+bA4uJiswqOxF8GhH02ECwyevUa9vwhwdLzyXfksbw==",
+      "path": "lib.harmony/2.4.2",
+      "hashPath": "lib.harmony.2.4.2.nupkg.sha512"
+    },
+    "System.Text.Json/10.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-vW2zhkWziyfhoSXNf42mTWyilw+vfwBGOsODDsHSFtOIY6LCgfRVUyaAilLEL4Kc1fzhaxcep5pS0VWYPSDW0w==",
+      "path": "system.text.json/10.0.5",
+      "hashPath": "system.text.json.10.0.5.nupkg.sha512"
+    },
+    "Common/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Dawnsbury Days/4.26.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Dawnsbury.Mods.DawnniExpanded/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Dawnsbury.Mods.LoresAndWeaknesses/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Dawnsbury.Mods.Remaster.FeatsDb/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Dawnsbury.Mods.Remaster.Spellbook/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ExplorationActivities/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "MonoGame.Framework/3.8.4.1": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "PsychicExpanded/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SpellsAndSpellhearts/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SpiritDamage/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "MonoGame.Extended/5.3.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Windows.Forms/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Steamworks.NET/2025.163.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "TiledLib/5.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Newtonsoft.Json/13.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Humanizer/2.14.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "PriorityQueue/5.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Windows.Forms.Design/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "ink-engine-runtime/1.1.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "FmodForFoxes/3.1.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "MoreLinq/4.4.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Drawing.Common/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "FmodForFoxes.Desktop/3.1.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "MedallionTopologicalSort/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SharpDX.DXGI/4.0.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SharpDX/4.0.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SharpDX.Direct3D11/4.0.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Windows.Forms.Primitives/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SharpDX.MediaFoundation/4.0.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SharpDX.XInput/4.0.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SharpDX.XAudio2/4.0.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "RemasterExpanded/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Private.Windows.Core/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Accessibility/4.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Private.Windows.GdiPlus/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Win32.SystemEvents/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Configuration.ConfigurationManager/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Formats.Nrbf/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Windows.Extensions/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.CodeDom/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SharpDX.Direct3D9/4.0.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "SharpDX.Mathematics/4.0.1.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "MorePsychicConscious/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Dawnsbury.Mods.Classes.Witch/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Diagnostics.EventLog/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "System.Security.Cryptography.ProtectedData/10.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

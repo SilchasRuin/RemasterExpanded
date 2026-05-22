@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "/XGwXJ0lLWA=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\jcbco\\RiderProjects\\DawnniExPatchMod\\RemasterExpanded\\RemasterExpanded.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\jcbco\\.nuget\\packages\\lib.harmony\\2.4.2\\lib.harmony.2.4.2.nupkg.sha512",
+    "C:\\Users\\jcbco\\.nuget\\packages\\microsoft.visualstudio.threading.analyzers\\17.14.15\\microsoft.visualstudio.threading.analyzers.17.14.15.nupkg.sha512",
+    "C:\\Users\\jcbco\\.nuget\\packages\\system.text.json\\10.0.5\\system.text.json.10.0.5.nupkg.sha512"
+  ],
+  "logs": []
+}

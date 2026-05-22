@@ -81,33 +81,38 @@ public class NewSpells
     int num = Math.Min(savingThrowResult == CheckResult.CriticalFailure ? 2 : 1, affliction.MaximumStage);
     await defender.AddAffliction(affliction.MaximumStage, EnterStage, new QEffect(affliction.Name + ", Stage", affliction.StagesDescription, ExpirationCondition.ExpiresAtStartOfSourcesTurn, attacker, (Illustration) IllustrationName.Poisoned)
     {
-      Id = affliction.Id,
-      Value = num,
-      RepresentsPoison = true,
-      Affliction = affliction,
-      CounteractLevel = attacker.MaximumSpellRank,
-      Tag = poisonAction,
-      StateCheck = affliction.StateCheck,
-      StateCheckWithVisibleChanges = affliction.StateCheckWithVisibleChanges,
-      StartOfSourcesTurn = (Func<QEffect, Task>) (async qfVenom =>
-      {
-          Affliction.AdjustValue(qfVenom,  await CommonSpellEffects.RollSavingThrowAsync(defender, poisonAction, Defense.Fortitude, affliction.DC), affliction.MaximumStage);
-          if (qfVenom.Value <= 0)
-              return;
-          await EnterStage(qfVenom);
-      })
-    }.WithExpirationAtStartOfSourcesTurn(attacker.Battle.CreatureControllingInitiative ?? attacker, affliction.MaximumDuration));
+        Id = affliction.Id,
+        Value = num,
+        RepresentsPoison = true,
+        Affliction = affliction,
+        CounteractLevel = attacker.MaximumSpellRank,
+        Tag = poisonAction,
+        StateCheck = affliction.StateCheck,
+        StateCheckWithVisibleChanges = affliction.StateCheckWithVisibleChanges,
+        StartOfSourcesTurn = (Func<QEffect, Task>)(async qfVenom =>
+        {
+            Affliction.AdjustValue(qfVenom,
+                await CommonSpellEffects.RollSavingThrowAsync(defender, poisonAction, Defense.Fortitude, affliction.DC),
+                affliction.MaximumStage);
+            if (qfVenom.Value <= 0)
+                return;
+            await EnterStage(qfVenom);
+        })
+    }.WithExpirationAtStartOfSourcesTurn(attacker.Battle.CreatureControllingInitiative ?? attacker,
+        affliction.MaximumDuration));
     return;
 
     async Task EnterStage(QEffect qfVenom)
     {
-      string? diceFormula = affliction.PoisonDamage(qfVenom.Value);
-      if (diceFormula != null)
-      {
-        DiceFormula damage = DiceFormula.FromText(diceFormula);
-        await CommonSpellEffects.DealDirectDamage(poisonAction, damage, qfVenom.Owner, CheckResult.Failure, DamageKind.Poison);
-      }
-      await affliction.EnterStage.InvokeIfNotNull(qfVenom, poisonAction);
+        string? diceFormula = affliction.PoisonDamage(qfVenom.Value);
+        if (diceFormula != null)
+        {
+            DiceFormula damage = DiceFormula.FromText(diceFormula);
+            await CommonSpellEffects.DealDirectDamage(poisonAction, damage, qfVenom.Owner, CheckResult.Failure,
+                DamageKind.Poison);
+        }
+
+        await affliction.EnterStage.InvokeIfNotNull(qfVenom, poisonAction);
     }
   }
 

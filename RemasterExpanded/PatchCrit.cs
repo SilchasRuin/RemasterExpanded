@@ -1,4 +1,5 @@
 ﻿using Dawnsbury.Auxiliary;
+using Dawnsbury.Core.CharacterBuilder.Feats;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Creatures;
@@ -20,6 +21,15 @@ internal static class PatchCrit
         if (strike.Item is null || (!strike.Item.HasTrait(Trait.Flail) && !strike.Item.HasTrait(Trait.Hammer)) || target.HasEffect(QEffectId.Prone) || !PlayerProfile.Instance.IsBooleanOptionEnabled("RE_CritChange")) return true;
         __result = Tasks.AltCrit(strike, target);
         return false;
+    }
+}
+
+[HarmonyPatch(typeof (DeitySelectionFeat), "ComposeDeityRulesText")]
+internal static class PatchDeitySelectionFeat
+{
+    private static void Postfix(ref string __result)
+    {
+        __result = __result.Replace("re_", "");
     }
 }
 

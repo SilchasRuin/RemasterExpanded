@@ -16,6 +16,7 @@ using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Core.Mechanics.Zoning;
 using Dawnsbury.Core.Tiles;
 using Dawnsbury.Display.Illustrations;
+using Dawnsbury.IO;
 using Dawnsbury.Modding;
 using Microsoft.Xna.Framework;
 using SpiritDamage;
@@ -221,8 +222,14 @@ public abstract class NewCantrips : NewSpells
                     spell.Traits.Add(HolyTrait.Holy);
                 if (caster.HasTrait(Trait.Evil))
                     spell.Traits.Add(UnholyTrait.Unholy);
-                await CommonSpellEffects.DealAttackRollDamage(spell, caster, target, result,
+                if (PlayerProfile.Instance.IsBooleanOptionEnabled("RemasterCantrips"))
+                    await CommonSpellEffects.DealAttackRollDamage(spell, caster, target, result,
                     $"{2 + (spell.SpellLevel - 1)}d4", ModData.SpiritDamage);
+                else
+                {
+                    await CommonSpellEffects.DealAttackRollDamage(spell, caster, target, result,
+                        $"{1 + (spell.SpellLevel - 1)}d4 + {spell.SpellcastingSource!.SpellcastingAbilityModifier}", ModData.SpiritDamage);
+                }
             };
         });
     }

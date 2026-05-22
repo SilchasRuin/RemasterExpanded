@@ -1,9 +1,11 @@
 ﻿using Dawnsbury.Audio;
+using Dawnsbury.Campaign.LongTerm;
 using Dawnsbury.Core.CharacterBuilder.Feats;
 using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Display.Illustrations;
 using Dawnsbury.Modding;
+using Microsoft.Xna.Framework;
 using SpiritDamage;
 
 namespace RemasterExpanded;
@@ -20,14 +22,15 @@ public class ModData
         public static readonly Trait BlackJacket = ModManager.RegisterTrait("RE_BlackJacket", new TraitProperties("Blackjacket", false));
         public static readonly Trait Pirate = ModManager.RegisterTrait("RE_Pirate", new TraitProperties("Pirate", false));
         public static readonly Trait Viking = ModManager.RegisterTrait("RE_Viking", new TraitProperties("Viking", false));
-        public static readonly Trait Sanctified = ModManager.RegisterTrait("RE_Sanctified", new TraitProperties("Sanctified", true, "If you are good your sanctified actions and spells gain the holy trait, if you are evil your sanctified actions and spells gain the unholy trait,."));
+        public static readonly Trait Sanctified = ModManager.RegisterTrait("RE_Sanctified", new TraitProperties("Sanctified", true, "If you are good your sanctified actions and spells gain the holy trait, if you are evil your sanctified actions and spells gain the unholy trait."));
     }
 
     public static class MFeatNames
     {
-        public static readonly FeatName HandOfTheApprentice = ModManager.RegisterFeatName("RE_HandOfTheApprenticeFT", "Hand of the Apprentice");
         public static readonly FeatName MercenaryMotivation = ModManager.RegisterFeatName("RE_MercenaryMotivation", "Mercenary Motivation");
         public static readonly FeatName GuardsFury = ModManager.RegisterFeatName("RE_GuardsFury", "Guard's Fury");
+        public static readonly FeatName Vigil = ModManager.RegisterFeatName("Vigil", "Vigil");
+        public static readonly FeatName Knowledge = ModManager.RegisterFeatName("RE_Knowledge", "Knowledge");
     }
 
     public static class MQEffectIds
@@ -66,6 +69,11 @@ public class ModData
     public static class MSoundEffects
     {
         public static readonly SfxName Croak = ModManager.RegisterNewSoundEffect("PMAssets/FrogCroak.mp3", 2);
+    }
+
+    public static class MLongTermEffectIds
+    {
+        public static readonly LongTermEffectId FeetToFins = ModManager.RegisterEnumMember<LongTermEffectId>("RE_FeetToFins");
     }
 
     public static DamageKind SpiritDamage => DamageSpirit.Spirit;

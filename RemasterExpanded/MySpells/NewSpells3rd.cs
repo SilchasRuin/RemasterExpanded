@@ -1,13 +1,21 @@
-﻿using Dawnsbury.Audio;
+﻿using System.Collections.Immutable;
+using Dawnsbury.Audio;
+using Dawnsbury.Campaign.LongTerm;
+using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
 using Dawnsbury.Core.CombatActions;
+using Dawnsbury.Core.Coroutines.Options.Reactive;
+using Dawnsbury.Core.Creatures;
 using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Core;
 using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Mechanics.Targeting;
+using Dawnsbury.Core.Mechanics.Targeting.TargetingRequirements;
+using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Core.Mechanics.Treasure;
 using Dawnsbury.Core.Possibilities;
+using Dawnsbury.Core.Tiles;
 using Dawnsbury.Display.Text;
 using Dawnsbury.Modding;
 using static RemasterExpanded.ModData;
@@ -108,5 +116,86 @@ public abstract class NewSpells3rd : NewSpells
                     return Task.CompletedTask;
                 });
         });
+        FeetToFins = ModManager.RegisterNewSpell("RE_FeetToFins", 3, (_, _, level, inCombat, _) =>
+        {
+            return Spells.CreateModern(IllustrationName.JumpSpell, "Feet to Fins",
+                [Trait.Morph, Trait.Arcane, Trait.Primal],
+                "The target's feet transform into fins, improving mobility in the water but reducing it on land.",
+                "A willing target gains swimming, but it's speed is reduced to 5 feet unless it is in water or able to fly.",
+                Target.AdjacentCreatureOrSelf().WithAdditionalConditionOnTargetCreature((creature, creature1) =>
+                    creature1.FriendOf(creature)
+                        ? Usability.Usable
+                        : Usability.NotUsableOnThisCreature("Must be willing.")),
+                level, null)
+                .WithSoundEffect(SfxName.ScratchFlesh)
+                .WithHeightenedAtSpecificLevel(level, 6, inCombat, "You may cast this spell as a free action at the start of combat and it lasts until your next daily preparations.")
+                .WithEffectOnEachTarget(async (spell, caster, target, _) =>
+                {
+                    target.AddQEffect(FeetToFins(caster, spell));
+                    if (level >= 6)
+                    {
+                        target.LongTermEffects?.Add(new LongTermEffect
+                        {
+                            Id = MLongTermEffectIds.FeetToFins,
+                            Duration = LongTermEffectDuration.UntilLongRest,
+                            OnApply = () => FeetToFins(caster, spell)
+                        });
+                    }
+                })
+                .WithCastsAsAReaction((effect, thisSpell, canCast) =>
+                {
+                    if (!canCast() || level < 6)
+                        return;
+                    effect.StartOfCombatReaction = qf =>
+                    {
+                        Creature caster = effect.Owner;
+                        ReactionOption feet = ReactionOption.CreateFromSpellAsAReaction(thisSpell, thisSpell.Description, async () =>
+                        {
+                            CombatAction dummy = CombatAction.CreateSimple(caster, "Feet to Fins",
+                                Trait.DoNotShowInCombatLog, Trait.DoNotShowOverheadOfActionName).WithActionCost(0);
+                            dummy.Target = new CreatureTarget(RangeKind.Ranged,
+                                new FriendOrSelfCreatureTargetingRequirement(),
+                                (_, _, _) => int.MinValue);
+                            dummy.WithDescription(thisSpell.Description);
+                            dummy.Illustration = thisSpell.Illustration;
+                            await caster.Battle.GameLoop.FullCast(dummy);
+                            if (dummy.ChosenTargets.ChosenCreature == null || thisSpell.EffectOnOneTarget == null)
+                            {
+                                caster.Spellcasting?.RevertExpendingOfResources(thisSpell);
+                                return;
+                            }
+                            await thisSpell.EffectOnOneTarget.Invoke(thisSpell, caster, dummy.ChosenTargets.ChosenCreature,
+                                CheckResult.Success);
+                        }).WithIsFreeAction();
+                        feet.Caption = "Feet to Fins" + $" (rank {level})";
+                        return feet;
+                    };
+                });
+            static QEffect FeetToFins(Creature caster, CombatAction spell)
+            {
+                return new QEffect("Feet to Fins", "You have swimming but your speed is reduced to 5 feet unless you are in water or able to fly.", ExpirationCondition.Never, caster, spell.Illustration)
+                {
+                    StateCheck = qf =>
+                    {
+                        qf.Owner.AddQEffect(QEffect.Swimming().WithExpirationEphemeral());
+                        int speed = SetSpeed(qf.Owner.Speed);
+                        qf.Owner.AddQEffect(new QEffect(ExpirationCondition.Ephemeral)
+                        {
+                            BonusToAllSpeeds = effect =>
+                                effect.Owner.HasEffect(QEffectId.AquaticCombat) ||
+                                effect.Owner.HasEffect(QEffectId.Flying) || effect.Owner.Space.Tiles.All(t => t.Kind is TileKind.Water or TileKind.ShallowWater)
+                                    ? null
+                                    : new Bonus(speed + 1, BonusType.Untyped, "Feet to Fins",
+                                        false)
+                        });
+                    }
+                };
+            }
+        });
+    }
+    public static int SetSpeed(int speed)
+    {
+        ImmutableList<int> speeds = [speed];
+        return -speeds[0];
     }
 }

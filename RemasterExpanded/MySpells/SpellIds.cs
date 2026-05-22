@@ -17,4 +17,11 @@ public abstract class SpellIds
     public static SpellId InterdisciplinaryIncantation { get; set; }
     public static SpellId Figment { get; set; }
     public static SpellId SummonConstruct { get; set; }
+    public static SpellId ObjectMemory { get; set; }
+    public static SpellId RememberTheLost { get; set; }
+    public static SpellId FeetToFins { get; set; }
+    public static SpellId SavorTheSting { get; set; }
+    public static SpellId RetributivePain { get; set; }
+    public static SpellId ScholarlyRecollection { get; set; }
+    public static SpellId KnowTheEnemy { get; set; }
 }

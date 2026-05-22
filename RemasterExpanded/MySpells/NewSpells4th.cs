@@ -61,6 +61,11 @@ public abstract class NewSpells4th : NewSpells
                         await CommonAbilityEffects.CriticalSpecializationEffect(caster.CreateStrike(weapon), target);
                 });
         });
+        ModManager.RegisterActionOnEachSpell(spell =>
+        {
+            if (ModManager.TryParse("WeaponStorm", out SpellId weapon) && spell.SpellId == weapon)
+                spell.Illustration = MIllustrations.CreateIllustration("WeaponStorm");
+        });
         VisionOfDeath = ModManager.RegisterNewSpell("RE_VisionOfDeath", 4, (_, _, level, inCombat, _) =>
         {
             return Spells.CreateModern(MIllustrations.CreateIllustration("Vision"), "Vision of Death", [Trait.Concentrate, Trait.Death, Trait.Emotion, Trait.Fear, Trait.Manipulate, Trait.Mental,

@@ -38,6 +38,9 @@
     <Reference Include="ExplorationActivities">
       <HintPath>..\..\Debug\ExplorationActivities\bin\Debug\net10.0-windows\ExplorationActivities.dll</HintPath>
     </Reference>
+    <Reference Include="HereThereBeDragons">
+      <HintPath>..\..\HereThereBeDragons2\bin\Debug\net10.0-windows\HereThereBeDragons.dll</HintPath>
+    </Reference>
     <Reference Include="MonoGame.Framework">
       <HintPath>D:\SteamLibrary\steamapps\common\Dawnsbury Days\Data\MonoGame.Framework.dll</HintPath>
     </Reference>
@@ -55,6 +58,32 @@
   <ItemGroup>
     <PackageReference Include="Lib.Harmony" Version="2.4.2" />
     <PackageReference Include="System.Text.Json" Version="10.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="obj\DawnniExPatchMod.csproj.nuget.dgspec.json" />
+    <Content Include="obj\DawnniExPatchMod.csproj.nuget.g.props" />
+    <Content Include="obj\DawnniExPatchMod.csproj.nuget.g.targets" />
+    <Content Include="obj\Debug\net10.0-windows\Dawnsbury.Mods.RemasterExpanded.dll" />
+    <Content Include="obj\Debug\net10.0-windows\Dawnsbury.Mods.RemasterExpanded.pdb" />
+    <Content Include="obj\Debug\net10.0-windows\Remaster.0EF15A91.Up2Date" />
+    <Content Include="obj\Debug\net10.0-windows\RemasterExpanded.AssemblyInfoInputs.cache" />
+    <Content Include="obj\Debug\net10.0-windows\RemasterExpanded.assets.cache" />
+    <Content Include="obj\Debug\net10.0-windows\RemasterExpanded.csproj.AssemblyReference.cache" />
+    <Content Include="obj\Debug\net10.0-windows\RemasterExpanded.csproj.CoreCompileInputs.cache" />
+    <Content Include="obj\Debug\net10.0-windows\RemasterExpanded.csproj.FileListAbsolute.txt" />
+    <Content Include="obj\project.assets.json" />
+    <Content Include="obj\project.nuget.cache" />
+    <Content Include="obj\project.packagespec.json" />
+    <Content Include="obj\RemasterExpanded.csproj.nuget.dgspec.json" />
+    <Content Include="obj\RemasterExpanded.csproj.nuget.g.props" />
+    <Content Include="obj\RemasterExpanded.csproj.nuget.g.targets" />
+    <Content Include="obj\rider.project.model.nuget.info" />
+    <Content Include="obj\rider.project.restore.info" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="obj\Debug\net10.0-windows\.NETCoreApp,Version=v10.0.AssemblyAttributes.cs" />
   </ItemGroup>
 
 </Project>

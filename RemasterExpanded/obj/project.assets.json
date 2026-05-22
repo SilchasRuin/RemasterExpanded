@@ -1,0 +1,320 @@
+{
+  "version": 3,
+  "targets": {
+    "net10.0-windows7.0": {
+      "Lib.Harmony/2.4.2": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/0Harmony.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/0Harmony.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "Microsoft.VisualStudio.Threading.Analyzers/17.14.15": {
+        "type": "package",
+        "build": {
+          "buildTransitive/Microsoft.VisualStudio.Threading.Analyzers.targets": {}
+        }
+      },
+      "System.Text.Json/10.0.5": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/System.Text.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/System.Text.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/System.Text.Json.targets": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Lib.Harmony/2.4.2": {
+      "sha512": "D2X9ojVjqbqdqWVK3VQETrEb56yVoXxtEp6tP5UvW0PP+bA4uJiswqOxF8GhH02ECwyevUa9vwhwdLzyXfksbw==",
+      "type": "package",
+      "path": "lib.harmony/2.4.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "HarmonyLogo.png",
+        "LICENSE",
+        "README.md",
+        "lib.harmony.2.4.2.nupkg.sha512",
+        "lib.harmony.nuspec",
+        "lib/net10.0/0Harmony.dll",
+        "lib/net10.0/0Harmony.pdb",
+        "lib/net10.0/0Harmony.xml",
+        "lib/net35/0Harmony.dll",
+        "lib/net35/0Harmony.pdb",
+        "lib/net35/0Harmony.xml",
+        "lib/net452/0Harmony.dll",
+        "lib/net452/0Harmony.pdb",
+        "lib/net452/0Harmony.xml",
+        "lib/net472/0Harmony.dll",
+        "lib/net472/0Harmony.pdb",
+        "lib/net472/0Harmony.xml",
+        "lib/net48/0Harmony.dll",
+        "lib/net48/0Harmony.pdb",
+        "lib/net48/0Harmony.xml",
+        "lib/net5.0/0Harmony.dll",
+        "lib/net5.0/0Harmony.pdb",
+        "lib/net5.0/0Harmony.xml",
+        "lib/net6.0/0Harmony.dll",
+        "lib/net6.0/0Harmony.pdb",
+        "lib/net6.0/0Harmony.xml",
+        "lib/net7.0/0Harmony.dll",
+        "lib/net7.0/0Harmony.pdb",
+        "lib/net7.0/0Harmony.xml",
+        "lib/net8.0/0Harmony.dll",
+        "lib/net8.0/0Harmony.pdb",
+        "lib/net8.0/0Harmony.xml",
+        "lib/net9.0/0Harmony.dll",
+        "lib/net9.0/0Harmony.pdb",
+        "lib/net9.0/0Harmony.xml",
+        "lib/netcoreapp3.0/0Harmony.dll",
+        "lib/netcoreapp3.0/0Harmony.pdb",
+        "lib/netcoreapp3.0/0Harmony.xml",
+        "lib/netcoreapp3.1/0Harmony.dll",
+        "lib/netcoreapp3.1/0Harmony.pdb",
+        "lib/netcoreapp3.1/0Harmony.xml",
+        "lib/netstandard2.0/_._"
+      ]
+    },
+    "Microsoft.VisualStudio.Threading.Analyzers/17.14.15": {
+      "sha512": "mXQPJsbuUD2ydq4/ffd8h8tSOFCXec+2xJOVNCvXjuMOq/+5EKHq3D2m2MC2+nUaXeFMSt66VS/J4HdKBixgcw==",
+      "type": "package",
+      "path": "microsoft.visualstudio.threading.analyzers/17.14.15",
+      "hasTools": true,
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "NOTICE",
+        "PackageIcon.png",
+        "README.md",
+        "analyzers/cs/Microsoft.VisualStudio.Threading.Analyzers.CSharp.dll",
+        "analyzers/cs/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.dll",
+        "analyzers/cs/Microsoft.VisualStudio.Threading.Analyzers.dll",
+        "analyzers/cs/cs/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/cs/de/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/cs/es/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/cs/fr/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/cs/it/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/cs/ja/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/cs/ko/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/cs/pl/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/cs/pt-BR/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/cs/ru/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/cs/tr/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/cs/zh-Hans/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/cs/zh-Hant/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.dll",
+        "analyzers/vb/Microsoft.VisualStudio.Threading.Analyzers.VisualBasic.dll",
+        "analyzers/vb/Microsoft.VisualStudio.Threading.Analyzers.dll",
+        "analyzers/vb/cs/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/de/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/es/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/fr/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/it/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/ja/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/ko/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/pl/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/pt-BR/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/ru/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/tr/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/zh-Hans/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "analyzers/vb/zh-Hant/Microsoft.VisualStudio.Threading.Analyzers.CodeFixes.resources.dll",
+        "buildTransitive/AdditionalFiles/vs-threading.LegacyThreadSwitchingMembers.txt",
+        "buildTransitive/AdditionalFiles/vs-threading.MainThreadAssertingMethods.txt",
+        "buildTransitive/AdditionalFiles/vs-threading.MainThreadSwitchingMethods.txt",
+        "buildTransitive/AdditionalFiles/vs-threading.MembersRequiringMainThread.txt",
+        "buildTransitive/Microsoft.VisualStudio.Threading.Analyzers.targets",
+        "microsoft.visualstudio.threading.analyzers.17.14.15.nupkg.sha512",
+        "microsoft.visualstudio.threading.analyzers.nuspec",
+        "tools/install.ps1",
+        "tools/uninstall.ps1"
+      ]
+    },
+    "System.Text.Json/10.0.5": {
+      "sha512": "vW2zhkWziyfhoSXNf42mTWyilw+vfwBGOsODDsHSFtOIY6LCgfRVUyaAilLEL4Kc1fzhaxcep5pS0VWYPSDW0w==",
+      "type": "package",
+      "path": "system.text.json/10.0.5",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "analyzers/dotnet/roslyn3.11/cs/System.Text.Json.SourceGeneration.dll",
+        "analyzers/dotnet/roslyn3.11/cs/cs/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/de/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/es/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/fr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/it/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/ja/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/ko/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/pl/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/pt-BR/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/ru/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/tr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/zh-Hans/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn3.11/cs/zh-Hant/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/System.Text.Json.SourceGeneration.dll",
+        "analyzers/dotnet/roslyn4.0/cs/cs/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/de/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/es/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/fr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/it/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/ja/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/ko/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/pl/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/pt-BR/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/ru/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/tr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/zh-Hans/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.0/cs/zh-Hant/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/System.Text.Json.SourceGeneration.dll",
+        "analyzers/dotnet/roslyn4.4/cs/cs/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/de/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/es/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/fr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/it/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/ja/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/ko/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/pl/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/pt-BR/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/ru/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/tr/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/zh-Hans/System.Text.Json.SourceGeneration.resources.dll",
+        "analyzers/dotnet/roslyn4.4/cs/zh-Hant/System.Text.Json.SourceGeneration.resources.dll",
+        "buildTransitive/net461/System.Text.Json.targets",
+        "buildTransitive/net462/System.Text.Json.targets",
+        "buildTransitive/net8.0/System.Text.Json.targets",
+        "buildTransitive/netcoreapp2.0/System.Text.Json.targets",
+        "buildTransitive/netstandard2.0/System.Text.Json.targets",
+        "lib/net10.0/System.Text.Json.dll",
+        "lib/net10.0/System.Text.Json.xml",
+        "lib/net462/System.Text.Json.dll",
+        "lib/net462/System.Text.Json.xml",
+        "lib/net8.0/System.Text.Json.dll",
+        "lib/net8.0/System.Text.Json.xml",
+        "lib/net9.0/System.Text.Json.dll",
+        "lib/net9.0/System.Text.Json.xml",
+        "lib/netstandard2.0/System.Text.Json.dll",
+        "lib/netstandard2.0/System.Text.Json.xml",
+        "system.text.json.10.0.5.nupkg.sha512",
+        "system.text.json.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    "net10.0-windows7.0": [
+      "Lib.Harmony >= 2.4.2",
+      "Microsoft.VisualStudio.Threading.Analyzers >= 17.14.15",
+      "System.Text.Json >= 10.0.5"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\jcbco\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "1.0.0",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\jcbco\\RiderProjects\\DawnniExPatchMod\\RemasterExpanded\\RemasterExpanded.csproj",
+      "projectName": "Dawnsbury.Mods.RemasterExpanded",
+      "projectPath": "C:\\Users\\jcbco\\RiderProjects\\DawnniExPatchMod\\RemasterExpanded\\RemasterExpanded.csproj",
+      "packagesPath": "C:\\Users\\jcbco\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\jcbco\\RiderProjects\\DawnniExPatchMod\\RemasterExpanded\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\jcbco\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net10.0-windows"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "C:\\nugetPackages": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net10.0-windows7.0": {
+          "targetAlias": "net10.0-windows",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "noWarn": [
+          "NU1901",
+          "NU1902",
+          "NU1903",
+          "NU1904"
+        ],
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "all"
+      },
+      "SdkAnalysisLevel": "10.0.100"
+    },
+    "frameworks": {
+      "net10.0-windows7.0": {
+        "targetAlias": "net10.0-windows",
+        "dependencies": {
+          "Lib.Harmony": {
+            "target": "Package",
+            "version": "[2.4.2, )"
+          },
+          "Microsoft.VisualStudio.Threading.Analyzers": {
+            "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+            "suppressParent": "All",
+            "target": "Package",
+            "version": "[17.14.15, )"
+          },
+          "System.Text.Json": {
+            "target": "Package",
+            "version": "[10.0.5, )"
+          }
+        },
+        "imports": [
+          "net461",
+          "net462",
+          "net47",
+          "net471",
+          "net472",
+          "net48",
+          "net481"
+        ],
+        "assetTargetFallback": true,
+        "warn": true,
+        "frameworkReferences": {
+          "Microsoft.NETCore.App": {
+            "privateAssets": "all"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Users\\jcbco\\.dotnet\\sdk\\10.0.101/PortableRuntimeIdentifierGraph.json"
+      }
+    }
+  }
+}

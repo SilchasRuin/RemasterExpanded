@@ -26,10 +26,12 @@ public class ModLoader
         NewItems.LoadItems();
         ModManager.RegisterBooleanSettingsOption("RE_CritChange", "Remaster Expanded: Remaster Flail and Hammer Critical Specialization", "Changes flails and hammers to use their remastered critical specializations, which requires a saving throw against your Class DC.", false);
         ModManager.RegisterBooleanSettingsOption("RE_AlchemicalOrganization", "Remaster Expanded: Organize Alchemical Items", "Organizes alchemical items into item groups according to their type. {b}NOTE:{/b} You must restart the game for this to take place.", true);
+        ModManager.RegisterBooleanSettingsOption("RemasterCantrips", "Remaster Expanded: Enforce Remaster Rule Cantrip Damage for Divine Lance", "If this is enabled, Divine Lance will use remaster damage baseline for divine lance (base damage 2d4), if disabled it will use pre-remaster baseline (base damage 1d4 + spellcasting ability).", ModData.Remaster);
         Harmony harmony = new("critSpecChange");
         harmony.PatchAll();
         Inkdrop.AddInkdrop();
         NewSpells.LoadSpells();
+        NewDeities.LoadDomains();
         foreach (Feat feat in FeatLoader.LoadFeats())
         {
             ModManager.AddFeat(feat);
@@ -46,6 +48,8 @@ public class ModLoader
             }
         }
         SorcerousPotency.Load();
+        ModifyGunslinger.Load();
+        UpdateItems.Load();
         if (ModManager.TryParse("DawnniEx", out Trait _))
         {
             ModManager.RegisterBooleanSettingsOption("RemoveDawnniFeats", "Remaster Expanded: Remove Obsolete Dawnni Content", "This mod option removes Dawnni Expanded's archetype feats and Familiar feats and mutagens already added by the base game. {b}NOTE:{/b} You must restart the game for this to take place.", false);
