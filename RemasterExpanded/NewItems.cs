@@ -1,5 +1,13 @@
-﻿using Dawnsbury.Audio;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dawnsbury.Audio;
 using Dawnsbury.Auxiliary;
+using Dawnsbury.Core;
+using Dawnsbury.Core.CharacterBuilder.Feats;
+using Dawnsbury.Core.CharacterBuilder.FeatsDb.Alchemy;
+using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
+using Dawnsbury.Core.CharacterBuilder.Selections.Options;
 using Dawnsbury.Core.CharacterBuilder.Spellcasting;
 using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Coroutines.Options;
@@ -11,10 +19,13 @@ using Dawnsbury.Core.Mechanics.Core;
 using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Mechanics.Rules;
 using Dawnsbury.Core.Mechanics.Targeting;
+using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Core.Mechanics.Treasure;
 using Dawnsbury.Core.Possibilities;
 using Dawnsbury.Core.Tiles;
+using Dawnsbury.Display;
 using Dawnsbury.Display.Illustrations;
+using Dawnsbury.IO;
 using Dawnsbury.Modding;
 using Microsoft.Xna.Framework;
 using SpiritDamage;
@@ -307,7 +318,63 @@ public class NewItems
                         });
                     }));
         });
+        ModManager.RegisterNewItemIntoTheShop("RE_TassetsOfFlexibility", name =>
+        {
+            return new Item(name, MIllustrations.CreateIllustration("Tassets"), "tassets of flexibility", 4, 100,
+                Trait.Invested, Trait.Magical, Trait.Worn)
+                .WithDescription("{i}You can attach these light-brown leather flaps adorned with gold stitching to a breastplate or even clothing to protect your upper legs in battle. They give you the freedom to move your body to its limit without worrying about exposing yourself to a hit.{/i}" +
+                                 "\n\nWhile wearing the tasset of flexibility, you gain a +1 item bonus to Acrobatics checks and once per day can take the following action:" +
+                                 "\n\n{b}Lunging Attack{/b} {icon:Action} (concentrate); Make a Strike with a melee weapon, increasing your reach by 5 feet for that Strike.")
+                .WithOnCreatureWhenWorn((item, self) =>
+                {
+                    self.AddQEffect(new QEffect
+                    {
+                        ProvideStrikeModifier = weapon =>
+                        {
+                            if (!weapon.HasTrait(Trait.Melee) || weapon.HasTrait(Trait.Unarmed) || self.PersistentUsedUpResources.UsedUpActions.Contains("Lunging Attack"))
+                                return null;
+                            CombatAction strike = self.CreateStrike(weapon);
+                            strike.WithPrologueEffectOnChosenTargetsBeforeRolls(async (action, cr, _) =>
+                            {
+                                cr.AddQEffect(new QEffect
+                                {
+                                    Id = MQEffectIds.LungingReach,
+                                    AfterYouTakeAction = async (qEffect, combatAction) =>
+                                    {
+                                        if (combatAction != action)
+                                            return;
+                                        qEffect.ExpiresAt = ExpirationCondition.Immediately;
+                                    }
+                                });
+                                cr.Battle.GameLoop.RecalculateFlankingFor(cr);
+                            });
+                            strike.EffectOnOneTarget += async (_, caster, _, _) =>
+                            {
+                                caster.PersistentUsedUpResources.UsedUpActions.Add("Lunging Attack");
+                            };
+                            strike.Name = strike.Name.Replace("Strike", "Lunging Attack");
+                            strike.ContextMenuName = strike.ContextMenuName?.Replace("Strike", "Lunging Attack") ?? strike.ContextMenuName;
+                            strike.ShortName = strike.ShortName.Replace("Strike", "Lunging Attack");
+                            strike.Target = FeatLoader.ReachPlusFive(item, self).WithAdditionalConditionOnTargetCreature((me, _) => me.PersistentUsedUpResources.UsedUpActions.Contains("Lunging Attack") ? Usability.NotUsable("Lunging Attack may only be used once per day.") : Usability.Usable);
+                            strike.Description = strike.Description.Replace($"{{b}}Reach{{/b}} {item.DetermineReach(self)*5}", $"{{b}}Reach{{/b}} {(item.DetermineReach(self)+1)*5}");
+                            strike.Traits.Add(Trait.Concentrate);
+                            return strike;
+                        },
+                        BonusToSkillChecks = (skill, _, _) => skill == Skill.Acrobatics ? new Bonus(1, BonusType.Item, "Tassets of Flexibility") : null
+                    });
+                });
+        });
+        ModManager.RegisterNewItemIntoTheShop("RE_FaithSymbolHeal", name => FaithSymbol(name, 18, 1, 4, 80, true));
+        ModManager.RegisterNewItemIntoTheShop("RE_FaithSymbolHarm", name => FaithSymbol(name, 18, 1, 4, 80, false));
+        ModManager.RegisterNewItemIntoTheShop("RE_FaithSymbolHealGreater", name => FaithSymbol(name, 24, 3, 8, 425, true, "greater"));
+        ModManager.RegisterNewItemIntoTheShop("RE_FaithSymbolHarmGreater", name => FaithSymbol(name, 24, 3, 8, 425, false, "greater"));
+        ModManager.RegisterNewItemIntoTheShop("RE_FaithSymbolHealMajor", name => FaithSymbol(name, 30, 5, 12, 1700, true, "major"));
+        ModManager.RegisterNewItemIntoTheShop("RE_FaithSymbolHarmMajor", name => FaithSymbol(name, 30, 5, 12, 1700, false, "major"));
+        ModManager.RegisterInlineTooltip("sanctify", MTraits.Sanctified.GetTraitProperties().RulesText ?? "");
+        ModManager.RegisterInlineTooltip("holy", HolyTrait.Holy.GetTraitProperties().RulesText ?? "");
+        ModManager.RegisterInlineTooltip("unholy",  UnholyTrait.Unholy.GetTraitProperties().RulesText ?? "");
         #region removed
+
         // GlueBombLesser = ModManager.RegisterNewItemIntoTheShop("RE_GlueBombLesser", name =>
         // {
         //     Item bomb = new(name, MIllustrations.GlueBomb, "glue bomb (lesser)", 1, 3, Trait.Alchemical,
@@ -555,6 +622,185 @@ public class NewItems
         //     };
         //     return item;
         // });
+
         #endregion
+    }
+
+    public static Item FaithSymbol(ItemName name, int dc, int rank, int level, int price, bool heal, string greater = "")
+    {
+        string major = greater != "" ? $" ({greater})" : "";
+        string healOrHarm = heal ? "heal" : "harm";
+        FeatName allowedFont = heal ? FeatName.HealingFont : FeatName.HarmfulFont;
+        var humanName = $"faith symbol of {healOrHarm}{major}";
+        Illustration faithIllustration = heal ? MIllustrations.CreateIllustration("Faith") : MIllustrations.CreateIllustration("FaithHarm");
+        string spellLink = heal ? AllSpells.CreateModernSpellTemplate(SpellId.Heal, Trait.Innate, rank).ToSpellLink() : AllSpells.CreateModernSpellTemplate(SpellId.Harm, Trait.Innate, rank).ToSpellLink();
+        return new Item(name, faithIllustration, humanName, level, price, Trait.Worn,
+                Trait.Divine, Trait.Invested)
+            .WithDescription("{i}You have a symbol showing devotion to your deity.{/i}" +
+                             $"\n\n{{b}}Requirements:{{/b}} You must worship a deity and your deity's font must include {spellLink}." +
+                             "\n\nIf you are not {tooltip:sanctify}sanctified{/} and you are good aligned, you become sanctified, gaining the {tooltip:holy}holy{/} trait. If you are not sanctified and you are evil aligned, you become sanctified, gaining the {tooltip:unholy}unholy{/} trait." +
+                             $"\n\nIf you have the spellcasting feature, the symbol can cast {spellLink}, or the 1st-rank spell from your deity's cleric spells once per day. The DC for any of these spells is {dc} and the spells are cast at rank {rank}.")
+            .WithCanUse((values, _) => values.Deity is {} deity && deity.AllowedFonts.Contains(allowedFont))
+            .WithWornAt(MTraits.FaithSymbol)
+            .WithStaticDC(dc)
+            .WithOnCreatureWhenWorn((item, creature) =>
+            {
+                if (creature.PersistentCharacterSheet is not { } sheet)
+                    return;
+                if (creature.HasTrait(Trait.Good) && !creature.HasTrait(HolyTrait.Holy))
+                    creature.Traits.Add(HolyTrait.Holy);
+                else if (creature.HasTrait(Trait.Evil) && !creature.HasTrait(UnholyTrait.Unholy)) 
+                    creature.Traits.Add(UnholyTrait.Unholy);
+                QEffect menu = new(ExpirationCondition.Ephemeral)
+                {
+                    ProvideActionIntoPossibilitySection = (_, section) =>
+                    {
+                        if (section.PossibilitySectionId != PossibilitySectionId.ItemActions)
+                            return null;
+                        return new SubmenuPossibility(IllustrationName.CastASpell, "Faith Symbol")
+                        {
+                            SubmenuId = MSubmenuIds.FaithSymbol,
+                            PossibilityGroup = "Faith Symbol"
+                        };
+                    },
+                    Key = "FaithSymbol"
+                };
+                CombatAction harmOrHeal = !heal ? AllSpells.CreateMonsterSpellInCombat(SpellId.Harm, creature, rank, dc) : AllSpells.CreateMonsterSpellInCombat(SpellId.Heal, creature, rank, dc);
+                harmOrHeal.CastFromScroll = item;
+                AddCastRestriction(harmOrHeal, "faith symbol");
+                CombatAction deitySpellAction = CombatAction.CreateSimple(creature, "Placeholder");
+                QEffect cast = new(ExpirationCondition.Ephemeral)
+                {
+                    ProvideSectionIntoSubmenu = (_, section) =>
+                    {
+                        if (section.SubmenuId != MSubmenuIds.FaithSymbol)
+                            return null;
+                        if (sheet.Calculated.Deity is {} deity)
+                        {
+                            SpellId? deitySpell = deity.GrantedSpells.FirstOrDefault(sp =>
+                                AllSpells.CreateModernSpellTemplate(sp, Trait.Innate).MinimumSpellLevel == 1);
+                            if (deitySpell != null)
+                            {
+                                deitySpellAction = AllSpells.CreateMonsterSpellInCombat(deitySpell.Value, creature, rank, dc);
+                                deitySpellAction.CastFromScroll = item;
+                                AddCastRestriction(deitySpellAction, "faith symbol");
+                            }
+                        }
+                        PossibilitySection symbol = new("Faith Symbol");
+                        symbol.AddPossibility(Possibilities.CreateSpellPossibility(harmOrHeal));
+                        symbol.AddPossibility(Possibilities.CreateSpellPossibility(deitySpellAction));
+                        return symbol;
+                    }
+                };
+                creature.AddQEffect(new QEffect()
+                {
+                    StateCheck = qf =>
+                    {
+                        Creature self = qf.Owner;
+                        if (self.Spellcasting == null) return;
+                        creature.AddQEffect(menu);
+                        creature.AddQEffect(cast);
+                    }
+                });
+            });
+    }
+
+    public static void AddCastRestriction(CombatAction spell, string baseName)
+    {
+        switch (spell.Target)
+        {
+            case AreaTarget target:
+                target.AdditionalRequirementOnAreaCaster += creature =>
+                    creature.PersistentUsedUpResources.UsedUpActions.Contains(
+                        $"{baseName}")
+                        ? Usability.NotUsable(
+                            $"You may cast a spell from a {baseName} once per day.")
+                        : Usability.Usable;
+                spell.EffectOnChosenTargets += async (_, caster, _) =>
+                {
+                    caster.PersistentUsedUpResources.UsedUpActions.Add(
+                        $"{baseName}");
+                };
+                break;
+            case CreatureTarget target2:
+                target2.WithAdditionalConditionOnTargetCreature((creature, _) =>
+                    creature.PersistentUsedUpResources.UsedUpActions.Contains(
+                        $"{baseName}")
+                        ? Usability.NotUsable(
+                            $"You may cast a spell from a {baseName} once per day.")
+                        : Usability.Usable);
+                spell.EffectOnChosenTargets += async (_, caster, _) =>
+                {
+                    caster.PersistentUsedUpResources.UsedUpActions.Add(
+                        $"{baseName}");
+                };
+                break;
+            case DependsOnActionsSpentTarget target2:
+                switch (target2.IfOneAction)
+                {
+                    case CreatureTarget target1:
+                        target1.WithAdditionalConditionOnTargetCreature((creature, _) =>
+                            creature.PersistentUsedUpResources.UsedUpActions.Contains(
+                                $"{baseName}")
+                                ? Usability.NotUsable(
+                                    $"You may cast a spell from a {baseName} once per day.")
+                                : Usability.Usable);
+                        break;
+                    case AreaTarget areaTarget:
+                        areaTarget.AdditionalRequirementOnAreaCaster += creature =>
+                            creature.PersistentUsedUpResources.UsedUpActions.Contains(
+                                $"{baseName}")
+                                ? Usability.NotUsable(
+                                    $"You may cast a spell from a {baseName} once per day.")
+                                : Usability.Usable;
+                        break;
+                }
+
+                switch (target2.IfTwoActions)
+                {
+                    case CreatureTarget target1:
+                        target1.WithAdditionalConditionOnTargetCreature((creature, _) =>
+                            creature.PersistentUsedUpResources.UsedUpActions.Contains(
+                                $"{baseName}")
+                                ? Usability.NotUsable(
+                                    $"You may cast a spell from a {baseName} once per day.")
+                                : Usability.Usable);
+                        break;
+                    case AreaTarget areaTarget:
+                        areaTarget.AdditionalRequirementOnAreaCaster += creature =>
+                            creature.PersistentUsedUpResources.UsedUpActions.Contains(
+                                $"{baseName}")
+                                ? Usability.NotUsable(
+                                    $"You may cast a spell from a {baseName} once per day.")
+                                : Usability.Usable;
+                        break;
+                }
+
+                switch (target2.IfThreeActions)
+                {
+                    case CreatureTarget target1:
+                        target1.WithAdditionalConditionOnTargetCreature((creature, _) =>
+                            creature.PersistentUsedUpResources.UsedUpActions.Contains(
+                                $"{baseName}")
+                                ? Usability.NotUsable(
+                                    $"You may cast a spell from a {baseName} once per day.")
+                                : Usability.Usable);
+                        break;
+                    case AreaTarget areaTarget:
+                        areaTarget.AdditionalRequirementOnAreaCaster += creature =>
+                            creature.PersistentUsedUpResources.UsedUpActions.Contains(
+                                $"{baseName}")
+                                ? Usability.NotUsable(
+                                    $"You may cast a spell from a {baseName} once per day.")
+                                : Usability.Usable;
+                        break;
+                }
+                spell.EffectOnChosenTargets += async (_, caster, _) =>
+                {
+                    caster.PersistentUsedUpResources.UsedUpActions.Add(
+                        $"{baseName}");
+                };
+                break;
+        }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Threading.Tasks;
 using Dawnsbury.Audio;
 using Dawnsbury.Campaign.LongTerm;
 using Dawnsbury.Core;

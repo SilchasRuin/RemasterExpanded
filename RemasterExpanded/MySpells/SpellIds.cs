@@ -24,4 +24,7 @@ public abstract class SpellIds
     public static SpellId RetributivePain { get; set; }
     public static SpellId ScholarlyRecollection { get; set; }
     public static SpellId KnowTheEnemy { get; set; }
+    public static SpellId Befuddle { get; set; }
+    public static SpellId AnimatedAssault { get; set; }
+    public static SpellId IceStorm { get; set; }
 }

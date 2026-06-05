@@ -1,8 +1,12 @@
-﻿using Dawnsbury.Core;
+﻿using System.Collections.Generic;
+using Dawnsbury.Core;
+using Dawnsbury.Core.CharacterBuilder;
 using Dawnsbury.Core.CharacterBuilder.Feats;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
+using Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Archetypes;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Specific;
+using Dawnsbury.Core.CharacterBuilder.Selections.Options;
 using Dawnsbury.Core.CharacterBuilder.Spellcasting;
 using Dawnsbury.Core.Creatures;
 using Dawnsbury.Core.Mechanics.Core;
@@ -13,6 +17,9 @@ using Dawnsbury.Display.Text;
 using Dawnsbury.IO;
 using Dawnsbury.Modding;
 using HarmonyLib;
+using RemasterExpanded.MyArchetypes;
+using RemasterExpanded.MySpells;
+using static RemasterExpanded.ModData;
 using NewSpells = RemasterExpanded.MySpells.NewSpells;
 
 namespace RemasterExpanded;
@@ -26,17 +33,22 @@ public class ModLoader
         NewItems.LoadItems();
         ModManager.RegisterBooleanSettingsOption("RE_CritChange", "Remaster Expanded: Remaster Flail and Hammer Critical Specialization", "Changes flails and hammers to use their remastered critical specializations, which requires a saving throw against your Class DC.", false);
         ModManager.RegisterBooleanSettingsOption("RE_AlchemicalOrganization", "Remaster Expanded: Organize Alchemical Items", "Organizes alchemical items into item groups according to their type. {b}NOTE:{/b} You must restart the game for this to take place.", true);
-        ModManager.RegisterBooleanSettingsOption("RemasterCantrips", "Remaster Expanded: Enforce Remaster Rule Cantrip Damage for Divine Lance", "If this is enabled, Divine Lance will use remaster damage baseline for divine lance (base damage 2d4), if disabled it will use pre-remaster baseline (base damage 1d4 + spellcasting ability).", ModData.Remaster);
+        ModManager.RegisterBooleanSettingsOption("RemasterCantrips", "Remaster Expanded: Enforce Remaster Rule Cantrip Damage for Divine Lance", "If this is enabled, Divine Lance will use remaster damage baseline for divine lance (base damage 2d4), if disabled it will use pre-remaster baseline (base damage 1d4 + spellcasting ability).", Remaster);
         Harmony harmony = new("critSpecChange");
         harmony.PatchAll();
         Inkdrop.AddInkdrop();
         NewSpells.LoadSpells();
+        TangibleDreamFigment.LoadFigment();
+        if (RemasterSpells && LoadPsychic)
+        {
+            OscillatingWaveRemaster.RemasterOscillatingWave();
+        }
         NewDeities.LoadDomains();
         foreach (Feat feat in FeatLoader.LoadFeats())
         {
             ModManager.AddFeat(feat);
         }
-        if (ModData.Remaster && ModData.MoreSpells)
+        if (Remaster && MoreSpells)
         {
             foreach (Feat feat in ModifyRemasterWizard.LoadRemasterWizardFeats())
             {
@@ -49,6 +61,7 @@ public class ModLoader
         }
         SorcerousPotency.Load();
         ModifyGunslinger.Load();
+        Sanctification.ModifyChampionCleric();
         UpdateItems.Load();
         if (ModManager.TryParse("DawnniEx", out Trait _))
         {
@@ -58,10 +71,52 @@ public class ModLoader
         }
         LoadOrder.AtEndOfLoadingSequence += () =>
         {
+            foreach (DeitySelectionFeat? deitySelectionFeat in AllFeats.All.Where(ft => ft is DeitySelectionFeat).Cast<DeitySelectionFeat>())
+            {
+                deitySelectionFeat?.OnSheet = null;
+                IEnumerable<SpellId>? extraSpells = deitySelectionFeat?.GrantedSpells;
+                Skill? divineSkill = deitySelectionFeat?.DivineSkill;
+                deitySelectionFeat?.WithOnSheet(values =>
+                {
+                    ClassSelectionFeat? classSelectionFeat = values.Class;
+                    Trait trait = classSelectionFeat?.ClassTrait ?? Trait.None;
+                    if (trait == Trait.Cleric)
+                    {
+                        if (values.PreparedSpells.TryGetValue(Trait.Cleric, out PreparedSpellSlots? preparedSpellSlots))
+                            preparedSpellSlots.AdditionalPreparableSpells.AddRange(extraSpells ?? throw new InvalidOperationException());
+                        if (deitySelectionFeat.AllowedFonts.Length == 1)
+                            values.GrantFeat(deitySelectionFeat.AllowedFonts[0]);
+                        else
+                            values.AddSelectionOption(new SingleFeatSelectionOption("Font", "Divine font", 1, ft => ft.HasTrait(Trait.DivineFont)));
+                    }
+                    if (trait is Trait.Cleric or Trait.Champion)
+                    {
+                        Trait mainTrait = Items.CreateNew(deitySelectionFeat.FavoredWeapon).MainTrait;
+                        if (mainTrait == Trait.None)
+                            throw new Exception("This favored weapon does not have a main trait.");
+                        if (mainTrait == Trait.SteelShield)
+                            values.Proficiencies.Set(Trait.Shield, Proficiency.Trained);
+                        if (mainTrait == Trait.Shortbow)
+                            values.Proficiencies.Set(Trait.CompositeShortbow, Proficiency.Trained);
+                        values.Proficiencies.Set(mainTrait, Proficiency.Trained);
+                    }
+                    if (!divineSkill.HasValue ||
+                        (!values.AdditionalClassTraits.Any(tr => tr is Trait.Cleric or Trait.Champion) && trait != Trait.Cleric && trait != Trait.Champion))
+                        return;
+                    values.TrainInThisOrSubstitute(divineSkill.Value);
+                });
+            }
+            foreach (Feat feat in AllFeats.All.Where(ft => ft is ClassSelectionFeat { ClassTrait: not Trait.Cleric and not Trait.Champion }))
+            {
+                feat.OnSheet += values =>
+                    values.AddSelectionOption(new SingleFeatSelectionOption("RE_DeitySelection", "Deity", -1,
+                        ft => ft is DeitySelectionFeat).WithIsOptional());
+            }
+            
             Item withRunes = Items.CreateNew(NewItems.AutoloadLeathers).WithModificationRune(ItemName.ArmorPotencyRunestone)
                 .WithModificationRune(ItemName.ResilientRunestone);
             Items.ShopItems.Add(withRunes);
-            if (ModData.Remaster && ModData.MoreSpells)
+            if (Remaster && MoreSpells)
             {
                 ModifyRemasterWizard.PatchWizard();
             }
@@ -132,6 +187,7 @@ public class ModLoader
             }
             if (PlayerProfile.Instance.IsBooleanOptionEnabled("RE_AlchemicalOrganization"))
                 AlchemicalOrganization.LoadOrganization();
+            
         };
     }
 }

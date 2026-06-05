@@ -1,4 +1,8 @@
-﻿using Dawnsbury.Audio;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dawnsbury.Audio;
 using Dawnsbury.Auxiliary;
 using Dawnsbury.Core;
 using Dawnsbury.Core.Animations;
@@ -6,6 +10,7 @@ using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
 using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Coroutines.Options;
+using Dawnsbury.Core.Coroutines.Options.Reactive;
 using Dawnsbury.Core.Coroutines.Requests;
 using Dawnsbury.Core.Creatures;
 using Dawnsbury.Core.Intelligence;
@@ -101,9 +106,10 @@ public class NewSpells2nd : NewSpells
         });
         Hidebound = ModManager.RegisterNewSpell("RE_Hidebound", 2, (_, _, level, inCombat, _) =>
         {
+            int heighten = level % 2 == 0 ? level : level - 1;
             return Spells.CreateModern(MIllustrations.Hidebound, "Hidebound", [Trait.Concentrate, Trait.Manipulate, Trait.Arcane, Trait.Primal], 
                     "The target's skin erupts in thick hide or dense scales.",
-                    $"If you or an ally within 60 feet is hit with a Strike that deals physical damage, you can cast this spell as a {{icon:Reaction}} reaction, and that target gains resistance {(inCombat ? 5 + 3 * ((level - 2) / 2) : 5)} to physical damage, except adamantine, until the beginning of its next turn.",
+                    $"If you or an ally within 60 feet is hit with a Strike that deals physical damage, you can cast this spell as a {{icon:Reaction}} reaction, and that target gains resistance {S.HeightenedVariable(5 + 3 * ((heighten - 2) / 2), 5)} to physical damage, except adamantine, until the beginning of its next turn.",
                     Target.Uncastable(), level, null)
                 .WithHeighteningNumerical(level, 2, inCombat, 2, "The resistance increases by 3.")
                 .WithActionCost(-2).WithCastsAsAReaction((effect, spell, canCast) =>
@@ -112,14 +118,14 @@ public class NewSpells2nd : NewSpells
                     Creature caster = effect.Owner;
                     effect.AddGrantingOfTechnical(cr => cr.FriendOf(caster) && cr.DistanceTo(caster) <= 12, qfTech =>
                     {
-                        qfTech.YouAreDealtDamageEvent = async (effectQ, damage) =>
+                        qfTech.YouAreDealtDamageReaction = (effectQ, damage) =>
                         {
                             Creature defender = effectQ.Owner;
                             CombatAction? cAction = damage.CombatAction;
                             CombatAction fake = CombatAction.CreateSimple(caster, "Fake", Trait.Manipulate, Trait.Concentrate, Trait.DoNotShowInCombatLog, Trait.DoNotShowOverheadOfActionName, Trait.Spell).WithActionCost(0);
                             fake.SpellInformation = spell.SpellInformation;
                             int resistAmount = 5 + 3 * ((level - 2) / 2);
-                            if (!canCast() || !damage.KindedDamages.Any(kind => kind.DamageKind.IsPhysical()) || cAction == null || !cAction.HasTrait(Trait.Strike) || cAction.HasTrait(Trait.Adamantine) || !fake.CanBeginToUse(caster)) return;
+                            if (!canCast() || !damage.KindedDamages.Any(kind => kind.DamageKind.IsPhysical()) || cAction == null || !cAction.HasTrait(Trait.Strike) || cAction.HasTrait(Trait.Adamantine) || !fake.CanBeginToUse(caster)) return null;
                             int toReduce = 0;
                             List<DamageKind> affected = [];
                             foreach (KindedDamage kindedDamage in damage.KindedDamages.Where(kindedDamage => kindedDamage.DamageKind.IsPhysical()))
@@ -136,51 +142,133 @@ public class NewSpells2nd : NewSpells
                                     affected.Add(kindedDamage.DamageKind);
                                 }
                             }
-                            if (toReduce <= 0) return;
+                            if (toReduce <= 0) return null;
                             int totalDamage = damage.KindedDamages.Sum(kindedDamage => kindedDamage.ResolvedDamage);
-                            if (!await caster.AskToUseReaction(defender.Name+" is about to take "+totalDamage+" damage, would you like to use a reaction to cast {i}hidebound{i} at spell level "+level+" and reduce the damage by "+toReduce+"?", caster.Illustration)) return;
-                            caster.Spellcasting!.UseUpSpellcastingResources(spell);
-                            bool cast = await caster.Battle.GameLoop.FullCast(fake);
-                            if (!cast || fake.Disrupted)
-                            {
-                                caster.Overhead(spell.Name, Color.Black,
-                                    $"{caster} attempts to cast {{b}}{spell.Name}{{/b}}, but it was disrupted!",
-                                    spell.Name + " {icon:Reaction}",
-                                    spell.Description, spell.Traits);
-                                return;
-                            }
-                            caster.Overhead(spell.Name, Color.Black, $"{caster} casts {{b}}{spell.Name}{{/b}}.",
-                                spell.Name + " {icon:Reaction}",
-                                spell.Description, spell.Traits);
-                            QEffect hide = new("Hidebound", "You have resistance "+resistAmount+" to physical damage except adamantine.", ExpirationCondition.ExpiresAtStartOfYourTurn, caster, MIllustrations.Hidebound)
-                            {
-                                StateCheck = qf => qf.Owner.WeaknessAndResistance.AddSpecialResistance("physical",  (combatAction, dk) => dk.IsPhysical() && combatAction != null && !combatAction.HasTrait(Trait.Adamantine), resistAmount, "adamantine")
-                            };
-                            defender.AddQEffectAtPriority(hide, true);
-                            affected = [];
-                            foreach (KindedDamage kindedDamage in damage.KindedDamages.Where(d => d.DamageKind.IsPhysical()))
-                            {
-                                if (affected.Contains(kindedDamage.DamageKind)) continue;
-                                int num1 = resistAmount;
-                                if (defender.WeaknessAndResistance.Resistances.Count > 0 && defender.WeaknessAndResistance.Resistances.FirstOrDefault(resistance => resistance.Matches(cAction, kindedDamage.DamageKind)) is {} resist)
+                            ReactionOption hidebound = ReactionOption.CreateFromSpellAsAReaction(spell,
+                                defender.Name + " is about to take " + totalDamage +
+                                " damage, would you like to use a reaction to reduce the damage by " + toReduce + "?",
+                                async () =>
                                 {
-                                    num1 -= resist.Value;
-                                    num1 = Math.Max(num1, 0);
-                                }
-                                int num = Math.Min(kindedDamage.ResolvedDamage, num1);
-                                kindedDamage.ResolvedDamage -= num;
-                                affected.Add(kindedDamage.DamageKind);
-                            }
-                            damage.DamageEventDescription.AppendLine($"{{b}}-{toReduce.ToString()}{{/b}} Hidebound");
+                                    bool cast = await caster.Battle.GameLoop.FullCast(fake);
+                                    if (!cast || fake.Disrupted)
+                                    {
+                                        caster.Overhead(spell.Name, Color.Black,
+                                            $"{caster} attempts to cast {{b}}{spell.Name}{{/b}}, but it was disrupted!",
+                                            spell.Name + " {icon:Reaction}",
+                                            spell.Description, spell.Traits);
+                                        return;
+                                    }
+
+                                    caster.Overhead(spell.Name, Color.Black, $"{caster} casts {{b}}{spell.Name}{{/b}}.",
+                                        spell.Name + " {icon:Reaction}",
+                                        spell.Description, spell.Traits);
+                                    QEffect hide = new("Hidebound",
+                                        "You have resistance " + resistAmount +
+                                        " to physical damage except adamantine.",
+                                        ExpirationCondition.ExpiresAtStartOfYourTurn, caster, MIllustrations.Hidebound)
+                                    {
+                                        StateCheck = qf =>
+                                            qf.Owner.WeaknessAndResistance.AddSpecialResistance("physical",
+                                                (combatAction, dk) =>
+                                                    dk.IsPhysical() && combatAction != null &&
+                                                    !combatAction.HasTrait(Trait.Adamantine), resistAmount,
+                                                "adamantine")
+                                    };
+                                    defender.AddQEffectAtPriority(hide, true);
+                                    affected = [];
+                                    foreach (KindedDamage kindedDamage in damage.KindedDamages.Where(d =>
+                                                 d.DamageKind.IsPhysical()))
+                                    {
+                                        if (affected.Contains(kindedDamage.DamageKind)) continue;
+                                        int num1 = resistAmount;
+                                        if (defender.WeaknessAndResistance.Resistances.Count > 0 &&
+                                            defender.WeaknessAndResistance.Resistances.FirstOrDefault(resistance =>
+                                                resistance.Matches(cAction, kindedDamage.DamageKind)) is { } resist)
+                                        {
+                                            num1 -= resist.Value;
+                                            num1 = Math.Max(num1, 0);
+                                        }
+
+                                        int num = Math.Min(kindedDamage.ResolvedDamage, num1);
+                                        kindedDamage.ResolvedDamage -= num;
+                                        affected.Add(kindedDamage.DamageKind);
+                                    }
+
+                                    damage.DamageEventDescription.AppendLine(
+                                        $"{{b}}-{toReduce.ToString()}{{/b}} Hidebound");
+                            });
+                            return hidebound.WithTraits(spell.Traits.ToArray());
                         };
+                        // qfTech.YouAreDealtDamageEvent = async (effectQ, damage) =>
+                        // {
+                        //     Creature defender = effectQ.Owner;
+                        //     CombatAction? cAction = damage.CombatAction;
+                        //     CombatAction fake = CombatAction.CreateSimple(caster, "Fake", Trait.Manipulate, Trait.Concentrate, Trait.DoNotShowInCombatLog, Trait.DoNotShowOverheadOfActionName, Trait.Spell).WithActionCost(0);
+                        //     fake.SpellInformation = spell.SpellInformation;
+                        //     int resistAmount = 5 + 3 * ((level - 2) / 2);
+                        //     if (!canCast() || !damage.KindedDamages.Any(kind => kind.DamageKind.IsPhysical()) || cAction == null || !cAction.HasTrait(Trait.Strike) || cAction.HasTrait(Trait.Adamantine) || !fake.CanBeginToUse(caster)) return;
+                        //     int toReduce = 0;
+                        //     List<DamageKind> affected = [];
+                        //     foreach (KindedDamage kindedDamage in damage.KindedDamages.Where(kindedDamage => kindedDamage.DamageKind.IsPhysical()))
+                        //     {
+                        //         if (affected.Contains(kindedDamage.DamageKind)) continue;
+                        //         if (defender.WeaknessAndResistance.Resistances.Count > 0 && defender.WeaknessAndResistance.Resistances.FirstOrDefault(resistance => resistance.Matches(cAction, kindedDamage.DamageKind)) is {} resist)
+                        //         {
+                        //             toReduce += resistAmount - resist.Value;
+                        //             affected.Add(kindedDamage.DamageKind);
+                        //         }
+                        //         else
+                        //         {
+                        //             toReduce += resistAmount;
+                        //             affected.Add(kindedDamage.DamageKind);
+                        //         }
+                        //     }
+                        //     if (toReduce <= 0) return;
+                        //     int totalDamage = damage.KindedDamages.Sum(kindedDamage => kindedDamage.ResolvedDamage);
+                        //     if (!await caster.AskToUseReaction(defender.Name+" is about to take "+totalDamage+" damage, would you like to use a reaction to cast {i}hidebound{i} at spell level "+level+" and reduce the damage by "+toReduce+"?", caster.Illustration)) return;
+                        //     caster.Spellcasting!.UseUpSpellcastingResources(spell);
+                        //     bool cast = await caster.Battle.GameLoop.FullCast(fake);
+                        //     if (!cast || fake.Disrupted)
+                        //     {
+                        //         caster.Overhead(spell.Name, Color.Black,
+                        //             $"{caster} attempts to cast {{b}}{spell.Name}{{/b}}, but it was disrupted!",
+                        //             spell.Name + " {icon:Reaction}",
+                        //             spell.Description, spell.Traits);
+                        //         return;
+                        //     }
+                        //     caster.Overhead(spell.Name, Color.Black, $"{caster} casts {{b}}{spell.Name}{{/b}}.",
+                        //         spell.Name + " {icon:Reaction}",
+                        //         spell.Description, spell.Traits);
+                        //     QEffect hide = new("Hidebound", "You have resistance "+resistAmount+" to physical damage except adamantine.", ExpirationCondition.ExpiresAtStartOfYourTurn, caster, MIllustrations.Hidebound)
+                        //     {
+                        //         StateCheck = qf => qf.Owner.WeaknessAndResistance.AddSpecialResistance("physical",  (combatAction, dk) => dk.IsPhysical() && combatAction != null && !combatAction.HasTrait(Trait.Adamantine), resistAmount, "adamantine")
+                        //     };
+                        //     defender.AddQEffectAtPriority(hide, true);
+                        //     affected = [];
+                        //     foreach (KindedDamage kindedDamage in damage.KindedDamages.Where(d => d.DamageKind.IsPhysical()))
+                        //     {
+                        //         if (affected.Contains(kindedDamage.DamageKind)) continue;
+                        //         int num1 = resistAmount;
+                        //         if (defender.WeaknessAndResistance.Resistances.Count > 0 && defender.WeaknessAndResistance.Resistances.FirstOrDefault(resistance => resistance.Matches(cAction, kindedDamage.DamageKind)) is {} resist)
+                        //         {
+                        //             num1 -= resist.Value;
+                        //             num1 = Math.Max(num1, 0);
+                        //         }
+                        //         int num = Math.Min(kindedDamage.ResolvedDamage, num1);
+                        //         kindedDamage.ResolvedDamage -= num;
+                        //         affected.Add(kindedDamage.DamageKind);
+                        //     }
+                        //     damage.DamageEventDescription.AppendLine($"{{b}}-{toReduce.ToString()}{{/b}} Hidebound");
+                        // };
                     });
                 });
         });
         ModManager.RegisterNewSpell("RE_PyrefowlRebuke", 2, (_, _, level, inCombat, _) =>
         {
+            int heighten = level % 2 == 0 ? level : level - 1;
             return Spells.CreateModern(MIllustrations.PyrefowlRebuke, "Pyrefowl Rebuke", [Trait.Fire, Trait.Manipulate, Trait.Arcane, Trait.Primal, Trait.Move], 
                     "Fiery wings briefly envelop your arms, and with a swift wingbeat, you flutter away from your attacker in a shower of searing sparks.",
-                    $"When a creature within 10 feet of you Strikes and deals damage to you, you may use a {{icon:Reaction}} reaction to deal {(inCombat ? $"{{blue}}{1+(level-2)/2}d6{{/blue}}" : "1d6")} fire damage to the triggering creature, with a basic Reflex save, and Fly up to {(inCombat ? $"{{blue}}{10 + 5*(level % 2 == 0 ? (level - 2) / 2 : (level - 3) / 2)}{{/blue}}" : "10")} feet in a straight line directly away from it. If the creature critically fails its saving throw, your movement does not provoke reactions from it, and it's dazzled until the end of its next turn.",
+                    $"When a creature within 10 feet of you Strikes and deals damage to you, you may use a {{icon:Reaction}} reaction to deal {S.HeightenedVariable(heighten/2, 1)}d6 fire damage to the triggering creature, with a basic Reflex save, and Fly up to {S.HeightenedVariable(10 + 5 * ((heighten - 2)/ 2), 10)} feet in a straight line directly away from it. If the creature critically fails its saving throw, your movement does not provoke reactions from it, and it's dazzled until the end of its next turn.",
                     Target.Uncastable(), level, SpellSavingThrow.Basic(Defense.Reflex))
                 .WithActionCost(-2).WithHeighteningNumerical(level, 2, inCombat, 2, "The damage increases by 1d6, and the maximum distance you can Fly increases by 5 feet.")
                 .WithCastsAsAReaction((effect, spell, canCast) =>
@@ -189,96 +277,196 @@ public class NewSpells2nd : NewSpells
                     Creature self = effect.Owner;
                     CombatAction fake = CombatAction.CreateSimple(self, "Fake", Trait.Manipulate, Trait.Move, Trait.Fire, Trait.DoNotShowInCombatLog, Trait.DoNotShowOverheadOfActionName, Trait.Spell).WithActionCost(0);
                     fake.SpellInformation = spell.SpellInformation;
-                    effect.AfterYouTakeDamage = async (_, _, _, action, _) =>
+                    effect.AfterYouTakeDamageReaction = (_, damageEvent) =>
                     {
+                        CombatAction? action = damageEvent.CombatAction;
                         if (action == null || !action.HasTrait(Trait.Strike) || action.Owner.DistanceTo(self) > 2 ||
-                            !canCast() || !fake.CanBeginToUse(self)) return;
+                            !canCast() || !fake.CanBeginToUse(self) || !self.Alive) return null;
                         Creature enemy = action.Owner;
-                        if (!await self.AskToUseReaction(
-                                enemy.Name +
-                                " has damaged you with a strike, use a reaction to cast {i}pyrefowl rebuke{/i} at spell level " +
-                                level + "?", self.Illustration)) return;
-                        self.Spellcasting!.UseUpSpellcastingResources(spell);
-                        bool cast = await self.Battle.GameLoop.FullCast(fake);
-                        if (!cast || fake.Disrupted)
-                        {
-                            self.Overhead(spell.Name, Color.Black, $"{self} attempts to cast {{b}}{spell.Name}{{/b}}, but it was disrupted!",
-                                spell.Name + " {icon:Reaction}",
-                                spell.Description, spell.Traits);
-                            return;
-                        }
-                        self.Overhead(spell.Name, Color.Black, $"{self} casts {{b}}{spell.Name}{{/b}}.",
-                            spell.Name + " {icon:Reaction}",
-                            spell.Description, spell.Traits);
-                        CheckResult save = await CommonSpellEffects.RollSpellSavingThrowAsync(enemy, spell, Defense.Reflex);
-                        await CommonSpellEffects.DealBasicDamage(spell, self, enemy, save,
-                            DiceFormula.FromText($"{1 + (level - 2) / 2}d6", "Pyrefowl Rebuke"), DamageKind.Fire);
-                        QEffect flyingEffect = QEffect.Flying();
-                        self.AddQEffect(flyingEffect);
-                        await self.Battle.GameLoop.StateCheck();
-                        CombatAction? fly = self.Possibilities.Filter(ap =>
-                        {
-                            if (ap.CombatAction.ActionId != ActionId.Stride) return false;
-                            ap.CombatAction.ActionCost = 0;
-                            ap.RecalculateUsability();
-                            return true;
-                        }).CreateActions(true).FirstOrDefault() as CombatAction;
-                        if (save == CheckResult.CriticalFailure)
-                        {
-                            enemy.AddQEffect(QEffect.Dazzled().WithExpirationAtEndOfOwnersNextTurn());
-                            fly?.Traits.Add(Trait.DoesNotProvoke);
-                        }
-                        if (fly == null)
-                        {
-                            flyingEffect.ExpiresAt = ExpirationCondition.Immediately;
-                            return;
-                        }
-                        List<Option> tileOptions =
-                        [
-                            new CancelOption(true)
-                        ];
-                        IList<Tile> floodFill = Pathfinding.Floodfill(self, self.Battle,
-                                new PathfindingDescription
-                                {
-                                    Squares = 3,
-                                    Style = { MaximumSquares = 3 }
-                                })
-                            .Where(tile =>
-                                tile.LooksFreeTo(self) 
-                                && tile.Kind != TileKind.Chasm
-                                && tile.Kind != TileKind.Water
-                                && tile.Kind != TileKind.Lava
-                                && IsTileAway(self.Space.CenterTile.X, self.Space.CenterTile.Y, enemy.Space.CenterTile.X, enemy.Space.CenterTile.Y, 2, tile))
-                            .ToList();
-                        floodFill.ForEach(tile =>
-                        {
-                            if (!(bool)fly.Target.CanBeginToUse(self)) return;
-                            tileOptions.Add(fly.CreateUseOptionOn(tile)
-                                .WithIllustration(fly.Illustration));
-                        });
-                        Option chosenTile = (await self.Battle.SendRequest(
-                            new AdvancedRequest(self,
-                                "Choose where to Fly to or right-click to cancel. You must end your movement on solid ground.",
-                                tileOptions)
+                        ReactionOption rebuke = ReactionOption.CreateFromSpellAsAReaction(spell,
+                            $"{enemy.Name} has damaged you. Use a reaction to deal {S.HeightenedVariable(heighten / 2, 1)}d6 fire damage to the triggering creature, with a basic Reflex save, and Fly up to {S.HeightenedVariable(10 + 5 * ((heighten - 2) / 2), 10)} feet in a straight line directly away from it.",
+                            async () =>
                             {
-                                IsMainTurn = false,
-                                IsStandardMovementRequest = true,
-                                TopBarIcon = MIllustrations.PyrefowlRebuke,
-                                TopBarText =
-                                    "Choose where to Fly to or right-click to cancel. You must end your movement on solid ground.",
-                            })).ChosenOption;
-                        switch (chosenTile)
-                        {
-                            case CancelOption:
-                                action.RevertRequested = true;
-                                self.RemoveAllQEffects(qf => qf == flyingEffect);
-                                break;
-                            case TileOption tOpt:
-                                await tOpt.Action();
-                                self.RemoveAllQEffects(qf => qf == flyingEffect);
-                                break;
-                        }
+                                bool cast = await self.Battle.GameLoop.FullCast(fake);
+                                if (!cast || fake.Disrupted)
+                                {
+                                    self.Overhead(spell.Name, Color.Black,
+                                        $"{self} attempts to cast {{b}}{spell.Name}{{/b}}, but it was disrupted!",
+                                        spell.Name + " {icon:Reaction}",
+                                        spell.Description, spell.Traits);
+                                    return;
+                                }
+
+                                self.Overhead(spell.Name, Color.Black, $"{self} casts {{b}}{spell.Name}{{/b}}.",
+                                    spell.Name + " {icon:Reaction}",
+                                    spell.Description, spell.Traits);
+                                CheckResult save =
+                                    await CommonSpellEffects.RollSpellSavingThrowAsync(enemy, spell, Defense.Reflex);
+                                await CommonSpellEffects.DealBasicDamage(spell, self, enemy, save,
+                                    DiceFormula.FromText($"{1 + (level - 2) / 2}d6", "Pyrefowl Rebuke"),
+                                    DamageKind.Fire);
+                                QEffect flyingEffect = QEffect.Flying();
+                                self.AddQEffect(flyingEffect);
+                                await self.Battle.GameLoop.StateCheck();
+                                self.RegeneratePossibilities();
+                                CombatAction? fly = self.Possibilities.Filter(ap =>
+                                {
+                                    if (ap.CombatAction.ActionId != ActionId.Stride) return false;
+                                    ap.CombatAction.ActionCost = 0;
+                                    ap.RecalculateUsability();
+                                    return true;
+                                }).CreateActions(true).FirstOrDefault() as CombatAction;
+                                if (save == CheckResult.CriticalFailure)
+                                {
+                                    enemy.AddQEffect(QEffect.Dazzled().WithExpirationAtEndOfOwnersNextTurn());
+                                    fly?.Traits.Add(Trait.DoesNotProvoke);
+                                }
+
+                                if (fly == null)
+                                {
+                                    flyingEffect.ExpiresAt = ExpirationCondition.Immediately;
+                                    return;
+                                }
+
+                                List<Option> tileOptions =
+                                [
+                                    new CancelOption(true)
+                                ];
+                                IList<Tile> floodFill = Pathfinding.Floodfill(self, self.Battle,
+                                        new PathfindingDescription
+                                        {
+                                            Squares = 3,
+                                            Style = { MaximumSquares = 3 }
+                                        })
+                                    .Where(tile =>
+                                        tile.LooksFreeTo(self)
+                                        && tile.Kind != TileKind.Chasm
+                                        && tile.Kind != TileKind.Water
+                                        && tile.Kind != TileKind.Lava
+                                        && IsTileAway(self.Space.CenterTile.X, self.Space.CenterTile.Y,
+                                            enemy.Space.CenterTile.X, enemy.Space.CenterTile.Y, 2, tile))
+                                    .ToList();
+                                floodFill.ForEach(tile =>
+                                {
+                                    if (!(bool)fly.Target.CanBeginToUse(self)) return;
+                                    tileOptions.Add(fly.CreateUseOptionOn(tile)
+                                        .WithIllustration(fly.Illustration));
+                                });
+                                Option chosenTile = (await self.Battle.SendRequest(
+                                    new AdvancedRequest(self,
+                                        "Choose where to Fly to or right-click to cancel. You must end your movement on solid ground.",
+                                        tileOptions)
+                                    {
+                                        IsMainTurn = false,
+                                        IsStandardMovementRequest = true,
+                                        TopBarIcon = MIllustrations.PyrefowlRebuke,
+                                        TopBarText =
+                                            "Choose where to Fly to or right-click to cancel. You must end your movement on solid ground.",
+                                    })).ChosenOption;
+                                switch (chosenTile)
+                                {
+                                    case CancelOption:
+                                        action.RevertRequested = true;
+                                        self.RemoveAllQEffects(qf => qf == flyingEffect);
+                                        break;
+                                    case TileOption tOpt:
+                                        await tOpt.Action();
+                                        self.RemoveAllQEffects(qf => qf == flyingEffect);
+                                        break;
+                                }
+                            });
+                        return rebuke;
                     };
+                    // effect.AfterYouTakeDamage = async (_, _, _, action, _) =>
+                    // {
+                    //     if (action == null || !action.HasTrait(Trait.Strike) || action.Owner.DistanceTo(self) > 2 ||
+                    //         !canCast() || !fake.CanBeginToUse(self)) return;
+                    //     Creature enemy = action.Owner;
+                    //     if (!await self.AskToUseReaction(
+                    //             enemy.Name +
+                    //             " has damaged you with a strike, use a reaction to cast {i}pyrefowl rebuke{/i} at spell level " +
+                    //             level + "?", self.Illustration)) return;
+                    //     self.Spellcasting!.UseUpSpellcastingResources(spell);
+                    //     bool cast = await self.Battle.GameLoop.FullCast(fake);
+                    //     if (!cast || fake.Disrupted)
+                    //     {
+                    //         self.Overhead(spell.Name, Color.Black, $"{self} attempts to cast {{b}}{spell.Name}{{/b}}, but it was disrupted!",
+                    //             spell.Name + " {icon:Reaction}",
+                    //             spell.Description, spell.Traits);
+                    //         return;
+                    //     }
+                    //     self.Overhead(spell.Name, Color.Black, $"{self} casts {{b}}{spell.Name}{{/b}}.",
+                    //         spell.Name + " {icon:Reaction}",
+                    //         spell.Description, spell.Traits);
+                    //     CheckResult save = await CommonSpellEffects.RollSpellSavingThrowAsync(enemy, spell, Defense.Reflex);
+                    //     await CommonSpellEffects.DealBasicDamage(spell, self, enemy, save,
+                    //         DiceFormula.FromText($"{1 + (level - 2) / 2}d6", "Pyrefowl Rebuke"), DamageKind.Fire);
+                    //     QEffect flyingEffect = QEffect.Flying();
+                    //     self.AddQEffect(flyingEffect);
+                    //     await self.Battle.GameLoop.StateCheck();
+                    //     CombatAction? fly = self.Possibilities.Filter(ap =>
+                    //     {
+                    //         if (ap.CombatAction.ActionId != ActionId.Stride) return false;
+                    //         ap.CombatAction.ActionCost = 0;
+                    //         ap.RecalculateUsability();
+                    //         return true;
+                    //     }).CreateActions(true).FirstOrDefault() as CombatAction;
+                    //     if (save == CheckResult.CriticalFailure)
+                    //     {
+                    //         enemy.AddQEffect(QEffect.Dazzled().WithExpirationAtEndOfOwnersNextTurn());
+                    //         fly?.Traits.Add(Trait.DoesNotProvoke);
+                    //     }
+                    //     if (fly == null)
+                    //     {
+                    //         flyingEffect.ExpiresAt = ExpirationCondition.Immediately;
+                    //         return;
+                    //     }
+                    //     List<Option> tileOptions =
+                    //     [
+                    //         new CancelOption(true)
+                    //     ];
+                    //     IList<Tile> floodFill = Pathfinding.Floodfill(self, self.Battle,
+                    //             new PathfindingDescription
+                    //             {
+                    //                 Squares = 3,
+                    //                 Style = { MaximumSquares = 3 }
+                    //             })
+                    //         .Where(tile =>
+                    //             tile.LooksFreeTo(self) 
+                    //             && tile.Kind != TileKind.Chasm
+                    //             && tile.Kind != TileKind.Water
+                    //             && tile.Kind != TileKind.Lava
+                    //             && IsTileAway(self.Space.CenterTile.X, self.Space.CenterTile.Y, enemy.Space.CenterTile.X, enemy.Space.CenterTile.Y, 2, tile))
+                    //         .ToList();
+                    //     floodFill.ForEach(tile =>
+                    //     {
+                    //         if (!(bool)fly.Target.CanBeginToUse(self)) return;
+                    //         tileOptions.Add(fly.CreateUseOptionOn(tile)
+                    //             .WithIllustration(fly.Illustration));
+                    //     });
+                    //     Option chosenTile = (await self.Battle.SendRequest(
+                    //         new AdvancedRequest(self,
+                    //             "Choose where to Fly to or right-click to cancel. You must end your movement on solid ground.",
+                    //             tileOptions)
+                    //         {
+                    //             IsMainTurn = false,
+                    //             IsStandardMovementRequest = true,
+                    //             TopBarIcon = MIllustrations.PyrefowlRebuke,
+                    //             TopBarText =
+                    //                 "Choose where to Fly to or right-click to cancel. You must end your movement on solid ground.",
+                    //         })).ChosenOption;
+                    //     switch (chosenTile)
+                    //     {
+                    //         case CancelOption:
+                    //             action.RevertRequested = true;
+                    //             self.RemoveAllQEffects(qf => qf == flyingEffect);
+                    //             break;
+                    //         case TileOption tOpt:
+                    //             await tOpt.Action();
+                    //             self.RemoveAllQEffects(qf => qf == flyingEffect);
+                    //             break;
+                    //     }
+                    // };
                 });
         });
         ModManager.RegisterNewSpell("RE_StickyFire", 2, (_, _, level, inCombat, _) =>
@@ -387,6 +575,47 @@ public class NewSpells2nd : NewSpells
                     };
                     rainbow.Apply();
                 });
+        });
+        AnimatedAssault = ModManager.RegisterNewSpell("RE_AnimatedAssault", 2, (_, _, level, inCombat, _) =>
+        {
+            int heighten = level % 2 == 0 ? level : level - 1; 
+            return Spells.CreateModern(IllustrationName.PainfulVibrations3, "Animated Assault",
+                    [Trait.Arcane, Trait.Occult, Trait.SpellWithDuration],
+                    "You use your mind to manipulate unattended objects in the area, temporarily animating them to attack. The objects hover in the air, then hurl themselves at nearby creatures in a chaotic flurry of debris.",
+                    $"Creatures in the area take {S.HeightenedVariable(heighten, 2)}d10 bludgeoning damage with a basic Reflex save. On subsequent rounds, the first time each round you Sustain this spell, it deals {S.HeightenedVariable(heighten/2, 1)}d10 bludgeoning damage (basic Reflex save) to each creature in the area.",
+                    Target.Burst(24, 2), level, SpellSavingThrow.Basic(Defense.Reflex))
+                .WithSoundEffect(SfxName.ElementalBlastWood)
+                .WithHeighteningNumerical(level, 2, inCombat, 2, "The initial damage increases by 2d10, and the subsequent damage increases by 1d10.")
+                .WithEffectOnChosenTargets(async (spell, caster, targets) =>
+                {
+                    CheckResult result = spell.CheckResult;
+                    foreach (Creature creature in targets.ChosenCreatures)
+                    {
+                        await CommonSpellEffects.DealBasicDamage(spell, caster, creature, result, DiceFormula.FromText($"{heighten}d10", "Animated Assault"), DamageKind.Bludgeoning);
+                    }
+                    Zone assault = Zone.Spawn(caster, ZoneAttachment.StableBurst(targets.ChosenTiles));
+                    assault.TileEffectCreator = _ => new TileQEffect
+                    {
+                        Illustration = new Illustration[]
+                        {
+                            IllustrationName.Rubble,
+                            IllustrationName.Rubble2,
+                            IllustrationName.Rubble3,
+                            IllustrationName.Rubble4,
+                        }.GetRandomVisualOnly()
+                    };
+                    assault.ApplySustainment(spell, async _ =>
+                    {
+                        foreach (Creature creature in assault.CreaturesInZone)
+                        {
+                            CheckResult result2 = await CommonSpellEffects.RollSpellSavingThrowAsync(creature, spell, Defense.Reflex);
+                            await CommonSpellEffects.DealBasicDamage(spell, caster, creature, result2,
+                                DiceFormula.FromText($"{heighten / 2}d10", "Animated Assault"), DamageKind.Bludgeoning);
+                        }
+                    }, $"Sustain the spell to continue the duration and deal {heighten/2}d10 damage to all creatures in the area.");
+
+                });
+
         });
     }
 }

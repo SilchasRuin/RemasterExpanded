@@ -1,7 +1,12 @@
-﻿using Dawnsbury.Audio;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Dawnsbury.Audio;
+using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
 using Dawnsbury.Core.CombatActions;
+using Dawnsbury.Core.Coroutines.Options.Reactive;
 using Dawnsbury.Core.Creatures;
 using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Core;
@@ -73,59 +78,81 @@ public class NewSpells1st : NewSpells
                         cr => cr.EnemyOf(self) && self.CanSee(cr) && cr.DistanceTo(self) <= 24,
                         qfTech =>
                         {
-                            qfTech.YouBeginAction = async (qf, action) =>
+                            qfTech.YouBeginActionReaction = (qf, action) =>
                             {
-                                if (!action.HasTrait(Trait.Attack) || !action.HasTrait(Trait.Ranged) || !canCast()) return;
-                                CombatAction fake = CombatAction.CreateSimple(self, "Fake", Trait.Concentrate, Trait.Curse, Trait.DoNotShowInCombatLog, Trait.DoNotShowOverheadOfActionName).WithActionCost(0);
+                                if (!action.HasTrait(Trait.Attack) || !action.HasTrait(Trait.Ranged) || !canCast())
+                                    return null;
+                                CombatAction fake = CombatAction.CreateSimple(self, "Fake", Trait.Concentrate,
+                                        Trait.Curse, Trait.DoNotShowInCombatLog,
+                                        Trait.DoNotShowOverheadOfActionName)
+                                    .WithActionCost(0);
                                 fake.Target = Target.Ranged(24);
                                 fake.SpellInformation = spell.SpellInformation;
                                 Creature enemy = qf.Owner;
-                                if (!fake.CanBeginToUse(self)) return;
-                                if (!await self.AskToUseReaction(
-                                        $"{enemy.Name} is about to use {action.Name}, use a reaction to cast {{i}}curse of recoil{{/i}} at spell level {level}?", self.Illustration)) return;
-                                self.Spellcasting!.UseUpSpellcastingResources(spell);
-                                bool cast = await self.Battle.GameLoop.FullCast(fake, ChosenTargets.CreateSingleTarget(enemy));
-                                if (!cast || fake.Disrupted) return;
-                                self.Overhead(spell.Name, Color.Black, $"{self} casts {{b}}{spell.Name}{{/b}}.",
-                                    spell.Name + " {icon:Reaction}",
-                                    spell.Description, action.Traits);
-                                CheckResult save = await CommonSpellEffects.RollSpellSavingThrowAsync(enemy, spell, Defense.Will);
-                                switch (save)
+                                if (!fake.CanBeginToUse(self)) return null;
+                                ReactionOption curse = ReactionOption.CreateFromSpellAsAReaction(spell, $"{enemy.Name} is about to use {action.Name}, use a reaction to cast {{i}}curse of recoil{{/i}}?", async () =>
                                 {
-                                    case CheckResult.CriticalSuccess:
-                                        break;
-                                    case CheckResult.Success:
-                                        enemy.AddQEffect(QEffect.FlatFooted("curse of recoil")
-                                            .WithExpirationAtStartOfOwnerTurn());
-                                        break;
-                                    case CheckResult.Failure:
-                                        enemy.AddQEffect(QEffect.FlatFooted("curse of recoil")
-                                            .WithExpirationAtStartOfOwnerTurn());
-                                        enemy.AddQEffect(new QEffect
-                                        {
-                                            BonusToAttackRolls = (_, combatAction, _) => combatAction != action ? null : new Bonus(-1, BonusType.Status, "Curse of Recoil", false),
-                                            AfterYouTakeAction = (qEffect, combatAction) =>
+                                    bool cast = await self.Battle.GameLoop.FullCast(fake,
+                                        ChosenTargets.CreateSingleTarget(enemy));
+                                    if (!cast || fake.Disrupted)
+                                    {
+                                        self.Overhead(spell.Name, Color.Black, $"{self} attempted to cast {{b}}{spell.Name}{{/b}}, but it was disrupted!",
+                                            spell.Name + " {icon:Reaction}",
+                                            spell.Description, action.Traits);
+                                        return;
+                                    }
+                                    self.Overhead(spell.Name, Color.Black, $"{self} casts {{b}}{spell.Name}{{/b}}.",
+                                        spell.Name + " {icon:Reaction}",
+                                        spell.Description, action.Traits);
+                                    CheckResult save =
+                                        await CommonSpellEffects.RollSpellSavingThrowAsync(enemy, spell, Defense.Will);
+                                    switch (save)
+                                    {
+                                        case CheckResult.CriticalSuccess:
+                                            break;
+                                        case CheckResult.Success:
+                                            enemy.AddQEffect(QEffect.FlatFooted("curse of recoil")
+                                                .WithExpirationAtStartOfOwnerTurn());
+                                            break;
+                                        case CheckResult.Failure:
+                                            enemy.AddQEffect(QEffect.FlatFooted("curse of recoil")
+                                                .WithExpirationAtStartOfOwnerTurn());
+                                            enemy.AddQEffect(new QEffect
                                             {
-                                                if (action != combatAction) return Task.CompletedTask;
-                                                qEffect.ExpiresAt = ExpirationCondition.Immediately;
-                                                return Task.CompletedTask;
-                                            }
-                                        }.WithExpirationAtStartOfOwnerTurn());
-                                        break;
-                                    case CheckResult.CriticalFailure:
-                                        enemy.AddQEffect(QEffect.FlatFooted("curse of recoil")
-                                            .WithExpirationAtStartOfOwnerTurn());
-                                        enemy.AddQEffect(new QEffect("Curse of Recoil", "You have a -2 status penalty to ranged attacks made with the same weapon, spell, or ability as the triggering action.", ExpirationCondition.ExpiresAtStartOfYourTurn, self, MIllustrations.CurseOfRecoil)
-                                        {
-                                            BonusToAttackRolls = (_, combatAction, _) =>
+                                                BonusToAttackRolls = (_, combatAction, _) =>
+                                                    combatAction != action
+                                                        ? null
+                                                        : new Bonus(-1, BonusType.Status, "Curse of Recoil", false),
+                                                AfterYouTakeAction = (qEffect, combatAction) =>
+                                                {
+                                                    if (action != combatAction) return Task.CompletedTask;
+                                                    qEffect.ExpiresAt = ExpirationCondition.Immediately;
+                                                    return Task.CompletedTask;
+                                                }
+                                            }.WithExpirationAtStartOfOwnerTurn());
+                                            break;
+                                        case CheckResult.CriticalFailure:
+                                            enemy.AddQEffect(QEffect.FlatFooted("curse of recoil")
+                                                .WithExpirationAtStartOfOwnerTurn());
+                                            enemy.AddQEffect(new QEffect("Curse of Recoil",
+                                                "You have a -2 status penalty to ranged attacks made with the same weapon, spell, or ability as the triggering action.",
+                                                ExpirationCondition.ExpiresAtStartOfYourTurn, self,
+                                                MIllustrations.CurseOfRecoil)
                                             {
-                                                if ((combatAction.Item == null || combatAction.Item != action.Item) && combatAction.Name != action.Name)
-                                                    return null;
-                                                return new Bonus(-2, BonusType.Status, "Curse of Recoil", false);
-                                            }
-                                        });
-                                        break;
-                                }
+                                                BonusToAttackRolls = (_, combatAction, _) =>
+                                                {
+                                                    if ((combatAction.Item == null ||
+                                                         combatAction.Item != action.Item) &&
+                                                        combatAction.Name != action.Name)
+                                                        return null;
+                                                    return new Bonus(-2, BonusType.Status, "Curse of Recoil", false);
+                                                }
+                                            });
+                                            break;
+                                    }
+                                });
+                                curse.ReactingCreature = self;
+                                return curse;
                             };
                         });
                 });
@@ -149,6 +176,43 @@ public class NewSpells1st : NewSpells
                     {
                         await CommonSpellEffects.SummonMonster(spell, self, targets.ChosenTile!);
                     });
+            });
+        SpellIds.Befuddle = ModManager.RegisterNewSpell("RE_Befuddle", 1,
+            (_, _, level, _, _) =>
+            {
+                return Spells.CreateModern(IllustrationName.WarpMind, "Befuddle",
+                    [Trait.Emotion, Trait.Mental, Trait.Occult, Trait.Arcane],
+                    "You sow seeds of confusion in your target’s mind, causing its actions and thoughts to become clumsy.",
+                    "The target makes a Will save." +
+                    S.FourDegreesOfSuccess("The target is unaffected.", "The target is clumsy 1 and stupefied 1 for 1 round.",
+                        "The target is clumsy 2 and stupefied 2 for 1 round.",
+                        " The target is clumsy 3, stupefied 3, and confused for 1 round."), Target.Ranged(6), level, SpellSavingThrow.Standard(Defense.Will))
+                    .WithSoundEffect(SfxName.Mental)
+                    .WithEffectOnEachTarget(async (spell, caster, target, result) =>
+                    {
+                        switch (result)
+                        {
+                            case CheckResult.CriticalSuccess:
+                                return;
+                            case CheckResult.Success:
+                                target.AddQEffect(QEffect.Clumsy(1).WithExpirationInOneRound(caster).WithDispellable(spell));
+                                target.AddQEffect(QEffect.Stupefied(1).WithExpirationInOneRound(caster).WithDispellable(spell));
+                                return;
+                            case CheckResult.Failure:
+                                target.AddQEffect(QEffect.Clumsy(2).WithExpirationInOneRound(caster).WithDispellable(spell));
+                                target.AddQEffect(QEffect.Stupefied(2).WithExpirationInOneRound(caster).WithDispellable(spell));
+                                return;
+                            case CheckResult.CriticalFailure:
+                                target.AddQEffect(QEffect.Clumsy(3).WithExpirationInOneRound(caster).WithDispellable(spell));
+                                target.AddQEffect(QEffect.Stupefied(3).WithExpirationInOneRound(caster).WithDispellable(spell));
+                                target.AddQEffect(QEffect.Confused(true, spell).WithExpirationInOneRound(caster));
+                                return;
+                            default:
+                                throw new ArgumentOutOfRangeException(nameof(result), result, null);
+                        }
+                        
+                    });
+
             });
     }
 }

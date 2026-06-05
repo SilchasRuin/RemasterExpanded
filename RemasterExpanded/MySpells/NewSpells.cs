@@ -1,4 +1,8 @@
-﻿using Dawnsbury.Auxiliary;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dawnsbury.Auxiliary;
 using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CombatActions;
@@ -116,7 +120,7 @@ public class NewSpells
     }
   }
 
-    public static string IntToString(int number)
+    protected static string NumberToWord(int number)
     {
         return number switch
         {
@@ -129,7 +133,7 @@ public class NewSpells
             7 => "seven",
             8 => "eight",
             9 => "nine",
-            _ => "10"
+            _ => "ten"
         };
     }
     

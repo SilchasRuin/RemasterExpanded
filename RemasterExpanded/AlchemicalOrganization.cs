@@ -1,4 +1,5 @@
-﻿using Dawnsbury.Auxiliary;
+﻿using System.Linq;
+using Dawnsbury.Auxiliary;
 using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Mechanics.Treasure;
 using Dawnsbury.Display.Illustrations;

@@ -1,4 +1,6 @@
-﻿using Dawnsbury.Audio;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Dawnsbury.Audio;
 using Dawnsbury.Auxiliary;
 using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
@@ -112,13 +114,14 @@ public abstract class NewCantrips : NewSpells
                     figment.Traits.Add(Trait.Incorporeal);
                     figment.Traits.Add(Trait.Illusion);
                     figment.Traits.Add(Trait.Indestructible);
-                    figment.WithSpawnAsGaiaFriends();
+                    figment.WithSpawnAsGaia();
                     figment.WithTactics(Tactic.DoNothing);
                     figment.With(cr => cr.DescriptionFulltext = "This is an illusion created by Amped Figment.");
                     figment.Illustration = new TintedIllustration(illusionArray.GetRandomVisualOnly(), Color.LightCyan);
                     QEffect flankingFigment = FlankingFig(caster, figment, spell);
-                    caster.Battle.SpawnCreature(figment, caster.Battle.GaiaFriends, targets.ChosenTiles[0]);
+                    caster.Battle.SpawnCreature(figment, caster.Battle.Gaia, targets.ChosenTiles[0]);
                     await caster.Battle.GameLoop.StateCheck();
+                    figment.AddQEffect(new QEffect() { Id = QEffectId.CannotFlank });
                     figment.With(cr => cr.DescriptionFulltext = "This is an illusion created by Amped Figment.");
                     caster.AddQEffect(flankingFigment);
                     QEffect sustainedFigment = new(ExpirationCondition.ExpiresAtEndOfYourTurn)
@@ -214,13 +217,16 @@ public abstract class NewCantrips : NewSpells
         {
             if (sp.SpellId != SpellId.DivineLance) return;
             sp.EffectOnOneTarget = null;
-            sp.Traits.Add(MTraits.Sanctified);
-            sp.Traits.Add(SpiritTrait.Spirit);
+            if (!RemasterSpells)
+            {
+                sp.Traits.Add(MTraits.Sanctified);
+                sp.Traits.Add(SpiritTrait.Spirit);
+            }
             sp.EffectOnOneTarget = async (spell, caster, target, result) =>
             {
-                if (caster.HasTrait(Trait.Good))
+                if (caster.HasTrait(HolyTrait.Holy))
                     spell.Traits.Add(HolyTrait.Holy);
-                if (caster.HasTrait(Trait.Evil))
+                if (caster.HasTrait(UnholyTrait.Unholy))
                     spell.Traits.Add(UnholyTrait.Unholy);
                 if (PlayerProfile.Instance.IsBooleanOptionEnabled("RemasterCantrips"))
                     await CommonSpellEffects.DealAttackRollDamage(spell, caster, target, result,
@@ -249,8 +255,7 @@ public abstract class NewCantrips : NewSpells
                                     foreach (Creature flanked in sc.Owner.Battle.AllCreatures.Where(enemy =>
                                                  IsFigFlanking(enemy, figment, qfTech.Owner, spell)))
                                     {
-                                        QEffect flanking = QEffect.FlankedBy(sc.Owner).WithExpirationEphemeral();
-                                        flanking.Id = 0;
+                                        QEffect flanking = FlankedBy(figment);
                                         flanked.AddQEffect(flanking);
                                     }
                                 },
@@ -258,19 +263,18 @@ public abstract class NewCantrips : NewSpells
                                 SourceAction = spell,
                                 AfterYouTakeHostileAction = (_, action) =>
                                 {
-                                    if ((!action.HasTrait(Trait.Strike) &&
-                                         (!action.HasTrait(Trait.Spell) || !action.HasTrait(Trait.Attack))) ||
-                                        (!action.HasTrait(Trait.Melee) && !action.HasTrait(Trait.VersatileMelee))) return;
+                                    if ((!action.HasTrait(Trait.Melee) && !action.HasTrait(Trait.VersatileMelee)) || !action.HasTrait(Trait.Attack) || action.HasTrait(Trait.AttackDoesNotTargetAC))
+                                        return;
                                     if (!IsFigFlanking(action.ChosenTargets.ChosenCreatures[0], figment, action.Owner, spell))
                                         return;
-                                    if (caster.FindQEffect(MQEffectIds.FlankingFig) is not { } fig) return;
-                                    fig.ExpiresAt = ExpirationCondition.Immediately;
                                     foreach (Creature ally in caster.Battle.AllCreatures.Where(cr => cr.FindQEffect(MQEffectIds.FlankAdd) is {} flanking && flanking.SourceAction == spell))
                                     {
                                         if (ally.FindQEffect(MQEffectIds.FlankAdd) is { } flanking &&
                                             flanking.SourceAction == spell)
                                             flanking.ExpiresAt = ExpirationCondition.Immediately;
                                     }
+                                    if (caster.FindQEffect(MQEffectIds.FlankingFig) is {} fig)
+                                        fig.ExpiresAt = ExpirationCondition.Immediately;
                                 }
                             });
                         };
@@ -280,8 +284,15 @@ public abstract class NewCantrips : NewSpells
     private static bool IsFigFlanking(Creature enemy, Creature figment, Creature flanker, CombatAction spell)
     {
         if (flanker.HasEffect(QEffectId.GangUp))
-            return enemy.IsAdjacentTo(figment) && flanker.DistanceTo(enemy) <= 2 && (enemy.FindQEffect(MQEffectIds.Disbelief) is not { } dis || dis.SourceAction != spell);
+            return enemy.IsAdjacentTo(figment) && flanker.DistanceTo(enemy) <= flanker.Space.ActualReach && (enemy.FindQEffect(MQEffectIds.Disbelief) is not { } dis || dis.SourceAction != spell);
         return enemy.IsAdjacentTo(figment) && FlankingRules.IsOpposite(figment.Occupies, flanker, enemy) &&
                (enemy.FindQEffect(MQEffectIds.Disbelief) is not { } disbelief || disbelief.SourceAction != spell);
+    }
+    public static QEffect FlankedBy(Creature flanker)
+    {
+        return new QEffect("Flanked", "[this condition has no description]", ExpirationCondition.Ephemeral, flanker)
+        {
+            IsFlatFootedTo = (qEffect, attacker, combatAction) => attacker == null || attacker == flanker || combatAction == null || !combatAction.HasTrait(Trait.Melee) && !combatAction.HasTrait(Trait.VersatileMelee) || qEffect.Owner.HasEffect(QEffectId.DenyAdvantage) && attacker.Level <= qEffect.Owner.Level || qEffect.Owner.HasEffect(QEffectId.AllAroundVision) ? null : "flanking"
+        };
     }
 }

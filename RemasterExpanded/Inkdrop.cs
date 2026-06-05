@@ -1,4 +1,5 @@
-﻿using Dawnsbury.Core.CombatActions;
+﻿using System.Linq;
+using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Creatures;
 using Dawnsbury.Core.Creatures.Parts;
 using Dawnsbury.Core.Mechanics;

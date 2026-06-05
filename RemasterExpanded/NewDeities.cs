@@ -1,4 +1,7 @@
-﻿using Dawnsbury.Core.CharacterBuilder.Feats;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Dawnsbury.Core.CharacterBuilder.Feats;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
 using Dawnsbury.Core.CharacterBuilder.Spellcasting;
@@ -74,6 +77,35 @@ public static class NewDeities
             [FeatName.DomainDeath, MFeatNames.Vigil, FeatName.DomainZeal, FeatName.DomainConfidence],
             [SpellId.TrueStrike, SpellId.Paralyze, SpellId.Stoneskin], ItemName.Greataxe, Skill.Athletics);
         yield return theWatcher;
+        if (ModManager.TryParse("PS_Change", out FeatName change) && ModManager.TryParse("PS_Trickery", out FeatName trickery) && ModManager.TryParse("Nightmares", out FeatName nightmare))
+        {
+            Feat thePranksters = CreateDeity("The Pranksters",
+                "Some people just want to delight in anarchy and the Pranksters are here to help. The Pranksters are not a singular entity, but rather a covenant of powerful fey and chaotic spirits who delight in a world made less predictable." +
+                "\n\nThose who follow the Pranksters run the gamut, from well meaning jokesters to cruel maniacs. There is no singular set of rituals or prayers common to the adherents of the Pranksters, and they'd be insulted if anyone tried to create one!",
+                "Upset the established order, be unpredictable, prank those who expect it least",
+                "Be boring, wear drab colors, undo anarchy",
+                [NineCornerAlignment.ChaoticNeutral, NineCornerAlignment.ChaoticEvil, NineCornerAlignment.ChaoticGood],
+                [FeatName.HarmfulFont, FeatName.HealingFont],
+                [change, trickery, nightmare, FeatName.DomainLuck],
+                [SpellIds.Befuddle, SpellId.HideousLaughter, SpellId.CloakOfColors],
+                ItemName.GnomeFlickmace, Skill.Deception);
+            yield return thePranksters;
+        } 
+
+        if (ModManager.TryParse("PS_Metal", out FeatName metal) && ModManager.TryParse("Falcata", out ItemName falcata) && ModManager.TryParse("PS_Creation", out FeatName creation) && ModManager.TryParse("SH_Forge", out SpellId forge))
+        {
+            Feat theSovereignSword = CreateDeity("The Sovereign Sword",
+                "A magic blade once wielded by a long lost deity, the Sovereign Sword gained sentience and a spark of divinity when retrieved by adventurers after their wielder was devoured by the Beast of Ages. How and why this happened has remained a mystery to scholars since, but the Sovereign Sword has taken a place amongst the pantheon." +
+                "\n\nThe Sovereign Sword's creed focuses on preparation for future dangers and the creation of magical artifacts. They are the patron of other intelligent items and command that those who would take up these items treat them with respect.",
+                "Craft masterworks, respect and cherish items, prepare for myriad futures",
+                "Disrespect or destroy intelligent items",
+                NineCornerAlignmentExtensions.All(),
+                [FeatName.HarmfulFont, FeatName.HealingFont],
+                [metal, creation, MFeatNames.Knowledge, FeatName.DomainHealing],
+                [forge, SpellIds.AnimatedAssault, SpellIds.WeaponStorm],
+                falcata, Skill.Crafting);
+            yield return theSovereignSword;
+        }
     }
 
     public static void LoadDomains()
@@ -99,12 +131,12 @@ public static class NewDeities
         AllFeats.GetFeatByFeatName(FeatName.DomainFluency).Subfeats?.Add(oracleDomain);
     }
     
-    private static Feat CreateAdvancedDomainFeat(Trait forClass, Feat domainFeat) 
+    internal static Feat CreateAdvancedDomainFeat(Trait forClass, Feat domainFeat) 
     {
         string name = domainFeat.Name;
         SpellId advancedSpell = (SpellId)domainFeat.Tag!;
         Spell spell = AllSpells.CreateModernSpellTemplate(advancedSpell, forClass);
-        Feat advancedDomain = new Feat(ModManager.RegisterFeatName("AdvancedDomain:" + forClass.HumanizeTitleCase2() + ":" + name, name + ": " + spell.Name), "Your studies or prayers have unlocked deeper secrets of the " + name.ToLower() + " domain.",
+        Feat advancedDomain = new Feat(ModManager.TryParse("AdvancedDomain:" + forClass.HumanizeTitleCase2() + ":" + name, out FeatName featName) ? featName : ModManager.RegisterFeatName("AdvancedDomain:" + forClass.HumanizeTitleCase2() + ":" + name, name + ": " + spell.Name), "Your studies or prayers have unlocked deeper secrets of the " + name.ToLower() + " domain.",
                 $"You learn the {forClass.HumanizeTitleCase2().ToLower()} focus spell " + AllSpells.CreateSpellLink(advancedSpell, forClass) + ", and you gain 1 focus point, up to a maximum 3.", [], null)
             .WithIllustration(spell.Illustration)
             .WithRulesBlockForSpell(advancedSpell, forClass)
@@ -121,6 +153,9 @@ public static class NewDeities
                         break;
                     case Trait.Champion:
                         sheet.AddFocusSpellAndFocusPoint(Trait.Champion, Ability.Charisma, advancedSpell);
+                        break;
+                    default:
+                        sheet.AddFocusSpellAndFocusPoint(MTraits.CampfireChronicler, Ability.Charisma, advancedSpell);
                         break;
                 }
             });

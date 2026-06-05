@@ -1,4 +1,6 @@
-﻿using Dawnsbury.Audio;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Dawnsbury.Audio;
 using Dawnsbury.Auxiliary;
 using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.Feats;

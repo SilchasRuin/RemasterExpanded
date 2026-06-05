@@ -1,15 +1,19 @@
-﻿using Dawnsbury.Auxiliary;
+﻿using System.Threading.Tasks;
+using Dawnsbury.Auxiliary;
 using Dawnsbury.Core.CharacterBuilder.Feats;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Creatures;
+using Dawnsbury.Core.Creatures.Parts;
 using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Core;
 using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Mechanics.Treasure;
+using Dawnsbury.Core.Tiles;
 using Dawnsbury.IO;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
+using static RemasterExpanded.ModData;
 
 namespace RemasterExpanded;
 
@@ -24,12 +28,33 @@ internal static class PatchCrit
     }
 }
 
-[HarmonyPatch(typeof (DeitySelectionFeat), "ComposeDeityRulesText")]
-internal static class PatchDeitySelectionFeat
+[HarmonyPatch(typeof(CombatAction), nameof(CombatAction.DoesThisVersatileMeleeActionCountsAsMeleeAgainst))]
+internal static class PatchVersatileMelee
 {
-    private static void Postfix(ref string __result)
+    internal static bool Prefix(CombatAction __instance, Creature? targetedCreature, ref bool __result)
     {
-        __result = __result.Replace("re_", "");
+        if (__instance.ActionId != MActionIds.PsychicIgnition || targetedCreature is null)
+            return true;
+        __result = __instance.Owner.DistanceToWith10FeetException(targetedCreature) <= __instance.Owner.Space.NaturalReach + 1;
+        return false;
+    }
+}
+
+[HarmonyPatch(typeof(Space), "CalculateActualReach")]
+internal static class PatchReach
+{
+    internal static bool Prefix(Space __instance, ref int __result)
+    {
+        if (!__instance.Self.HasEffect(MQEffectIds.IncreasedReach) && !__instance.Self.HasEffect(MQEffectIds.LungingReach))
+            return true;
+        if (__instance.Self.HasEffect(MQEffectIds.IncreasedReach))
+            __result = __instance.NaturalReach + 1;
+        else if (__instance.Self.HasEffect(MQEffectIds.LungingReach))
+        {
+            int num = __instance.Self.MeleeWeapons.Max(itm => itm.DetermineReach(__instance.Self));
+            __result = num + 1;
+        }
+        return false;
     }
 }
 

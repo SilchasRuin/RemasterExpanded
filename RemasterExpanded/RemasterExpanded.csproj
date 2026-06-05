@@ -45,10 +45,10 @@
       <HintPath>D:\SteamLibrary\steamapps\common\Dawnsbury Days\Data\MonoGame.Framework.dll</HintPath>
     </Reference>
     <Reference Include="PsychicExpanded">
-      <HintPath>..\..\ClassLibrary1\PsychicExpanded\bin\Debug\net10.0-windows\PsychicExpanded.dll</HintPath>
+      <HintPath>..\..\ClassLibrary1\PsychicExpanded\bin\Release\net10.0-windows\PsychicExpanded.dll</HintPath>
     </Reference>
     <Reference Include="SpellsAndSpellhearts">
-      <HintPath>D:\SteamLibrary\steamapps\common\Dawnsbury Days\CustomMods\SpellsAndSpellhearts.dll</HintPath>
+      <HintPath>C:\Users\jcbco\RiderProjects\SpellsAndSpellhearts\SpellsAndSpellhearts\bin\Release\net10.0-windows\SpellsAndSpellhearts.dll</HintPath>
     </Reference>
     <Reference Include="SpiritDamage">
       <HintPath>..\..\SpiritDamage\SpiritDamage\bin\Debug\net10.0-windows\SpiritDamage.dll</HintPath>

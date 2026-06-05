@@ -1,4 +1,8 @@
-﻿using Dawnsbury.Audio;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dawnsbury.Audio;
 using Dawnsbury.Auxiliary;
 using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
@@ -21,6 +25,7 @@ using Dawnsbury.Display.Illustrations;
 using Dawnsbury.Display.Text;
 using Dawnsbury.Modding;
 using Microsoft.Xna.Framework;
+using SpiritDamage;
 using static RemasterExpanded.ModData;
 using static RemasterExpanded.MySpells.SpellIds;
 
@@ -69,6 +74,11 @@ public class NewSpells5th : NewSpells
                             qf.Owner.AddQEffect(QEffect.FlatFooted("Impaled").WithExpirationEphemeral());
                     target.AddQEffect(impaled);
                 });
+        });
+        ModManager.RegisterActionOnEachSpell(spell =>
+        {
+            if (ModManager.TryParse("ImpalingSpike", out SpellId spiked) && spell.SpellId == spiked)
+                spell.Illustration = IllustrationName.PrimalCaltrops;
         });
         HowlingBlizzard = ModManager.RegisterNewSpell("RE_HowlingBlizzard", 5, (_, _, level, inCombat, _) =>
         {
@@ -136,7 +146,7 @@ public class NewSpells5th : NewSpells
                     return Task.CompletedTask;
                 });
         });
-        InvokeSpirits = ModManager.TryParse("InvokeSpirits", out SpellId spirits) ? spirits : ModManager.RegisterNewSpell("RE_InvokeSpirits", 5, (_, _, level, inCombat, _) =>
+        InvokeSpirits = ModManager.TryParse("InvokeSpirits", out SpellId invokeSpirits) ? invokeSpirits : ModManager.RegisterNewSpell("RE_InvokeSpirits", 5, (_, _, level, inCombat, _) =>
         {
             return Spells.CreateModern(MIllustrations.CreateIllustration("InvokeSpirits"), "Invoke Spirits", [Trait.Concentrate, Trait.Emotion, Trait.Fear, Trait.Manipulate, Trait.Mental, Trait.Negative, Trait.Arcane, Trait.Divine, Trait.Occult],
                 "Ragged apparitions of the dead rise to stalk the living.",
@@ -242,6 +252,49 @@ public class NewSpells5th : NewSpells
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(result), result, null);
+                    }
+                });
+        });
+        ModManager.ReplaceExistingSpell(SpellId.DivineWrath, 4, (_, level, inCombat, _) =>
+        {
+            return Spells.CreateModern(IllustrationName.DivineWrath, "Divine Wrath",
+                    [SpiritTrait.Spirit, MTraits.Sanctified, Trait.Divine, Trait.InflictsSlow],
+                    "You channel the fury of divinity against your foes.",
+                    $"You deal {S.HeightenedVariable(level, 4)}d10 spirit damage to enemies in the area, depending on their Fortitude save."
+                    + S.FourDegreesOfSuccess("The creature is unaffected.", "The creature takes half damage.", "The creature takes full damage and is sickened 1.", "The creature takes full damage and is sickened 2; while it's sickened, it's also slowed 1."),
+                    Target.Burst(24, 4).WithIncludeOnlyIf((at, cr) => cr.EnemyOf(at.OwnerAction.Owner)), level, SpellSavingThrow.Standard(Defense.Fortitude))
+                .WithSoundEffect(SfxName.DivineLance)
+                .WithHeighteningOfDamageEveryLevel(level, 4, inCombat, "1d10")
+                .WithEffectOnEachTarget(async (spell, caster, target, result) =>
+                {
+                    if (caster.HasTrait(HolyTrait.Holy))
+                        spell.Traits.Add(HolyTrait.Holy);
+                    if (caster.HasTrait(UnholyTrait.Unholy))
+                        spell.Traits.Add(UnholyTrait.Unholy);
+                    QEffect sick = QEffect.Sickened(result == CheckResult.CriticalFailure ? 2 : 1,
+                        spell.SpellcastingSource?.FixedDC ?? 10);
+                    if (result == CheckResult.CriticalFailure)
+                    {
+                        sick.StateCheck = effect =>
+                        {
+                            effect.Owner.AddQEffect(QEffect.Slowed(1).WithExpirationEphemeral());
+                        };
+                    }
+                    switch (result)
+                    {
+                        case CheckResult.CriticalSuccess:
+                            return;
+                        case CheckResult.Success:
+                            await CommonSpellEffects.DealBasicDamage(spell, caster, target, result,
+                                DiceFormula.FromText($"{level}d10", "Divine Wrath"), DamageSpirit.Spirit);
+                            return;
+                        case CheckResult.CriticalFailure:
+                        case CheckResult.Failure:
+                        default:
+                            await CommonSpellEffects.DealBasicDamage(spell, caster, target, CheckResult.Failure,
+                                DiceFormula.FromText($"{level}d10", "Divine Wrath"), DamageSpirit.Spirit);
+                            target.AddQEffect(sick);
+                            break;
                     }
                 });
         });

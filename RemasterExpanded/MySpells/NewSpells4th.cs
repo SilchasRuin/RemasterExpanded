@@ -1,19 +1,29 @@
-﻿using Dawnsbury.Audio;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Dawnsbury.Audio;
+using Dawnsbury.Auxiliary;
 using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
 using Dawnsbury.Core.CharacterBuilder.Spellcasting;
+using Dawnsbury.Core.Creatures;
 using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Core;
+using Dawnsbury.Core.Mechanics.Damage;
 using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Mechanics.Targeting;
 using Dawnsbury.Core.Mechanics.Targeting.TargetingRequirements;
+using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Core.Mechanics.Treasure;
+using Dawnsbury.Core.Mechanics.Zoning;
 using Dawnsbury.Core.Possibilities;
 using Dawnsbury.Core.Roller;
+using Dawnsbury.Core.Tiles;
 using Dawnsbury.Display.Illustrations;
 using Dawnsbury.Display.Text;
 using Dawnsbury.Modding;
+using Dawnsbury.Mods.Remaster.Spellbook;
 using Microsoft.Xna.Framework;
 using static RemasterExpanded.ModData;
 using static RemasterExpanded.MySpells.SpellIds;
@@ -28,7 +38,7 @@ public abstract class NewSpells4th : NewSpells
         {
             return Spells.CreateModern(MIllustrations.CreateIllustration("WeaponStorm"), "Weapon Storm", [Trait.Concentrate, Trait.Manipulate, Trait.Arcane, Trait.Primal],
                     "You swing a weapon you're holding, and the weapon magically multiplies into duplicates that swipe at all creatures in either a cone or an emanation.",
-                    $"This spell deals {IntToString(level)} dice of damage to creatures in the area with a Reflex save. This damage has the same type as a weapon you are wielding and uses the same die size. Determine the die size as if you were attacking with the weapon."+
+                    $"This spell deals {NumberToWord(level)} dice of damage to creatures in the area with a Reflex save. This damage has the same type as a weapon you are wielding and uses the same die size. Determine the die size as if you were attacking with the weapon."+
                     S.FourDegreesOfSuccess("The creature is unaffected.", "The target takes half damage.", "The target takes full damage.", "The target takes double damage and is subject to the weapon's critical specialization effect."),
                     Target.DependsOnSpellVariant(variant => variant.Id == "EmanationWS" ? Target.SelfExcludingEmanation(2).WithAdditionalRequirementOnCaster(creature => creature.HeldItems.Any(item => item.WeaponProperties != null) ? Usability.Usable : Usability.NotUsable("You must be wielding a weapon.")) : 
                             Target.Cone(6).WithAdditionalRequirementOnCaster(creature => creature.HeldItems.Any(item => item.WeaponProperties != null) ? Usability.Usable : Usability.NotUsable("You must be wielding a weapon.")))
@@ -110,6 +120,60 @@ public abstract class NewSpells4th : NewSpells
                         default:
                             throw new ArgumentOutOfRangeException(nameof(result), result, null);
                     }
+                });
+        });
+        IceStorm = ModManager.RegisterNewSpell("RE_IceStorm", 4, (_, _, level, inCombat, _) =>
+        {
+            int heighten = level % 2 == 0 ? level - 4 : level - 5;
+            return Spells.CreateModern(MIllustrations.CreateIllustration("IceStorm"), "Ice Storm", 
+                    [Trait.Cold, Trait.Arcane, Trait.Primal, Trait.SpellWithDuration],
+                "You create a gray storm cloud that pelts creatures with an icy deluge.",
+                $"When you Cast the Spell, a burst of magical hail deals {S.HeightenedVariable(2 + heighten / 2, 2)}d8 bludgeoning damage and {S.HeightenedVariable(2 + heighten / 2, 2)}d8 cold damage to each creature in the area below the cloud (basic Reflex save). As long as you sustain the spell, snow and sleet continue to rain down in the area, making the area difficult terrain. Any creature that ends its turn in the storm takes {S.HeightenedVariable(2 + heighten / 2, 2)} cold damage." +
+                $"\n\nIf you Cast this Spell outdoors, you can create two clouds instead of one. As normal, if a Large or larger creature is in both clouds, it still only takes the initial damage once and the continuing damage once per turn.", 
+                Target.Burst(24, 4), level, SpellSavingThrow.Basic(Defense.Reflex))
+                .WithSoundEffect(SfxName.RayOfFrost)
+                .WithActionCost(3)
+                .WithHeighteningNumerical(level,  4, inCombat, 2, "The initial bludgeoning damage and cold damage increase by 1d8 each, and the cold damage creatures take at the end of their turns increases by 1.")
+                .WithCastsAsAReaction((effect, action, _) =>
+                {
+                    effect.ModifyActionPossibility = (_, combatAction) =>
+                    {
+                        if (action.SpellId != combatAction.SpellId || combatAction.Owner.Battle.Map.IsIndoors)
+                            return;
+                        combatAction.Target = new MultipleBurstsTarget(24, 4, 2);
+                    };
+                })
+                .WithEffectOnChosenTargets(async (spell, self, targets) =>
+                {
+                    CheckResult result = spell.CheckResult;
+                    foreach (Creature target in targets.ChosenCreatures)
+                    {
+                        await CommonSpellEffects.DealBasicDamage(spell, self, target, result,
+                            new KindedDamage(DiceFormula.FromText($"{2 + heighten / 2}d8", "Ice Storm"),
+                                DamageKind.Bludgeoning),
+                            new KindedDamage(DiceFormula.FromText($"{2 + heighten / 2}d8", "Ice Storm"),
+                                DamageKind.Cold));
+                    }
+                    Zone iceStorm = Zone.Spawn(self, ZoneAttachment.StableBurst(targets.ChosenTiles));
+                    iceStorm.ApplySustainment(spell);
+                    iceStorm.TileEffectCreator = _ => new TileQEffect
+                    {
+                        Illustration = new Illustration[]
+                        {
+                            IllustrationName.SnowTile1,
+                            IllustrationName.SnowTile2,
+                            IllustrationName.SnowTile3,
+                            IllustrationName.SnowTile4
+                        }.GetRandomVisualOnly(),
+                        TransformsTileIntoDifficultTerrain = true
+                    };
+                    iceStorm.AfterCreatureEndsItsTurnHere = async creature =>
+                    {
+                        await CommonSpellEffects.DealDirectDamage(spell,
+                            DiceFormula.FromText($"{2 + heighten / 2}", "Ice Storm"), creature, CheckResult.Failure,
+                            DamageKind.Cold);
+                    };
+                    iceStorm.Apply();
                 });
         });
     }
