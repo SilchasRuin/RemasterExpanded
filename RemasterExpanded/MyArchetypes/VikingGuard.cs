@@ -8,6 +8,7 @@ using Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Archetypes;
 using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Coroutines.Options;
+using Dawnsbury.Core.Coroutines.Options.Reactive;
 using Dawnsbury.Core.Coroutines.Requests;
 using Dawnsbury.Core.Creatures;
 using Dawnsbury.Core.Intelligence;
@@ -47,7 +48,9 @@ public class VikingGuard
                 {
                     return new ActionPossibility(new CombatAction(qf.Owner, IllustrationName.Shield, "Designate Ally", [Trait.Basic],
                         "Choose an ally you can see, who becomes your designated ally. Until the end of the encounter, whenever your designated ally is adjacent to you and you're conscious, they gain a +2 circumstance bonus to AC and Reflex saving throws. You can have only one designated ally at a time, and if you designate a new ally, the previous ally loses any benefits.",
-                        Target.RangedFriend(200).WithAdditionalConditionOnTargetCreature((self, friend) => friend == self ? Usability.NotUsableOnThisCreature("You cannot target yourself") : Usability.Usable)).WithEffectOnEachTarget((_, caster, target, _) =>
+                        Target.RangedFriend(200).WithAdditionalConditionOnTargetCreature((self, friend) => friend == self ? Usability.NotUsableOnThisCreature("You cannot target yourself") : Usability.Usable))
+                        .WithActionId(RActionIds.DesignateAlly)
+                        .WithEffectOnEachTarget(async (_, caster, target, _) =>
                     {
                         QEffect ally = new("Designated Ally", $"As long as you are adjacent to {caster.Name} you gain a +2 circumstance bonus to AC and Reflex saves.", ExpirationCondition.Never, qf.Owner,
                             IllustrationName.Shield)
@@ -66,36 +69,41 @@ public class VikingGuard
                             friend.RemoveAllQEffects(effect => effect.Id == MQEffectIds.DesignatedAlly && effect.Source == caster);
                         }
                         target.AddQEffect(ally);
-                        return Task.CompletedTask;
                     })).WithPossibilityGroup("Abilities"); 
                 };
                 qf.Name = "Designate Ally {icon: Action}";
             })
-            .WithPrerequisite(values => values.GetProficiency(Trait.Athletics) >=  Proficiency.Trained && values.GetProficiency(Trait.Intimidation) >= Proficiency.Trained, "You must be trained in Athletics and Intimidation.")
-            ;
+            .WithPrerequisite(values => values.GetProficiency(Trait.Athletics) >=  Proficiency.Trained && values.GetProficiency(Trait.Intimidation) >= Proficiency.Trained, "You must be trained in Athletics and Intimidation.");
         yield return vikingGuardDedication;
         Feat reactiveStrike = ArchetypeFeats.DuplicateFeatAsArchetypeFeat(FeatName.AttackOfOpportunity, MTraits.VikingGuard, 4).WithCustomName("Reactive Striker");
         yield return reactiveStrike;
         Feat protectAllyExploration = new Feat(ModManager.RegisterFeatName("RE_ProtectAlly", "Protect Ally"), "", "You may use Designate Ally as a free action at the start of an encounter.", [ExplorationActivities.ModData.Traits.ExplorationActivity], null)
             .WithPermanentQEffect("You may use Designate Ally as a free action at the start of an encounter.",qf =>
             {
-                qf.StartOfCombatAfterInitiativeOrderIsSetUp = async effect =>
+                qf.StartOfCombatReaction = effect =>
                 {
                     Creature caster = effect.Owner;
-                    Creature? original = caster.Battle.ActiveCreature;
-                    caster.Battle.ActiveCreature = caster;
-                    CombatAction? designate = effect.Owner.Possibilities
-                        .Filter(ap => ap.CombatAction.Name == "Designate Ally").CreateActions(true).FirstOrDefault()
-                        ?.Action;
-                    if (designate != null)
-                        await qf.Owner.Battle.GameLoop.FullCast(designate.WithActionCost(0));
-                    caster.Battle.ActiveCreature = original;
+                    ReactionOption designate = ReactionOption.CreateCustom("Designate Ally",
+                        "Use designate ally as a free action.", IllustrationName.Shield, caster,
+                        async () =>
+                        {
+                            Creature? original = caster.Battle.ActiveCreature;
+                            caster.Battle.ActiveCreature = caster;
+                            caster.RegeneratePossibilities();
+                            CombatAction? designate = effect.Owner.Possibilities
+                                .Filter(ap => ap.CombatAction.ActionId == RActionIds.DesignateAlly).CreateActions(true).FirstOrDefault()
+                                ?.Action;
+                            if (designate != null)
+                                await qf.Owner.Battle.GameLoop.FullCast(designate.WithActionCost(0));
+                            caster.Battle.ActiveCreature = original;
+                        });
+                    return designate.WithIsFreeAction();
                 };
             })
             .WithPrerequisite(values => values.HasFeat(vikingGuardDedication), "You must have the Viking Guard dedication to take this exploration activity.");
         yield return protectAllyExploration;
         Feat defendersGrit = new TrueFeat(ModManager.RegisterFeatName("RE_DefendersGrit", "Defender's Grit"), 4,
-                "You can't protect anyone if you’re dead.",
+                "You can't protect anyone if you're dead.",
                 "You gain the Diehard general feat. If you start your turn adjacent to your designated ally, you gain a number of temporary Hit Points equal to half your level.",
                 [])
             .WithAvailableAsArchetypeFeat(MTraits.VikingGuard)
@@ -113,7 +121,7 @@ public class VikingGuard
         yield return defendersGrit;
         Feat guardsFury = new TrueFeat(MFeatNames.GuardsFury, 4,
                 "Some Viking Guards tap into a well of fury to protect their charges.",
-                "You can use the Rage action. While raging, you take a –1 penalty to AC. If you’re adjacent to your designated ally while raging, increase the additional damage from Rage from 2 to 4.",
+                "You can use the Rage action. While raging, you take a -1 penalty to AC. If you’re adjacent to your designated ally while raging, increase the additional damage from Rage from 2 to 4.",
                 [])
             .WithAvailableAsArchetypeFeat(MTraits.VikingGuard)
             .WithOnCreature(self =>

@@ -21,8 +21,8 @@ public static class NewDeities
         Feat zarazrael = new DeitySelectionFeat(ModManager.RegisterFeatName("RE_Zarazrael", "Deity: Zarazrael"), 
             "Zarazrael, the Burning Blade, is the archangel of justice, duty and righteous vengeance. He is the archetypal paladin, valuing strength of arms, keeping oaths, the righting of wrongs, and destruction of the wicked." +
             "\n\nBorn of an archdevil and an elemental lord of flame, Zarazrael knows of the struggle for acceptance and to rise above one's nature. Followers of Zarazrael are to lead by example, destroying the wicked without remorse and setting an example of duty and courage for those who can be shown a better path.",
-            "{b}•Edicts{/b} Punish the wicked, avenge the innocent, stand strong in the face of adversity." +
-            "\n{b}•Anathema{/b} Break one's oaths, abandon one's comrades, allow evil to escape just punishment.", 
+            "{b}• Edicts{/b} Punish the wicked, avenge the innocent, stand strong in the face of adversity." +
+            "\n{b}• Anathema{/b} Break one's oaths, abandon one's comrades, allow evil to escape just punishment.", 
             [NineCornerAlignment.LawfulGood], 
             [FeatName.HealingFont, FeatName.HarmfulFont], [FeatName.DomainFire, FeatName.DomainZeal, FeatName.DomainMight, FeatName.DomainDestruction], ItemName.BastardSword,
             [SpellId.TrueStrike, SpellId.Haste, SpellId.FireShield], Skill.Intimidation);
@@ -34,8 +34,8 @@ public static class NewDeities
                 ModManager.RegisterFeatName("RE_WorldSerpent", "Deity: The World Serpent"),
                 "Braggadocios and fierce, the World Serpent is an immense serpentine draconic entity who is the patron deity of sea serpents and linnorms. His immense length and vast strength is said to be so great that he could crush a mountain by coiling around it. Arrogant, but lazy, he waits and watches in the depths of the Endless Oceans, occasionally answering the prayers of those willing to subjugate themselves." +
                 "\n\nFollowers of the World Serpent know that one must never demand from him, and always deliver all due honorifics, for his wrath at being slighted is great. Despite this, the World Serpent's ancient wisdom is vast, containing knowledge otherwise lost to time.",
-                "{b}•Edicts:{/b} Seek ancient knowledge, plumb seldom seen depths, punish those who slight you" +
-                "\n{b}•Anathema{/b} Destroy lost knowledge, seek out and slay sea serpents or linnorms without cause",
+                "{b}• Edicts:{/b} Seek ancient knowledge, plumb seldom seen depths, punish those who slight you" +
+                "\n{b}• Anathema{/b} Destroy lost knowledge, seek out and slay sea serpents or linnorms without cause",
                 [NineCornerAlignment.ChaoticNeutral, NineCornerAlignment.ChaoticEvil, NineCornerAlignment.NeutralEvil],
                 [FeatName.HealingFont, FeatName.HarmfulFont],
                 [FeatName.DomainDestruction, CcRequired.DomainDragon, FeatName.DomainWater, MFeatNames.Vigil], ItemName.Whip,
@@ -64,7 +64,7 @@ public static class NewDeities
             [NineCornerAlignment.NeutralGood, NineCornerAlignment.TrueNeutral, NineCornerAlignment.ChaoticNeutral, NineCornerAlignment.ChaoticGood],
             [FeatName.HealingFont],
             [FeatName.DomainDeath, FeatName.DomainTravel, MFeatNames.Vigil, MFeatNames.Knowledge],
-            [SpellId.FleetStep, SpellId.LooseTimesArrow, SpellId.DimensionDoor],
+            [SpellIds.Tailwind, SpellId.LooseTimesArrow, SpellId.DimensionDoor],
             ItemName.Club, Skill.Survival);
         yield return theTraveler;
         Feat theWatcher = CreateDeity("The Watcher",
@@ -165,7 +165,7 @@ public static class NewDeities
     private static Feat CreateDeity(string deityName, string flavorText, string edicts, string anathema, NineCornerAlignment[] alignments, FeatName[] allowedFonts, FeatName[] domains, SpellId[] extraSpells,ItemName favoredWeapon, Skill favoredSkill)
     {
         Feat deity = new DeitySelectionFeat(ModManager.RegisterFeatName("RE_"+deityName.Replace(" ", ""), "Deity: "+deityName), flavorText,
-            "{b}•Edicts{/b} "+edicts+"\n{b}•Anathema{/b} "+anathema, alignments, allowedFonts, domains, favoredWeapon, extraSpells, favoredSkill);
+            "{b}• Edicts{/b} "+edicts+"\n{b}• Anathema{/b} "+anathema, alignments, allowedFonts, domains, favoredWeapon, extraSpells, favoredSkill);
         AllFeats.GetFeatByFeatName(FeatName.Cleric).Subfeats?.Add(deity);
         return deity;
     }

@@ -112,7 +112,7 @@ public class OscillatingWaveRemaster
             spell.WithActionId(ModData.MActionIds.PsychicIgnition);
             spell.WithPrologueEffectOnChosenTargetsBeforeRolls(async (action, self, _) =>
             {
-                self.AddQEffect(new QEffect()
+                self.AddQEffect(new QEffect
                 {
                     Id = ModData.MQEffectIds.IncreasedReach,
                     AfterYouTakeAction = async (effect, combatAction) =>
@@ -160,7 +160,7 @@ public class OscillatingWaveRemaster
                 {
                     SpellRepertoire repertoire = sheet.SpellRepertoires[Trait.Psychic];
                     Spell psiCantrip1 = AllSpells.CreateModernSpell(frostbite, null,
-                        sheet.MaximumSpellLevel, false, new SpellInformation()
+                        sheet.MaximumSpellLevel, false, new SpellInformation
                         {
                             ClassOfOrigin = Trait.Psychic,
                             PsychicAmpInformation = new PsychicAmpInformation()
@@ -168,7 +168,7 @@ public class OscillatingWaveRemaster
                     repertoire.SpellsKnown.Add(psiCantrip1);
                     repertoire.SpellsKnown.RemoveAll(spell => spell.SpellId == SpellId.RayOfFrost);
                     Spell psiCantrip2 = AllSpells.CreateModernSpell(ignition, null,
-                        sheet.MaximumSpellLevel, false, new SpellInformation()
+                        sheet.MaximumSpellLevel, false, new SpellInformation
                         {
                             ClassOfOrigin = Trait.Psychic,
                             PsychicAmpInformation = new PsychicAmpInformation()
@@ -210,7 +210,7 @@ public class OscillatingWaveRemaster
                 {
                     SpellRepertoire repertoire = sheet.SpellRepertoires[Trait.Psychic];
                     Spell psiCantrip1 = AllSpells.CreateModernSpell(frostbite, null,
-                        sheet.MaximumSpellLevel, false, new SpellInformation()
+                        sheet.MaximumSpellLevel, false, new SpellInformation
                         {
                             ClassOfOrigin = Trait.Psychic,
                             PsychicAmpInformation = new PsychicAmpInformation()
@@ -233,7 +233,7 @@ public class OscillatingWaveRemaster
                 {
                     SpellRepertoire repertoire = values.SpellRepertoires[Trait.Psychic];
                     Spell psiCantrip1 = AllSpells.CreateModernSpell(ignition, null,
-                        values.MaximumSpellLevel, false, new SpellInformation()
+                        values.MaximumSpellLevel, false, new SpellInformation
                         {
                             ClassOfOrigin = Trait.Psychic,
                             PsychicAmpInformation = new PsychicAmpInformation()
@@ -263,7 +263,7 @@ public class OscillatingWaveRemaster
                 wave4.WithOnSheet(values => values.SpellRepertoires[Trait.Psychic]
                     .SpellsKnown
                     .Add(AllSpells.CreateModernSpell(frostbite, null, values.MaximumSpellLevel, false,
-                        new SpellInformation()
+                        new SpellInformation
                         {
                             ClassOfOrigin = Trait.Psychic,
                             PsychicAmpInformation = new PsychicAmpInformation()
@@ -296,7 +296,7 @@ public class OscillatingWaveRemaster
                 wave5.WithOnSheet(values => values.SpellRepertoires[Trait.Psychic]
                     .SpellsKnown
                     .Add(AllSpells.CreateModernSpell(ignition, null, values.MaximumSpellLevel, false,
-                        new SpellInformation()
+                        new SpellInformation
                         {
                             ClassOfOrigin = Trait.Psychic,
                             PsychicAmpInformation = new PsychicAmpInformation()
@@ -312,7 +312,7 @@ public class OscillatingWaveRemaster
 
     public static Spell CreatePsychicSpellTemplate(SpellId spellId)
     {
-        return AllSpells.CreateModernSpell(spellId, null, -1, false , new SpellInformation()
+        return AllSpells.CreateModernSpell(spellId, null, -1, false , new SpellInformation
         {
             ClassOfOrigin = Trait.Psychic,
             PsychicAmpInformation = new PsychicAmpInformation()

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dawnsbury.Audio;
 using Dawnsbury.Auxiliary;
+using Dawnsbury.Campaign.LongTerm;
 using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.Feats;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Alchemy;
@@ -27,6 +28,7 @@ using Dawnsbury.Display;
 using Dawnsbury.Display.Illustrations;
 using Dawnsbury.IO;
 using Dawnsbury.Modding;
+using Dawnsbury.Mods.LoresAndWeaknesses;
 using Microsoft.Xna.Framework;
 using SpiritDamage;
 using static RemasterExpanded.ModData;
@@ -48,7 +50,8 @@ public class NewItems
                                  "\n\nYou gain the following actions:" +
                                  "\n\n{b}Block Manipulation{/b} {icon:Reaction} (concentrate); Once per day as a reaction {icon:Reaction}, when you gain the stupefied condition, you can decrease the value of your stupefied condition by 1." +
                                  "\n\n{b}Hunker Down{/b} {icon:Action} (manipulate); You gain a +1 circumstance bonus to your AC against ranged attacks until the start of your next turn.")
-                .WithWornAt(Trait.Headwear).WithItemAction((item, creature) =>
+                .WithWornAt(Trait.Headwear)
+                .WithItemAction((item, creature) =>
                     {
                         return new CombatAction(creature, item.Illustration, "Hunker Down", [Trait.Manipulate, Trait.Basic], "{i}You hunker down, protecting your head using your helmet.{/i}" +
                                 "\n\nYou gain a +1 circumstance bonus to your AC against ranged attacks until the start of your next turn.",
@@ -360,7 +363,7 @@ public class NewItems
                             strike.Traits.Add(Trait.Concentrate);
                             return strike;
                         },
-                        BonusToSkillChecks = (skill, _, _) => skill == Skill.Acrobatics ? new Bonus(1, BonusType.Item, "Tassets of Flexibility") : null
+                        BonusToSkillChecks = (skill, _, _) => skill == Skill.Acrobatics ? new Bonus(1, BonusType.Item, "Tasset of Flexibility") : null
                     });
                 });
         });
@@ -373,6 +376,65 @@ public class NewItems
         ModManager.RegisterInlineTooltip("sanctify", MTraits.Sanctified.GetTraitProperties().RulesText ?? "");
         ModManager.RegisterInlineTooltip("holy", HolyTrait.Holy.GetTraitProperties().RulesText ?? "");
         ModManager.RegisterInlineTooltip("unholy",  UnholyTrait.Unholy.GetTraitProperties().RulesText ?? "");
+        ModManager.RegisterInlineTooltip("interact", "You can use the Interact action to:" +
+                                                     "\n• Draw, put away, or swap an item." +
+                                                     "\n• Pick up an item from the ground." +
+                                                     "\n• Hand off a held item to a willing creature with a free hand." +
+                                                     "\n• Change your grip by adding a hand to an item.");
+        ModManager.RegisterInlineTooltip("ReactiveStrike", "Reactive Strike is another name for Attack of Opportunity.");
+        ModManager.RegisterNewItemIntoTheShop("RE_SplintArmor", name => new Item(name, MIllustrations.CreateIllustration("Splint"), "splint mail", 1, 13, Trait.HeavyArmor, Trait.Composite)
+            .WithArmorProperties(new ArmorProperties(5, 1, -3, -2, 16)
+            {
+                IsMetal = true
+            }));
+        LongTermEffects.RegisterWithNumberArgument("RETacticianCharges", LongTermEffectDuration.Forever, TacticianCharges);
+        ModManager.RegisterNewItemIntoTheShop("RE_TacticiansHelm", name =>
+        {
+            return new Item(name, MIllustrations.CreateIllustration("TacticiansHelm"), "tactician's helm", 5, 160,
+                    Trait.Invested, Trait.Magical, Trait.Worn)
+                .WithDescription("{i}Repurposing and enchanting a helmet worn by a battlefield commander can create a tactician's helm, imparting knowledge of battlefield tactics that feeds off your minor victories.{/i}" +
+                                 "You gain a +1 item bonus to Warfare Lore. The helmet becomes gains a charge each time you hit a creature with a {tooltip:ReactiveStrike}Reactive Strike{/tooltip}. A {i}tactician's helm[/i} can hold up to 2 charges, and its charges begin at 0.\n\n" +
+                                 "{b}Activate {icon:Action}{/b} (concentrate); {b}Cost{/b} 1 charge from the helm; {b}Frequency{/b} once per encounter; {b}Effect{/b} You choose one of the following effects." +
+                                 "\n{b}• Charge!{/b} Stride twice." +
+                                 "\n{b}• Move It!{/b} You gain a +2 status bonus to Acrobatics and Athletics checks until the end of this turn." +
+                                 "\n{b}• Protect!{/b} If you're wielding a shield, Stride to a space adjacent to an ally, then Raise your Shield." +
+                                 "\n{b}• Re-Arm!{/b} You can make up to three interact actions as free actions. Each of these actions must be used to do something listed under {tooltip:interact}Interact{/tooltip} and must be completed in sequence.")
+                .WithWornAt(Trait.Headwear)
+                .WithPermanentQEffectWhenWorn((qfItem, item) =>
+                {
+                    qfItem.AfterYouTakeActionAgainstTarget = async (qf, action, _, result) =>
+                    {
+                        if (!action.HasTrait(Trait.AttackOfOpportunity) || result <= CheckResult.Failure)
+                            return;
+                        Creature self = qf.Owner;
+                        if (self.FindQEffect(MQEffectIds.TacticianCharges) is not {} charges)
+                        {
+                            self.AddQEffect(TacticianCharges(1));
+                        }
+                        else if (charges.Value < 2)
+                        {
+                            charges.Value += 1;
+                        }
+                    };
+                    qfItem.ProvideActionIntoPossibilitySection = (effect, section) =>
+                    {
+                        if (section.PossibilitySectionId != PossibilitySectionId.ItemActions)
+                            return null;
+                        return new SubmenuPossibility(item.Illustration, "Tactician's Helm")
+                        {
+                            Subsections = [new PossibilitySection("Tactician's Helm")
+                            {
+                                Possibilities = TacticianCombatActions(effect.Owner).ToList()
+                            }]
+                        };
+                    };
+                    qfItem.BonusToSkills = skill =>
+                        skill == Lores.GetRegisteredLore("Warfare Lore", null)?.Skill
+                            ? new Bonus(1, BonusType.Item, item.BaseHumanName)
+                            : null;
+                });
+        });
+
         #region removed
 
         // GlueBombLesser = ModManager.RegisterNewItemIntoTheShop("RE_GlueBombLesser", name =>
@@ -692,7 +754,7 @@ public class NewItems
                         return symbol;
                     }
                 };
-                creature.AddQEffect(new QEffect()
+                creature.AddQEffect(new QEffect
                 {
                     StateCheck = qf =>
                     {
@@ -716,11 +778,6 @@ public class NewItems
                         ? Usability.NotUsable(
                             $"You may cast a spell from a {baseName} once per day.")
                         : Usability.Usable;
-                spell.EffectOnChosenTargets += async (_, caster, _) =>
-                {
-                    caster.PersistentUsedUpResources.UsedUpActions.Add(
-                        $"{baseName}");
-                };
                 break;
             case CreatureTarget target2:
                 target2.WithAdditionalConditionOnTargetCreature((creature, _) =>
@@ -729,11 +786,10 @@ public class NewItems
                         ? Usability.NotUsable(
                             $"You may cast a spell from a {baseName} once per day.")
                         : Usability.Usable);
-                spell.EffectOnChosenTargets += async (_, caster, _) =>
-                {
-                    caster.PersistentUsedUpResources.UsedUpActions.Add(
-                        $"{baseName}");
-                };
+                break;
+            case SelfTarget target2:
+                target2.WithAdditionalRestriction2(spell.Owner.PersistentUsedUpResources.UsedUpActions.Contains(
+                        $"{baseName}"), $"You may cast a spell from a {baseName} once per day.");
                 break;
             case DependsOnActionsSpentTarget target2:
                 switch (target2.IfOneAction)
@@ -753,6 +809,10 @@ public class NewItems
                                 ? Usability.NotUsable(
                                     $"You may cast a spell from a {baseName} once per day.")
                                 : Usability.Usable;
+                        break;
+                    case SelfTarget selfTarget:
+                        selfTarget.WithAdditionalRestriction2(spell.Owner.PersistentUsedUpResources.UsedUpActions.Contains(
+                                $"{baseName}"), $"You may cast a spell from a {baseName} once per day.");
                         break;
                 }
 
@@ -774,6 +834,10 @@ public class NewItems
                                     $"You may cast a spell from a {baseName} once per day.")
                                 : Usability.Usable;
                         break;
+                    case SelfTarget selfTarget:
+                        selfTarget.WithAdditionalRestriction2(spell.Owner.PersistentUsedUpResources.UsedUpActions.Contains(
+                                $"{baseName}"), $"You may cast a spell from a {baseName} once per day.");
+                        break;
                 }
 
                 switch (target2.IfThreeActions)
@@ -794,13 +858,181 @@ public class NewItems
                                     $"You may cast a spell from a {baseName} once per day.")
                                 : Usability.Usable;
                         break;
+                    case SelfTarget selfTarget:
+                        selfTarget.WithAdditionalRestriction2(spell.Owner.PersistentUsedUpResources.UsedUpActions.Contains(
+                                $"{baseName}"), $"You may cast a spell from a {baseName} once per day.");
+                        break;
                 }
-                spell.EffectOnChosenTargets += async (_, caster, _) =>
-                {
-                    caster.PersistentUsedUpResources.UsedUpActions.Add(
-                        $"{baseName}");
-                };
                 break;
         }
+        spell.EffectOnChosenTargets += async (_, caster, _) =>
+        {
+            caster.PersistentUsedUpResources.UsedUpActions.Add(
+                $"{baseName}");
+        };
+    }
+
+    public static QEffect TacticianCharges(int value)
+    {
+        int oValue = value;
+        return new QEffect
+        {
+            Id = MQEffectIds.TacticianCharges,
+            Value = value,
+            Name = "Tactician Charges",
+            Description = $"Your {{i}}tactician's helm{{/i}} has {oValue} charge{(oValue == 1 ? "" : "s")}.",
+            Illustration = MIllustrations.CreateIllustration("TacticiansHelm"),
+            EndOfCombat = async (effect, b) =>
+            {
+                int newValue = effect.Value;
+                if (!b)
+                    return;
+                if (effect.Owner.LongTermEffects is not {} lte)
+                    return;
+                lte.Effects.RemoveAll(lt => lt.Text == "RETacticianCharges");
+                if (WellKnownLongTermEffects.CreateLongTermEffect("RETacticianCharges", null, newValue) is {} charges)
+                    lte.Add(charges);
+            },
+            StateCheck = qf =>
+            {
+                if (qf.Value == oValue)
+                    return;
+                oValue = qf.Value;
+                qf.Illustration = oValue switch
+                {
+                    0 => IllustrationName.None,
+                    >= 1 => MIllustrations.CreateIllustration("TacticiansHelm"),
+                    _ => qf.Illustration
+                };
+            }
+        };
+    }
+
+    public static IEnumerable<Possibility> TacticianCombatActions(Creature owner)
+    {
+        yield return new ActionPossibility(TacticianAction(owner, MIllustrations.CreateIllustration("Charge"), "Charge!",
+            "Stride twice.")
+            .WithEffectOnEachTarget(async (spell, caster, _, _) =>
+            {
+                if (!await caster.StrideAsync("Choose where to stride.", allowCancel: true))
+                {
+                    spell.RevertRequested = true;
+                    return;
+                }
+                if (!await caster.StrideAsync("Choose where to stride or cancel to convert to simple stride.", allowCancel: true))
+                {
+                    return;
+                }
+                TacticianUsed(caster);
+            }));
+        yield return new ActionPossibility(TacticianAction(owner, MIllustrations.CreateIllustration("MoveIt"),
+            "Move It!", "You gain a +2 status bonus to Acrobatics and Athletics checks until the end of this turn.")
+            .WithEffectOnEachTarget(async (spell, caster, _, _) =>
+            {
+                caster.AddQEffect(new QEffect("Move It!",
+                    "You have a +2 status bonus to Acrobatics and Athletics checks.",
+                    ExpirationCondition.ExpiresAtEndOfYourTurn, caster, spell.Illustration)
+                {
+                    BonusToSkillChecks = (skill, _, _) => skill is Skill.Acrobatics or Skill.Athletics ? new Bonus(2, BonusType.Status, "Move It!") : null
+                });
+                TacticianUsed(caster);
+            }));
+        yield return new ActionPossibility(TacticianAction(owner, MIllustrations.CreateIllustration("Protect"),
+            "Protect!",
+            "If you're wielding a shield, Stride to a space adjacent to an ally, then Raise your Shield.", 
+            Target.Self().WithAdditionalRestrictions([new Tuple<bool, string>(owner.FindQEffect(MQEffectIds.TacticianCharges) is not { } charges || charges.Value == 0, "You must have at least 1 charge to use this action"),
+                new Tuple<bool, string>(owner.HasEffect(MQEffectIds.TacticianUsed), "You can only use actions granted by a {i}tactician's helm{/i} once per encounter."),
+                new Tuple<bool, string>(!owner.WieldsItem(Trait.Shield), "You must be wielding a shield to use this action."),
+                new Tuple<bool, string>(owner.HasEffect(QEffectId.RaisingAShield), "You are already raising a shield.")]))
+            .WithEffectOnEachTarget(async (spell, caster, _, _) =>
+            {
+                if (!await caster.StrideOrStepAdvancedAsync("Choose where to stride adjacent to an ally.", allowCancel: true, permissibleTarget: tile => caster.Battle.AllCreatures.Any(cr => cr.FriendOfAndNotSelf(caster) && cr.Space.Tiles.Any(t => t.IsAdjacentTo(tile) || (!caster.Space.IsSingleSquare && tile.TilesToTheBottomRight(caster.Space.SizeInSquares)
+                        .Any(t2 => t2.IsAdjacentTo(t)))))))
+                {
+                    spell.RevertRequested = true;
+                    return;
+                }
+                if (!caster.Battle.AllCreatures.Any(cr => cr.FriendOfAndNotSelf(caster) && caster.IsAdjacentTo(cr)))
+                    return;
+                caster.RegeneratePossibilities();
+                Possibilities raiseShield = caster.Possibilities.Filter(ap =>
+                {
+                    if (ap.CombatAction.ActionId != ActionId.RaiseShield || ap.CombatAction.Name == "Raise shield (Devoted Guardian)")
+                        return false;
+                    ap.CombatAction.ActionCost = 0;
+                    ap.RecalculateUsability();
+                    return true;
+                });
+                caster.Possibilities = raiseShield;
+                List<Option> options = await caster.Battle.GameLoop.CreateActions(caster, caster.Possibilities, null);
+                await caster.Battle.GameLoop.OfferOptions(caster, options, true);
+                TacticianUsed(caster);
+            })
+        );
+        yield return new ActionPossibility(TacticianAction(owner, MIllustrations.CreateIllustration("ReArm"), "Re-Arm!",
+            "You can make up to three interact actions as free actions. Each of these actions must be used to do something listed under {tooltip:interact}Interact{/tooltip} and must be completed in sequence.")
+            .WithActionId(RActionIds.ReArm)
+            .WithEffectOnChosenTargets(async (self, _) =>
+                {
+                    self.AddQEffect(new QEffect(ExpirationCondition.ExpiresAtEndOfYourTurn)
+                        {
+                            AfterYouTakeAction = async (q, action) =>
+                            {
+                                if (!IsInteractAction(action) && action.ActionId != RActionIds.ReArm)
+                                {
+                                    q.ExpiresAt = ExpirationCondition.Immediately;
+                                }
+                                else if (action.ActionId != RActionIds.ReArm)
+                                    q.Value -= 1;
+                            },
+                            ModifyActionPossibility = (_, action) =>
+                            {
+                                if (IsInteractAction(action))
+                                {
+                                    action.ActionCost = 0;
+                                }
+                            },
+                            Value = 3,
+                            StateCheck = qf =>
+                            {
+                                if (qf.Value == 0)
+                                    qf.ExpiresAt = ExpirationCondition.Immediately;
+                            }
+                        }
+                    );
+                    TacticianUsed(self);
+                }
+            )
+        );
+    }
+
+    public static CombatAction TacticianAction(Creature owner, Illustration illustration, string name, string description, Target? target = null)
+    {
+        return CombatAction.CreateAction(owner, illustration, name,
+            [Trait.Concentrate, Trait.Basic],
+            description,
+            target ?? TacticianTarget(owner), 1, SfxName.Drum, null);
+    }
+
+    public static void TacticianUsed(Creature owner)
+    {
+        owner.AddQEffect(new QEffect
+        {
+            Id = MQEffectIds.TacticianUsed
+        });
+        owner.FindQEffect(MQEffectIds.TacticianCharges)?.Value -= 1;
+    }
+
+    public static Target TacticianTarget(Creature owner)
+    {
+        Target target = Target.Self();
+        return target.WithAdditionalRestrictions([new Tuple<bool, string>(owner.FindQEffect(MQEffectIds.TacticianCharges) is not { } charges || charges.Value == 0, "You must have at least 1 charge to use this action"),
+        new Tuple<bool, string>(owner.HasEffect(MQEffectIds.TacticianUsed), "You can only use actions granted by a {i}tactician's helm{/i} once per encounter.")]);
+            
+    }
+
+    public static bool IsInteractAction(CombatAction action)
+    {
+        return action.ActionId is ActionId.ReplaceItemInHand or ActionId.DrawItem or ActionId.PickUpItem || action.Name.Contains("Hand over") || action.Name.Contains("Add hand") || action.Name.Contains("Stow");
     }
 }

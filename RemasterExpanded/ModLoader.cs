@@ -34,6 +34,7 @@ public class ModLoader
         ModManager.RegisterBooleanSettingsOption("RE_CritChange", "Remaster Expanded: Remaster Flail and Hammer Critical Specialization", "Changes flails and hammers to use their remastered critical specializations, which requires a saving throw against your Class DC.", false);
         ModManager.RegisterBooleanSettingsOption("RE_AlchemicalOrganization", "Remaster Expanded: Organize Alchemical Items", "Organizes alchemical items into item groups according to their type. {b}NOTE:{/b} You must restart the game for this to take place.", true);
         ModManager.RegisterBooleanSettingsOption("RemasterCantrips", "Remaster Expanded: Enforce Remaster Rule Cantrip Damage for Divine Lance", "If this is enabled, Divine Lance will use remaster damage baseline for divine lance (base damage 2d4), if disabled it will use pre-remaster baseline (base damage 1d4 + spellcasting ability).", Remaster);
+        ModManager.RegisterBooleanSettingsOption("HideDuplicateWardenSpells", "Remaster Expanded: Hide Duplicate Warden Spells", "Hides the base game feats that are duplicated in the Initiate Warden feat line. {b}NOTE:{/b} You must restart the game for this to take place.", false);
         Harmony harmony = new("critSpecChange");
         harmony.PatchAll();
         Inkdrop.AddInkdrop();
@@ -69,9 +70,13 @@ public class ModLoader
             if (PlayerProfile.Instance.IsBooleanOptionEnabled("RemoveDawnniFeats"))
                 DawnniPatch.LoadDawnniPatch();
         }
+        if (PlayerProfile.Instance.IsBooleanOptionEnabled("HideDuplicateWardenSpells"))
+        {
+            RangerFeats.HideWardenFeats();
+        }
         LoadOrder.AtEndOfLoadingSequence += () =>
         {
-            foreach (DeitySelectionFeat? deitySelectionFeat in AllFeats.All.Where(ft => ft is DeitySelectionFeat).Cast<DeitySelectionFeat>())
+            foreach (DeitySelectionFeat? deitySelectionFeat in AllFeats.All.OfType<DeitySelectionFeat>())
             {
                 deitySelectionFeat?.OnSheet = null;
                 IEnumerable<SpellId>? extraSpells = deitySelectionFeat?.GrantedSpells;

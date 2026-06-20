@@ -36,7 +36,7 @@
       <HintPath>D:\SteamLibrary\steamapps\workshop\content\2693730\3223762737\CustomMods\Dawnsbury.Mods.Remaster.Spellbook.dll</HintPath>
     </Reference>
     <Reference Include="ExplorationActivities">
-      <HintPath>..\..\Debug\ExplorationActivities\bin\Debug\net10.0-windows\ExplorationActivities.dll</HintPath>
+      <HintPath>..\..\Debug\ExplorationActivities\bin\Release\net10.0-windows\ExplorationActivities.dll</HintPath>
     </Reference>
     <Reference Include="HereThereBeDragons">
       <HintPath>..\..\HereThereBeDragons2\bin\Debug\net10.0-windows\HereThereBeDragons.dll</HintPath>
@@ -57,7 +57,6 @@
 
   <ItemGroup>
     <PackageReference Include="Lib.Harmony" Version="2.4.2" />
-    <PackageReference Include="System.Text.Json" Version="10.0.5" />
   </ItemGroup>
 
   <ItemGroup>

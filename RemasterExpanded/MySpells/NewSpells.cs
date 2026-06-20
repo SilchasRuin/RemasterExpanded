@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Dawnsbury.Auxiliary;
+﻿using Dawnsbury.Auxiliary;
 using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
+using Dawnsbury.Core.CharacterBuilder.Spellcasting;
 using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Creatures;
 using Dawnsbury.Core.Mechanics;
@@ -14,6 +11,7 @@ using Dawnsbury.Core.Mechanics.Targeting;
 using Dawnsbury.Core.Roller;
 using Dawnsbury.Core.Tiles;
 using Dawnsbury.Display.Illustrations;
+using Dawnsbury.Modding;
 using static RemasterExpanded.ModData;
 
 namespace RemasterExpanded.MySpells;
@@ -24,6 +22,7 @@ public class NewSpells
     {
         NewCantrips.Load();
         NewFocusSpells.Load();
+        WardenSpells.Load();
         NewSpells1st.Load();
         NewSpells2nd.Load();
         NewSpells3rd.Load();
@@ -140,5 +139,10 @@ public class NewSpells
     public static string IfAmped(bool inCombat, string description)
     {
         return !inCombat ? $"\n\n{{Blue}}{{b}}Amp{{/b}} {description}{{/Blue}}" : "";
+    }
+    public delegate CombatAction CreateSpellDelegate(int level, bool inCombat);
+    public static SpellId FastCreateFocusSpell(string technicalSpellName, CreateSpellDelegate createSpell)
+    {
+        return ModManager.RegisterNewSpell(technicalSpellName, 0, (_, _, level, inCombat, _) => createSpell(level, inCombat));
     }
 }

@@ -69,7 +69,11 @@ public class FeatLoader
         {
             yield return feat;
         }
-        
+
+        foreach (Feat feat in RangerFeats.LoadFeats())
+        {
+            yield return feat;
+        }
     }
     public static void RobustHealthLogic(TrueFeat feat)
     {

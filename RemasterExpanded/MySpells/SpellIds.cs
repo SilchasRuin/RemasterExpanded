@@ -20,11 +20,24 @@ public abstract class SpellIds
     public static SpellId ObjectMemory { get; set; }
     public static SpellId RememberTheLost { get; set; }
     public static SpellId FeetToFins { get; set; }
-    public static SpellId SavorTheSting { get; set; }
-    public static SpellId RetributivePain { get; set; }
     public static SpellId ScholarlyRecollection { get; set; }
     public static SpellId KnowTheEnemy { get; set; }
     public static SpellId Befuddle { get; set; }
     public static SpellId AnimatedAssault { get; set; }
     public static SpellId IceStorm { get; set; }
+    public static SpellId Tailwind { get; set; }
+    public static SpellId DistractingDecoy { get; set; }
+    public static SpellId SlimeSpit { get; set; }
+    public static SpellId KeenSmell { get; set; }
+    public static SpellId AnimalFeature { get; set; }
+    public static SpellId HuntersLuck { get; set; }
+    public static SpellId SoothingMist { get; set; }
+    public static SpellId ThreateningMimicry { get; set; }
+    public static SpellId WarningStripes { get; set; }
+    public static SpellId RangersBramble { get; set; }
+    public static SpellId PulverizingWake { get; set; }
+    public static SpellId GluttonousGrowth { get; set; }
+    public static SpellId HuntersVision { get; set; }
+    public static SpellId PackBreaker { get; set; }
+    public static SpellId TerrainTransposition { get; set; } 
 }

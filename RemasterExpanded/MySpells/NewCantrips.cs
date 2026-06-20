@@ -1,6 +1,4 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
-using Dawnsbury.Audio;
+﻿using Dawnsbury.Audio;
 using Dawnsbury.Auxiliary;
 using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
@@ -121,7 +119,7 @@ public abstract class NewCantrips : NewSpells
                     QEffect flankingFigment = FlankingFig(caster, figment, spell);
                     caster.Battle.SpawnCreature(figment, caster.Battle.Gaia, targets.ChosenTiles[0]);
                     await caster.Battle.GameLoop.StateCheck();
-                    figment.AddQEffect(new QEffect() { Id = QEffectId.CannotFlank });
+                    figment.AddQEffect(new QEffect { Id = QEffectId.CannotFlank });
                     figment.With(cr => cr.DescriptionFulltext = "This is an illusion created by Amped Figment.");
                     caster.AddQEffect(flankingFigment);
                     QEffect sustainedFigment = new(ExpirationCondition.ExpiresAtEndOfYourTurn)

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
 using Dawnsbury.Audio;
 using Dawnsbury.Campaign.LongTerm;
 using Dawnsbury.Core;
@@ -41,9 +38,9 @@ public abstract class NewSpells3rd : NewSpells
                 .WithActionCost(2).WithSoundEffect(MSoundEffects.Croak)
                 .WithHeighteningNumerical(level, 3, inCombat, 1, "The damage for using an action with the auditory trait increases by 1d10.")
                 .WithProjectileCone(VfxStyle.NoAnimation())
-                .WithEffectOnEachTarget((spell, caster, target, result) =>
+                .WithEffectOnEachTarget(async (spell, caster, target, result) =>
                 {
-                    if (result == CheckResult.CriticalSuccess) return Task.CompletedTask;
+                    if (result == CheckResult.CriticalSuccess) return;
                     var description = "Whenever you use an action that has the auditory trait or attempt to Cast a Spell that doesn't have the subtle trait, you must succeed at a DC 5 flat check or the action is lost.";
                     switch (result)
                     {
@@ -116,12 +113,12 @@ public abstract class NewSpells3rd : NewSpells
                         }
                     };
                     target.AddQEffect(croak);
-                    return Task.CompletedTask;
                 });
         });
+        LongTermEffects.EasyRegister("RE_FeetToFins", LongTermEffectDuration.UntilLongRest, FeetToFinsQf);
         FeetToFins = ModManager.RegisterNewSpell("RE_FeetToFins", 3, (_, _, level, inCombat, _) =>
         {
-            return Spells.CreateModern(IllustrationName.JumpSpell, "Feet to Fins",
+            return Spells.CreateModern(MIllustrations.CreateIllustration("Fish"), "Feet to Fins",
                 [Trait.Morph, Trait.Arcane, Trait.Primal],
                 "The target's feet transform into fins, improving mobility in the water but reducing it on land.",
                 "A willing target gains swimming, but it's speed is reduced to 5 feet unless it is in water or able to fly.",
@@ -132,24 +129,19 @@ public abstract class NewSpells3rd : NewSpells
                 level, null)
                 .WithSoundEffect(SfxName.ScratchFlesh)
                 .WithHeightenedAtSpecificLevel(level, 6, inCombat, "You may cast this spell as a free action at the start of combat and it lasts until your next daily preparations.")
-                .WithEffectOnEachTarget(async (spell, caster, target, _) =>
+                .WithEffectOnEachTarget(async (_, _, target, _) =>
                 {
-                    target.AddQEffect(FeetToFins(caster, spell));
-                    if (level >= 6)
+                    target.AddQEffect(FeetToFinsQf());
+                    if (level >= 6 && WellKnownLongTermEffects.CreateLongTermEffect("RE_FeetToFins") is {} feetToFins)
                     {
-                        target.LongTermEffects?.Add(new LongTermEffect
-                        {
-                            Id = MLongTermEffectIds.FeetToFins,
-                            Duration = LongTermEffectDuration.UntilLongRest,
-                            OnApply = () => FeetToFins(caster, spell)
-                        });
+                        target.LongTermEffects?.Add(feetToFins);
                     }
                 })
                 .WithCastsAsAReaction((effect, thisSpell, canCast) =>
                 {
                     if (!canCast() || level < 6)
                         return;
-                    effect.StartOfCombatReaction = qf =>
+                    effect.StartOfCombatReaction = _ =>
                     {
                         Creature caster = effect.Owner;
                         ReactionOption feet = ReactionOption.CreateFromSpellAsAReaction(thisSpell, thisSpell.Description, async () =>
@@ -174,27 +166,27 @@ public abstract class NewSpells3rd : NewSpells
                         return feet;
                     };
                 });
-            static QEffect FeetToFins(Creature caster, CombatAction spell)
-            {
-                return new QEffect("Feet to Fins", "You have swimming but your speed is reduced to 5 feet unless you are in water or able to fly.", ExpirationCondition.Never, caster, spell.Illustration)
-                {
-                    StateCheck = qf =>
-                    {
-                        qf.Owner.AddQEffect(QEffect.Swimming().WithExpirationEphemeral());
-                        int speed = SetSpeed(qf.Owner.Speed);
-                        qf.Owner.AddQEffect(new QEffect(ExpirationCondition.Ephemeral)
-                        {
-                            BonusToAllSpeeds = effect =>
-                                effect.Owner.HasEffect(QEffectId.AquaticCombat) ||
-                                effect.Owner.HasEffect(QEffectId.Flying) || effect.Owner.Space.Tiles.All(t => t.Kind is TileKind.Water or TileKind.ShallowWater)
-                                    ? null
-                                    : new Bonus(speed + 1, BonusType.Untyped, "Feet to Fins",
-                                        false)
-                        });
-                    }
-                };
-            }
         });
+    }
+    public static QEffect FeetToFinsQf()
+    {
+        return new QEffect("Feet to Fins", "You have swimming but your speed is reduced to 5 feet unless you are in water or able to fly.", ExpirationCondition.Never, null, MIllustrations.CreateIllustration("Fish"))
+        {
+            StateCheck = qf =>
+            {
+                qf.Owner.AddQEffect(QEffect.Swimming().WithExpirationEphemeral());
+                int speed = SetSpeed(qf.Owner.Speed);
+                qf.Owner.AddQEffect(new QEffect(ExpirationCondition.Ephemeral)
+                {
+                    BonusToAllSpeeds = effect =>
+                        effect.Owner.HasEffect(QEffectId.AquaticCombat) ||
+                        effect.Owner.HasEffect(QEffectId.Flying) || effect.Owner.Space.Tiles.All(t => t.Kind is TileKind.Water or TileKind.ShallowWater)
+                            ? null
+                            : new Bonus(speed + 1, BonusType.Untyped, "Feet to Fins",
+                                false)
+                });
+            }
+        };
     }
     public static int SetSpeed(int speed)
     {

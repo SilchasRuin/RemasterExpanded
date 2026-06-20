@@ -160,7 +160,8 @@ public class UpdateItems
                 BonusToAttackRolls = (_, action, _) =>
                     action.Item != null && action.Item.HasTrait(Trait.Unarmed) && action.HasTrait(Trait.Attack)
                         ? new Bonus(bonus, BonusType.Item, "Bestial Mutagen", true)
-                        : null
+                        : null,
+                Traits = [Trait.Polymorph]
             };
             creature.AddQEffect(bestial);
         }

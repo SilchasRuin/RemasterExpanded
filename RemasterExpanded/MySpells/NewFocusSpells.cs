@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Dawnsbury.Audio;
+﻿using Dawnsbury.Audio;
 using Dawnsbury.Core;
 using Dawnsbury.Core.Animations.AuraAnimations;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
@@ -20,7 +17,6 @@ using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Core.Mechanics.Treasure;
 using Dawnsbury.Core.Possibilities;
 using Dawnsbury.Core.Roller;
-using Dawnsbury.Display.Illustrations;
 using Dawnsbury.Display.Text;
 using Dawnsbury.Modding;
 using Dawnsbury.Mods.LoresAndWeaknesses;
@@ -410,56 +406,6 @@ public class NewFocusSpells : NewSpells
                     if (result == CheckResult.CriticalFailure)
                         target.AddQEffect(QEffect.Frightened(1));
                 });
-        });
-
-        #endregion
-        #region PainDomain
-
-        SavorTheSting = ModManager.RegisterNewSpell("RE_SavorTheSting", 0, (_, _, level, inCombat, _) =>
-        {
-            return Spells.CreateModern(MIllustrations.CreateIllustration("SavorTheSting"), "Savor the Sting",
-                    [Trait.Cleric, Trait.Uncommon, Trait.Focus, Trait.Mental, Trait.Nonlethal, Trait.SomaticOnly],
-                    "You inflict pain upon the target and revel in their anguish.",
-                    $"This deals {S.HeightenedVariable(level, 1)}d4 mental damage and {S.HeightenedVariable(level, 1)}d4 persistent mental damage; the target must attempt a Will save. As long as the target is taking persistent damage from this spell, you gain a +1 status bonus to attack rolls and skill checks against the target." +
-                    S.FourDegreesOfSuccess("The target is unaffected.", "The target takes half damage and no persistent damage.", "The target takes full initial and persistent damage.", "The target takes double initial and persistent damage."),
-                    Target.Touch(), level, SpellSavingThrow.Standard(Defense.Will))
-                .WithSoundEffect(SfxName.FemaleDeath)
-                .WithHeighteningNumerical(level, 1, inCombat, 1,
-                    "The initial damage increases by 1d4 and the persistent damage increases by 1d4.")
-                .WithEffectOnEachTarget(async (spell, caster, target, result) =>
-                {
-                    await CommonSpellEffects.DealBasicDamage(spell, caster, target, result, DiceFormula.FromText($"{level}d4", "Savor the Sting"), DamageKind.Mental);
-                    DiceFormula? diceExpression1 = Checks.ModifyDamageFromBasicSave(DiceFormula.FromText($"{level}d4", "Persistent damage"), result);
-                    if (diceExpression1 == null)
-                        return;
-                    QEffect sting = QEffect.PersistentDamage(diceExpression1, DamageKind.Mental);
-                    sting.Description += $" {caster.Name} gains a +1 status bonus to attack rolls and skill checks against {target.Name}.";
-                    sting.StateCheck = effect =>
-                    {
-                        caster.AddQEffect(new QEffect(ExpirationCondition.Ephemeral)
-                        {
-                            BonusToAttackRolls = (_, action, creature) => creature != effect.Owner ||
-                                                                           (action.ActiveRollSpecification
-                                                                                ?.TaggedDetermineBonus.InvolvedSkill ==
-                                                                            null && !action.HasTrait(Trait.Attack)) ? null : new Bonus(1, BonusType.Status, "Savor the Sting", true)
-                        });
-                    };
-                    target.AddQEffect(sting);
-                });
-        });
-
-        RetributivePain = ModManager.RegisterNewSpell("RE_RetributivePain", 0, (_, _, level, inCombat, _) =>
-        {
-            return Spells.CreateModern(MIllustrations.CreateIllustration("RetributivePain"),  "Retributive Pain", [Trait.Uncommon, Trait.Cleric, Trait.Focus, Trait.SomaticOnly, Trait.Mental, Trait.Nonlethal],
-                "",
-                "",
-                Target.Uncastable(), level, SpellSavingThrow.Basic(Defense.Fortitude))
-                .WithSoundEffect(SfxName.Boneshaker)
-                .WithCastsAsAReaction((effect, thisSpell, canCast) =>
-                {
-                    
-                });
-
         });
 
         #endregion

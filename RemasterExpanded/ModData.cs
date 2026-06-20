@@ -1,17 +1,11 @@
-﻿using System;
-using System.Linq;
-using Dawnsbury.Audio;
-using Dawnsbury.Campaign.LongTerm;
+﻿using Dawnsbury.Audio;
 using Dawnsbury.Core.CharacterBuilder.Feats;
 using Dawnsbury.Core.CombatActions;
-using Dawnsbury.Core.Creatures;
 using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Enumerations;
-using Dawnsbury.Core.Mechanics.Treasure;
 using Dawnsbury.Core.Possibilities;
 using Dawnsbury.Display.Illustrations;
 using Dawnsbury.Modding;
-using Microsoft.Xna.Framework;
 using SpiritDamage;
 
 namespace RemasterExpanded;
@@ -22,6 +16,13 @@ public class ModData
     public static bool RemasterSpells { get; } = AppDomain.CurrentDomain.GetAssemblies().Any(assembly => assembly.GetName().Name == "Dawnsbury.Mods.Remaster.Spellbook");
     public static bool LoadPsychic { get; } = ModManager.TryParse("OscillatingWave", out FeatName _);
     public static bool MoreSpells { get; } = ModManager.TryParse("OscillatingWave", out FeatName _) && ModManager.TryParse("SH_Spellheart", out Trait _);
+
+    public static class RActionIds
+    {
+        public static readonly ActionId DesignateAlly = ModManager.RegisterEnumMember<ActionId>("RE_DesignateAlly");
+        public static readonly ActionId ReArm = ModManager.RegisterEnumMember<ActionId>("RE_Rearm");
+        public static readonly ActionId PackBreaker = ModManager.RegisterEnumMember<ActionId>("RE_PackBreaker");
+    }
     public static class MTraits
     {
         public static readonly Trait VikingGuard = ModManager.RegisterTrait("RE_VikingGuard", new TraitProperties("Viking Guard", false));
@@ -33,6 +34,7 @@ public class ModData
         public static readonly Trait Sanctified = ModManager.RegisterTrait("RE_Sanctified", new TraitProperties("Sanctified", true, "If you are good your sanctified actions and spells gain the holy trait, if you are evil your sanctified actions and spells gain the unholy trait."));
         public static readonly Trait CampfireChronicler = ModManager.RegisterTrait("RE_CampfireChronicler", new TraitProperties("Campfire Chronicler", false){ IsClassTrait = true });
         public static readonly Trait FaithSymbol = ModManager.RegisterTrait("RE_FaithSymbol", new TraitProperties("Faith Symbol", false));
+        public static readonly Trait AnimalWeapon = ModManager.RegisterTrait("RE_AnimalNaturalWeapon", new TraitProperties("Animal Natural Weapon", false));
     }
 
     public static class MFeatNames
@@ -48,8 +50,11 @@ public class ModData
         public static readonly FeatName HolyCleric = ModManager.RegisterFeatName("RE_ClericHoly", "Holy");
         public static readonly FeatName UnholyCleric = ModManager.RegisterFeatName("RE_ClericUnholy", "Unholy");
         public static readonly FeatName NoneCleric = ModManager.RegisterFeatName("RE_ClericNone", "None");
-        public static readonly FeatName Heal = ModManager.RegisterFeatName("RE_Heal", "Heal");
-        public static readonly FeatName Harm = ModManager.RegisterFeatName("RE_Harm", "Harm");
+        public static readonly FeatName InitiateWarden = ModManager.RegisterFeatName("RE_InitiateWarden", "Initiate Warden");
+        public static readonly FeatName MonsterHunter = ModManager.RegisterFeatName("RE_MonsterHunter", "Monster Hunter");
+        public static readonly FeatName MasterMonsterHunter = ModManager.RegisterFeatName("RE_MasterMonsterHunter", "Master Monster Hunter");
+        public static readonly FeatName AnimalFeature = ModManager.RegisterFeatName("RE_AnimalFeature", "Animal Feature");
+        public static readonly FeatName ExperiencedTracker = ModManager.RegisterFeatName("RE_ExperiencedTracker", "Experienced Tracker");
     }
 
     public static class MQEffectIds
@@ -69,6 +74,14 @@ public class ModData
         public static QEffectId Illuminate { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_Illuminate");
         public static QEffectId IncreasedReach { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_IncreasedReach");
         public static QEffectId LungingReach { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_LungingReach");
+        public static QEffectId TacticianCharges { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_TacticianCharges");
+        public static QEffectId TacticianUsed { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_TacticianUsed");
+        public static QEffectId MasterMonsterHunter { get; } =  ModManager.RegisterEnumMember<QEffectId>("RE_MasterMonsterHunter");
+        public static QEffectId LegendaryMonsterHunter { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_MonsterHunterLegendary");
+        public static QEffectId MonsterWarden { get; } =  ModManager.RegisterEnumMember<QEffectId>("RE_MonsterWarden");
+        public static QEffectId MonsterHunterUsed { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_MonsterHunterUsed");
+        public static QEffectId AnimalStrength  { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_AnimalStrength");
+        public static QEffectId AnimalFeatureClaws { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_AnimalFeatureClaws");
     }
 
     public static class MIllustrations
@@ -88,11 +101,6 @@ public class ModData
     public static class MSoundEffects
     {
         public static readonly SfxName Croak = ModManager.RegisterNewSoundEffect("PMAssets/FrogCroak.mp3", 2);
-    }
-
-    public static class MLongTermEffectIds
-    {
-        public static readonly LongTermEffectId FeetToFins = ModManager.RegisterEnumMember<LongTermEffectId>("RE_FeetToFins");
     }
     
     public static class MSubmenuIds
