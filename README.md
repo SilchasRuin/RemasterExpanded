@@ -1,5 +1,5 @@
 ### Ranger Feats
-* [Initiate Warden](https://2e.aonprd.com/Feats.aspx?ID=4862)
+* [Initiate Warden](https://2e.aonprd.com/Feats.aspx?ID=4862) Basegame feats which are duplicated here can be removed via Mod Option
 * [Advanced Warden](https://2e.aonprd.com/Feats.aspx?ID=4870) Does not include Canopy Crawler or Imitate Fauna
 * [Masterful Warden](https://2e.aonprd.com/Feats.aspx?ID=4878) Does not include Ephemeral Tracking
 * [Peerless Warden](https://2e.aonprd.com/Feats.aspx?ID=4890) Does not include Terrain Transposition(though it may be added in the future)
