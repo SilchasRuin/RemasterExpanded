@@ -11,6 +11,18 @@
 * [Nature Prowler](https://2e.aonprd.com/Feats.aspx?ID=5411) Applies when in outdoor environments
 * [Swift Tracker](https://2e.aonprd.com/Feats.aspx?ID=4882) Portions relevant for dawnsbury were implemented
 
+### Additional Items
+* [Trusty Helmet](https://2e.aonprd.com/Equipment.aspx?ID=3983)
+* [Autoload Leathers](https://2e.aonprd.com/Equipment.aspx?ID=3803)
+* [Squires Tabard](https://2e.aonprd.com/Equipment.aspx?ID=3980)
+* [Tasset of Flexibility](https://2e.aonprd.com/Equipment.aspx?ID=3982)
+* [Faith Symbol](https://2e.aonprd.com/Equipment.aspx?ID=2207)
+* [Golden Greaves](https://2e.aonprd.com/Equipment.aspx?ID=3965)
+* [Grippy Gloves](https://2e.aonprd.com/Equipment.aspx?ID=3966)
+* [Medal of Griffon's Heart](https://2e.aonprd.com/Equipment.aspx?ID=3971)
+* [Medal of the Wolf Pack](https://2e.aonprd.com/Equipment.aspx?ID=3971)
+* [Astral Rune](https://2e.aonprd.com/Equipment.aspx?ID=2832)
+* [Tactician's Helm](https://2e.aonprd.com/Equipment.aspx?ID=2339)
 
 ### Differences from Tabletop:  
 * Pirate and Viking grant Maritime Lore, a lore focused on various water based creatures, instead of Sailing Lore.  
