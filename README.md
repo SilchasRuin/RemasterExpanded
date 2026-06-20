@@ -1,3 +1,17 @@
+### Ranger Feats
+[Initiate Warden](https://2e.aonprd.com/Feats.aspx?ID=4862)
+[Advanced Warden](https://2e.aonprd.com/Feats.aspx?ID=4870) Does not include Canopy Crawler or Imitate Fauna
+[Masterful Warden](https://2e.aonprd.com/Feats.aspx?ID=4878) Does not include Ephemeral Tracking
+[Peerless Warden](https://2e.aonprd.com/Feats.aspx?ID=4890) Does not include Terrain Transposition(though it may be added in the future)
+[Monster Hunter](https://2e.aonprd.com/Feats.aspx?ID=4863)
+[Monster Warden](https://2e.aonprd.com/Feats.aspx?ID=4868)
+[Master Monster Hunter](https://2e.aonprd.com/Feats.aspx?ID=4889)
+[Legendary Monster Hunter](https://2e.aonprd.com/Feats.aspx?ID=4904)
+[Animal Strength](https://2e.aonprd.com/Feats.aspx?ID=5410)
+[Nature Prowler](https://2e.aonprd.com/Feats.aspx?ID=5411) Applies when in outdoor environments
+[Swift Tracker](https://2e.aonprd.com/Feats.aspx?ID=4882) Portions relevant for dawnsbury were implemented
+
+
 ### Differences from Tabletop:  
 Pirate and Viking grant Maritime Lore, a lore focused on various water based creatures, instead of Sailing Lore.  
 Pirate grants a bonus to Acrobatics checks and saving throws to Balance instead of ignoring difficult terrain and uneven ground.  
