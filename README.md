@@ -4,6 +4,7 @@
 * Blade ally is updated to Blessed Armament and allows the options from there.
 * Blessed Swiftness is added to the Blessings of the Devoted (new name of Divine Ally)
 * All Champions have a Champion Aura that is used for the range of their features. This is primarily relevant for the newly added Expand Aura feat.
+* With Champions of Evil and Shields of the Spirit mods, Touch of the Void and Lay on Hands now depend on the deity's allowed font to be selected.
 * A mod option can be used to hide feats which have been superseded in the remaster.
 
 ### Champion Feats
