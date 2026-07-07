@@ -51,7 +51,7 @@
 * [Cassisian Helmet](https://2e.aonprd.com/Equipment.aspx?ID=2333)
 * [Asp Coil](https://2e.aonprd.com/Weapons.aspx?ID=233)
 * [Scourge](https://2e.aonprd.com/Weapons.aspx?ID=531)
-* [Master Magus Ring](https://2e.aonprd.com/Equipment.aspx?ID=2327)
+* [Master Magus Ring](https://2e.aonprd.com/Equipment.aspx?ID=2327) Functionality matches the Oracle Crown implementation in Dawnsbury for the additional focus point.
 * [Holy Rune](https://2e.aonprd.com/Equipment.aspx?ID=2842) Updated to Remaster rules
 * [Unholy Rune](https://2e.aonprd.com/Equipment.aspx?ID=2851) Updated to Remaster rules
 
