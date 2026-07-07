@@ -7,8 +7,10 @@ using Dawnsbury.Core.CharacterBuilder.Spellcasting;
 using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Coroutines.Options;
 using Dawnsbury.Core.Coroutines.Options.Reactive;
+using Dawnsbury.Core.Coroutines.Requests;
 using Dawnsbury.Core.Creatures;
 using Dawnsbury.Core.Creatures.Parts;
+using Dawnsbury.Core.Intelligence;
 using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Core;
 using Dawnsbury.Core.Mechanics.Enumerations;
@@ -17,6 +19,7 @@ using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Core.Mechanics.Treasure;
 using Dawnsbury.Core.Possibilities;
 using Dawnsbury.Core.Roller;
+using Dawnsbury.Core.Tiles;
 using Dawnsbury.Display.Text;
 using Dawnsbury.Modding;
 using Dawnsbury.Mods.LoresAndWeaknesses;
@@ -538,6 +541,62 @@ public class NewFocusSpells : NewSpells
         });
 
         #endregion
+
+        #region DevotionSpells
+
+        SpectralAdvance = FastCreateFocusSpell("SpectralAdvance", (level, _) =>
+        {
+            return Spells.CreateModern(IllustrationName.QuickenTime, "Spectral Advance",
+                    [
+                        Trait.Uncommon, Trait.Champion, Trait.Concentrate, Trait.Focus, Trait.Polymorph, Trait.Spirit,
+                        Trait.NoHeightening, Trait.VerbalOnly
+                    ],
+                    "Taking on a spiritual form, you flash across the battlefield to engage an enemy.",
+                    "You Stride to a space adjacent to an enemy. If you cast the spell using 2 actions, you can Stride up to twice your Speed. Movement from spectral advance doesn't trigger reactions and ignores difficult terrain and greater difficult terrain. During the movement, you have resistance equal to your level to all damage.",
+                    Target.DependsOnActionsSpent(Target.Self().WithAdditionalRestriction(cr => cr.Battle.AllCreatures.Any(enemy => enemy.EnemyOf(cr) && enemy.DistanceTo(cr) <= cr.Speed) ? null : "There must be an enemy that you could move adjacent to."), Target.Self().WithAdditionalRestriction(cr => cr.Battle.AllCreatures.Any(enemy => enemy.EnemyOf(cr) && enemy.DistanceTo(cr) <= cr.Speed * 2) ? null : "There must be an enemy that you could move adjacent to."), null!), level, null)
+                .WithActionCost(-3)
+                .WithCreateVariantDescription((i, _) =>
+                {
+                    const string consistent = "Movement from spectral advance doesn't trigger reactions and ignores difficult terrain and greater difficult terrain. During the movement, you have resistance equal to your level to all damage.";
+                    return i switch
+                    {
+                        2 => "You Stride up to twice your speed to a space adjacent to an enemy. " + consistent,
+                        _ => "You Stride up to your speed to a space adjacent to an enemy. " + consistent
+                    };
+                })
+                .WithEffectOnSelf(async (action, self) =>
+                {
+                    int speed = self.Speed;
+                    QEffect advance = new()
+                    {
+                        StateCheck = sc =>
+                        {
+                            sc.Owner.WeaknessAndResistance.AddSpecialResistance(
+                                new SpecialResistance("resistance to all", (_, _) => true, self.Level, null));
+                            foreach (Creature enemy in self.Battle.AllCreatures.Where(cr => cr.EnemyOf(self)))
+                            {
+                                enemy.AddQEffect(new QEffect { Id = QEffectId.CannotTakeReactions }
+                                    .WithExpirationEphemeral());
+                            }
+                        },
+                        Id = QEffectId.IgnoresDifficultTerrain,
+                        Traits = [Trait.Polymorph]
+                    };
+                    if (action.SpentActions == 2)
+                        advance.BonusToAllSpeeds = _ => new Bonus(speed, BonusType.Untyped, "Spectral Advance");
+                    self.AddQEffect(advance);
+                    await self.Battle.GameLoop.StateCheck();
+                    if (!await StrideDoesNotProvokeAsync(self,tile => self.Battle.AllCreatures.Any(enemy => enemy.EnemyOf(self) && enemy.Space.Tiles.Any(t => t.IsAdjacentTo(tile) ||
+                            (!self.Space.IsSingleSquare && tile.TilesToTheBottomRight(self.Space.SizeInSquares)
+                                .Any(t2 => t2.IsAdjacentTo(t)))))))
+                    {
+                        action.RevertRequested = true;
+                    }
+                    advance.ExpiresAt = ExpirationCondition.Immediately;
+                });
+        });
+
+        #endregion
     }
 
     public static bool HasGrievance(Creature villain)
@@ -559,5 +618,59 @@ public class NewFocusSpells : NewSpells
             CreatureId.GrandmotherDemay => "Liandra!",
             _ => ""
         };
+    }
+
+    public static async Task<bool> StrideDoesNotProvokeAsync(Creature target, Func<Tile, bool> permissibleTarget)
+    {
+        List<Option> tileOptions =
+        [
+            new CancelOption(true),
+        ];
+        target.RegeneratePossibilities();
+        CombatAction? moveAction = (target.Possibilities
+                .Filter(ap =>
+                {
+                    if (ap.CombatAction.ActionId != ActionId.Stride)
+                        return false;
+                    ap.CombatAction.ActionCost = 0;
+                    ap.RecalculateUsability();
+                    return true;
+                })
+                .CreateActions(true)
+                .FirstOrDefault(pw => pw.Action.ActionId == ActionId.Stride) as CombatAction)
+            ?.WithActionCost(0).WithExtraTrait(Trait.DoesNotTriggerAnyReactions).WithExtraTrait(Trait.DoesNotProvoke);
+        List<Tile> floodFill = Pathfinding.Floodfill(target, target.Battle, new PathfindingDescription()
+            {
+                Squares = target.Speed,
+                Style =
+                {
+                    PermitsStep = false
+                }
+            })
+            .Where(tile => tile.LooksFreeTo(target) && permissibleTarget(tile))
+            .ToList();
+        floodFill.ForEach(tile =>
+        {
+            if (moveAction == null || !(bool)moveAction.Target.CanBeginToUse(target)) return;
+            tileOptions.Add(moveAction.CreateUseOptionOn(tile).WithIllustration(moveAction.Illustration));
+        });
+        if (floodFill.Count == 0) return false;
+        Option move = (await target.Battle.SendRequest(
+            new AdvancedRequest(target,
+                "Choose a square adjacent to an enemy.",
+                tileOptions)
+            {
+                IsMainTurn = false,
+                IsStandardMovementRequest = true,
+                TopBarIcon = target.Illustration,
+                TopBarText = target.Name +
+                             " choose a square adjacent to an enemy."
+            })).ChosenOption;
+        if (move is CancelOption)
+        {
+            return false;
+        }
+        await move.Action();
+        return true;
     }
 }

@@ -20,6 +20,7 @@ using Dawnsbury.Display.Illustrations;
 using Dawnsbury.Display.Text;
 using Dawnsbury.Modding;
 using Microsoft.Xna.Framework;
+using RemasterExpanded.Technical;
 using static RemasterExpanded.ModData;
 using static RemasterExpanded.MySpells.SpellIds;
 
@@ -65,11 +66,6 @@ public abstract class NewSpells4th : NewSpells
                     if (result == CheckResult.CriticalFailure)
                         await CommonAbilityEffects.CriticalSpecializationEffect(caster.CreateStrike(weapon), target);
                 });
-        });
-        ModManager.RegisterActionOnEachSpell(spell =>
-        {
-            if (ModManager.TryParse("WeaponStorm", out SpellId weapon) && spell.SpellId == weapon)
-                spell.Illustration = MIllustrations.CreateIllustration("WeaponStorm");
         });
         VisionOfDeath = ModManager.RegisterNewSpell("RE_VisionOfDeath", 4, (_, _, level, inCombat, _) =>
         {

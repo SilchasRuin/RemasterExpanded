@@ -1,5 +1,6 @@
 ﻿using Dawnsbury.Audio;
 using Dawnsbury.Core.CharacterBuilder.Feats;
+using Dawnsbury.Core.CharacterBuilder.FeatsDb;
 using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Enumerations;
@@ -10,18 +11,43 @@ using SpiritDamage;
 
 namespace RemasterExpanded;
 
-public class ModData
+public static class ModData
 {
     public static bool Remaster { get; } = AppDomain.CurrentDomain.GetAssemblies().Any(assembly => assembly.GetName().Name == "Dawnsbury.Mods.Remaster.FeatsDb");
     public static bool RemasterSpells { get; } = AppDomain.CurrentDomain.GetAssemblies().Any(assembly => assembly.GetName().Name == "Dawnsbury.Mods.Remaster.Spellbook");
     public static bool LoadPsychic { get; } = ModManager.TryParse("OscillatingWave", out FeatName _);
     public static bool MoreSpells { get; } = ModManager.TryParse("OscillatingWave", out FeatName _) && ModManager.TryParse("SH_Spellheart", out Trait _);
+    public static bool ChampionsOfEvil { get; } = ModManager.TryParse("PS_TyrantChampionSubclass", out FeatName _);
+    public static bool ShieldsOfSpirit { get; } = ModManager.TryParse("PS_GrandeurChampionSubclass", out FeatName _);
+    public static readonly Trait ModTrait = ModManager.ModBeingLoadedTrait ?? Trait.None;
 
+    public static T SafelyRegister<T>(string technicalName, string? displayName = null) where T : struct, Enum
+    {
+        return (T)(ModManager.TryParse(technicalName, out T alreadyRegistered)
+            ? alreadyRegistered
+            : typeof(T) == typeof(FeatName)
+                ? (Enum)ModManager.RegisterFeatName(technicalName, displayName)
+                : ModManager.RegisterEnumMember<T>(technicalName));
+    }
+
+    public static Feat? GetModdedFeat(string technicalName)
+    {
+        return ModManager.TryParse(technicalName, out FeatName featName)
+            ? AllFeats.GetFeatByFeatNameOptional(featName)
+            : null;
+    }
+    
     public static class RActionIds
     {
         public static readonly ActionId DesignateAlly = ModManager.RegisterEnumMember<ActionId>("RE_DesignateAlly");
         public static readonly ActionId ReArm = ModManager.RegisterEnumMember<ActionId>("RE_Rearm");
         public static readonly ActionId PackBreaker = ModManager.RegisterEnumMember<ActionId>("RE_PackBreaker");
+        public static readonly ActionId CommitmentToJustice = ModManager.RegisterEnumMember<ActionId>("RE_CommitmentToJustice");
+        public static readonly ActionId CommitmentToEquality = ModManager.RegisterEnumMember<ActionId>("RE_CommitmentToEquality");
+        public static readonly ActionId EvenTheOdds = ModManager.RegisterEnumMember<ActionId>("RE_EvenTheOdds");
+        public static readonly ActionId ImproviseStrategy = ModManager.RegisterEnumMember<ActionId>("RE_ImproviseStrategy");
+        public static readonly ActionId SeasonedCommand =  ModManager.RegisterEnumMember<ActionId>("RE_SeasonedCommand");
+        public static readonly ActionId FiendishBrand = ModManager.RegisterEnumMember<ActionId>("RE_FiendishBrand");
     }
     public static class MTraits
     {
@@ -35,6 +61,8 @@ public class ModData
         public static readonly Trait CampfireChronicler = ModManager.RegisterTrait("RE_CampfireChronicler", new TraitProperties("Campfire Chronicler", false){ IsClassTrait = true });
         public static readonly Trait FaithSymbol = ModManager.RegisterTrait("RE_FaithSymbol", new TraitProperties("Faith Symbol", false));
         public static readonly Trait AnimalWeapon = ModManager.RegisterTrait("RE_AnimalNaturalWeapon", new TraitProperties("Animal Natural Weapon", false));
+        public static readonly Trait AspCoil = ModManager.RegisterTrait("RE_AspCoil", new TraitProperties("Asp Coil", false));
+        public static readonly Trait Scourge = ModManager.RegisterTrait("RE_Scourge", new TraitProperties("Scourge", false));
     }
 
     public static class MFeatNames
@@ -44,6 +72,7 @@ public class ModData
         public static readonly FeatName Vigil = ModManager.RegisterFeatName("Vigil", "Vigil");
         public static readonly FeatName Knowledge = ModManager.RegisterFeatName("RE_Knowledge", "Knowledge");
         public static readonly FeatName DeificWeapon = ModManager.RegisterFeatName("DeificWeapon", "Deific Weapon");
+        public static readonly FeatName ChampionSanctification = ModManager.RegisterFeatName("RE_ChampionSanctification", "Sanctification");
         public static readonly FeatName HolyChampion = ModManager.RegisterFeatName("RE_ChampionHoly", "Holy");
         public static readonly FeatName UnholyChampion = ModManager.RegisterFeatName("RE_ChampionUnholy", "Unholy");
         public static readonly FeatName NoneChampion =  ModManager.RegisterFeatName("RE_ChampionNone", "None");
@@ -55,6 +84,12 @@ public class ModData
         public static readonly FeatName MasterMonsterHunter = ModManager.RegisterFeatName("RE_MasterMonsterHunter", "Master Monster Hunter");
         public static readonly FeatName AnimalFeature = ModManager.RegisterFeatName("RE_AnimalFeature", "Animal Feature");
         public static readonly FeatName ExperiencedTracker = ModManager.RegisterFeatName("RE_ExperiencedTracker", "Experienced Tracker");
+        public static readonly FeatName CommitmentToJustice = ModManager.RegisterFeatName("RE_CommitmentToJustice", "Commitment to Justice");
+        public static readonly FeatName CommitmentToEquality = ModManager.RegisterFeatName("RE_CommitmentToEquality", "Commitment to Equality");
+        public static readonly FeatName GoldenErinysStance = ModManager.RegisterFeatName("RE_GoldenErinysStance", "Golden Erinys Stance");
+        public static readonly FeatName BlessedCounterstrike = ModManager.RegisterFeatName("RE_BlessedCounterstrike", "Blessed Counterstrike");
+        public static readonly FeatName ExpandAura = ModManager.RegisterFeatName("RE_ExpandAura", "Expand Aura");
+        public static readonly FeatName BlessedSwiftness = ModManager.RegisterFeatName("RE_BlessedSwiftness", "Blessed Swiftness");
     }
 
     public static class MQEffectIds
@@ -82,6 +117,19 @@ public class ModData
         public static QEffectId MonsterHunterUsed { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_MonsterHunterUsed");
         public static QEffectId AnimalStrength  { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_AnimalStrength");
         public static QEffectId AnimalFeatureClaws { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_AnimalFeatureClaws");
+        public static QEffectId CommitmentToJustice { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_CommitmentToJustice");
+        public static QEffectId CommitmentToEquality { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_CommitmentToEquality");
+        public static QEffectId Talmandor { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_Talmandor");
+        public static QEffectId Cassisian { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_Cassisian");
+        public static QEffectId GoldenStance { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_GoldenStance");
+        public static QEffectId PromiseOfPain { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_PromiseOfPain");
+        public static QEffectId Wrathful { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_Wrathful");
+        public static QEffectId ChampionAura { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_ChampionAura");
+        public static QEffectId ExpandAura { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_ExpandAura");
+        public static QEffectId DivineHealth { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_DivineHealth");
+        public static QEffectId ChampionReactedAgainst { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_ChampionReactedAgainst");
+        public static QEffectId DefendedAgainst { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_DefendedAgainst");
+        public static QEffectId InvokedOath { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_InvokedOath");
     }
 
     public static class MIllustrations
@@ -120,4 +168,10 @@ public class ModData
     }
 
     public static DamageKind SpiritDamage => DamageSpirit.Spirit;
+
+    extension(DamageKind)
+    {
+        public static DamageKind Spirit => SpiritDamage;
+    }
+    
 }

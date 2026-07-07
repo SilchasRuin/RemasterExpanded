@@ -150,7 +150,7 @@ public class Pirate
                                 }))
                             .WithActionCost(2)
                             .WithActionId(ActionId.Demoralize)
-                            .WithEffectOnEachTarget(async (_, caster, target, result) =>
+                            .WithEffectOnEachTarget(async (_, caster, target, _) =>
                             {
                                 CombatAction demoralize = CommonCombatActions.Demoralize(caster).WithActionCost(0);
                                 await caster.Battle.GameLoop.FullCast(demoralize, ChosenTargets.CreateSingleTarget(target));

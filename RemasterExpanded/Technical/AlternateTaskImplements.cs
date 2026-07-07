@@ -7,7 +7,7 @@ using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Mechanics.Targeting;
 using Dawnsbury.Core.Mechanics.Targeting.Targets;
 
-namespace RemasterExpanded;
+namespace RemasterExpanded.Technical;
 
 public class AlternateTaskImplements
 {

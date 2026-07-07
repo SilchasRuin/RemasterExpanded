@@ -71,11 +71,6 @@ public class NewSpells5th : NewSpells
                     target.AddQEffect(impaled);
                 });
         });
-        ModManager.RegisterActionOnEachSpell(spell =>
-        {
-            if (ModManager.TryParse("ImpalingSpike", out SpellId spiked) && spell.SpellId == spiked)
-                spell.Illustration = IllustrationName.PrimalCaltrops;
-        });
         HowlingBlizzard = ModManager.RegisterNewSpell("RE_HowlingBlizzard", 5, (_, _, level, inCombat, _) =>
         {
             return Spells.CreateModern(MIllustrations.CreateIllustration("Blizzard"), "Howling Blizzard", [Trait.Air, Trait.Cold, Trait.Concentrate, Trait.Manipulate, Trait.Arcane, Trait.Primal],
@@ -119,7 +114,7 @@ public class NewSpells5th : NewSpells
                     S.FourDegreesOfSuccess("The target is unaffected.",  "The target is frightened 1.", "The target is frightened 2 and stunned 1.", "The target is frightened 3 and stunned 2."),
                     Target.Burst(20, 10).WithIncludeOnlyIf((at, creature) => creature.EnemyOf(at.OwnerAction.Owner)), level, SpellSavingThrow.Standard(Defense.Will))
                 .WithActionCost(3).WithSoundEffect(SfxName.FieryBurst)
-                .WithEffectOnEachTarget((_, _, target, result) =>
+                .WithEffectOnEachTarget(async (_, _, target, result) =>
                 {
                     switch (result)
                     {
@@ -139,7 +134,6 @@ public class NewSpells5th : NewSpells
                         default:
                             throw new ArgumentOutOfRangeException(nameof(result), result, null);
                     }
-                    return Task.CompletedTask;
                 });
         });
         InvokeSpirits = ModManager.TryParse("InvokeSpirits", out SpellId invokeSpirits) ? invokeSpirits : ModManager.RegisterNewSpell("RE_InvokeSpirits", 5, (_, _, level, inCombat, _) =>

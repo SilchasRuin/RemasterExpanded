@@ -39,7 +39,6 @@ public class NewSpells1st : NewSpells
                             return Usability.NotUsableOnThisCreature(
                                 "You must target a creature who is grabbed, immobilized, or restrained.");
                         }
-
                         return a != b
                             ? Usability.Usable
                             : Usability.NotUsableOnThisCreature("You cannot target yourself");
@@ -48,6 +47,7 @@ public class NewSpells1st : NewSpells
                 .WithEffectOnChosenTargets(async (spell, caster, targets) =>
                 {
                     Creature ally = targets.ChosenCreatures[0];
+                    ally.RegeneratePossibilities();
                     if (ally.Possibilities.Filter(ap =>
                         {
                             if (ap.CombatAction.ActionId != ActionId.Escape)
@@ -61,7 +61,6 @@ public class NewSpells1st : NewSpells
                         spell.RevertRequested = true;
                         return;
                     }
-
                     await ally.Battle.GameLoop.FullCast(escape);
                 });
         });
@@ -267,6 +266,7 @@ public class NewSpells1st : NewSpells
                             {
                                 await spellEffect.Invoke(spell, self,
                                     ChosenTargets.CreateSingleTarget(self));
+                                self.Spellcasting?.UseUpSpellcastingResources(spell);
                             }
                         });
                         return start;

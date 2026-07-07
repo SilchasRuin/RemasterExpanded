@@ -1,6 +1,6 @@
 ﻿using Dawnsbury.Core.Mechanics.Targeting.Targets;
 
-namespace RemasterExpanded;
+namespace RemasterExpanded.Technical;
 
 public class MultipleBurstsTarget(int range, int radius, int maximumBursts, string additionalTargetingText = "") : GeneratorTarget
 {

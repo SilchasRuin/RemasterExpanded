@@ -4,6 +4,7 @@ using Dawnsbury.Core.CharacterBuilder.Feats;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
+using Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb;
 using Dawnsbury.Core.CharacterBuilder.Selections.Options;
 using Dawnsbury.Core.CharacterBuilder.Spellcasting;
 using Dawnsbury.Core.CombatActions;
@@ -11,17 +12,23 @@ using Dawnsbury.Core.Coroutines.Options.Reactive;
 using Dawnsbury.Core.Creatures;
 using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Core;
+using Dawnsbury.Core.Mechanics.Damage;
 using Dawnsbury.Core.Mechanics.Enumerations;
+using Dawnsbury.Core.Mechanics.Rules;
 using Dawnsbury.Core.Mechanics.Targeting;
 using Dawnsbury.Core.Mechanics.Targeting.Targets;
+using Dawnsbury.Core.Mechanics.Treasure;
 using Dawnsbury.Core.Possibilities;
+using Dawnsbury.Core.Roller;
 using Dawnsbury.Core.Tiles;
 using Dawnsbury.Display.Controls.Statblocks;
+using Dawnsbury.Display.Illustrations;
 using Dawnsbury.Display.Text;
 using Dawnsbury.Modding;
 using Dawnsbury.Mods.LoresAndWeaknesses;
 using Microsoft.Xna.Framework;
 using RemasterExpanded.MySpells;
+using RemasterExpanded.Technical;
 using static ExplorationActivities.ModData.QEffectIds;
 using static RemasterExpanded.ModData;
 using Ranger = Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Ranger;
@@ -323,7 +330,7 @@ public class RangerFeats
                     }
                     else
                         qfSelf.Owner.Overhead("Nature Prowler inactive", Color.Gainsboro,
-                            qfSelf.Owner + " is indoors, and so the Nature Prowler feat doesn't work.");
+                            qfSelf.Owner + " is indoors, and so the Nature Prowler feat doesn't grant improved speed while Sneaking.");
                 };
             });
         yield return new TrueFeat(MFeatNames.ExperiencedTracker, 1,
@@ -371,6 +378,60 @@ public class RangerFeats
             .WithPrerequisite(values => values.GetProficiency(Trait.Survival) >= Proficiency.Expert,
                 "You must be an expert in Survival.")
             .WithPrerequisite(MFeatNames.ExperiencedTracker, "Experienced Tracker");
+        yield return new TrueFeat(ModManager.RegisterFeatName("RE_SecondSting", "Second Sting"), 12,
+                "You read your prey's movements and transform them into openings, so failures with one weapon set up glancing blows with the other.",
+                "{b}Requirements{/b} You are wielding two melee weapons, each in a different hand" +
+                "\n\nMake a melee Strike with one of the required weapons against your hunted prey. The Strike gains the following failure effect." +
+                "\n\n{b}Failure{/b} You deal the damage the other required weapon would have dealt on a hit, excluding all damage dice. (This removes dice from weapon runes, spells, and special abilities, not just weapon damage dice.)",
+                [Trait.Ranger, Trait.Press])
+            .WithActionCost(1)
+            .WithPermanentQEffect("While wielding two weapons, you can make a Strike that deals some damage even on a miss.", 
+                qf =>
+            {
+                Creature owner = qf.Owner;
+                qf.ProvideStrikeModifier = weapon =>
+                {
+                    if (!weapon.HasTrait(Trait.Melee) || owner.HeldItems.Count != 2)
+                        return null;
+                    StrikeModifiers strikeModifiers = new()
+                    {
+                        OnEachTarget = async (self, target, result) =>
+                        {
+                            if (result != CheckResult.Failure)
+                                return;
+                            Item? otherWeapon = self.HeldItems.FirstOrDefault(wp => wp != weapon);
+                            if (otherWeapon == null)
+                                return;
+                            QEffect removeDice = new()
+                            {
+                                YouDealDamageEvent = async (_, damage) =>
+                                {
+                                    foreach (KindedDamage kindedDamage in damage.KindedDamages)
+                                    {
+                                        DiceFormula? dice = NoDice(kindedDamage.DiceFormula);
+                                        kindedDamage.DiceFormula = dice;
+                                    }
+                                    damage.KindedDamages.RemoveAll(kd => kd.DiceFormula == null);
+                                }
+                            };
+                            CombatAction strike = StrikeRules.CreateStrike(self, otherWeapon, RangeKind.Melee, -1);
+                            if (strike.EffectOnOneTarget == null)
+                                return;
+                            self.AddQEffect(removeDice);
+                            await strike.EffectOnOneTarget.Invoke(strike, self, target, CheckResult.Success);
+                            removeDice.ExpiresAt = ExpirationCondition.Immediately;
+                        }
+                    };
+                    CombatAction sting = StrikeRules.CreateStrike(owner, weapon, RangeKind.Melee, -1, false, strikeModifiers);
+                    sting.WithFullRename("Second Sting");
+                    sting.WithExtraTrait(Trait.Press).WithExtraTrait(Trait.Basic)
+                        .WithDescription(StrikeRules.CreateBasicStrikeDescription2(strikeModifiers, additionalFailureText: "You deal the damage your other weapon would have dealt on a hit, excluding all damage dice. (This removes damage dice from weapon runes, spells, and special abilities, in addition to weapon damage dice.)"));
+                    sting.Illustration = new SideBySideIllustration(weapon.Illustration, IllustrationName.WyvernSting);
+                    if (sting.Target is CreatureTarget creatureTarget)
+                        creatureTarget.WithAdditionalConditionOnTargetCreature(new HuntedPreyCreatureTargetingRequirement());
+                    return sting;
+                };
+            });
     }
 
     public static void HideWardenFeats()
@@ -379,6 +440,7 @@ public class RangerFeats
         AllFeats.GetFeatByFeatName(FeatName.MagicHide).Traits.Remove(Trait.Ranger);
         AllFeats.GetFeatByFeatName(FeatName.HealCompanion).Traits.Remove(Trait.Ranger);
         AllFeats.GetFeatByFeatName(FeatName.EnlargeCompanion).Traits.Remove(Trait.Ranger);
+        AllFeats.GetFeatByFeatName(FeatName.TerrainTransposition).Traits.Remove(Trait.Ranger);
     }
 
     public static IEnumerable<Feat> LoadInitiateWarden()
@@ -450,7 +512,7 @@ public class RangerFeats
     {
         List<SpellId> peerless = 
         [
-            SpellIds.PulverizingWake, SpellIds.GluttonousGrowth, SpellIds.PackBreaker, SpellIds.HuntersVision
+            SpellIds.PulverizingWake, SpellIds.GluttonousGrowth, SpellIds.PackBreaker, SpellIds.HuntersVision, SpellId.TerrainTransposition
         ];
         foreach (SpellId spellId in peerless)
         {
@@ -466,5 +528,17 @@ public class RangerFeats
                     sheet.AddFocusSpellAndFocusPoint(Trait.Ranger, Ability.Wisdom, spellId);
                 });
         }
+    }
+
+    public static DiceFormula? NoDice(DiceFormula? formula)
+    {
+        if (formula == null)
+            return null;
+        var diceFormula = formula.ToString();
+        diceFormula = diceFormula.Replace(" ", "");
+        string[] strArray1 = diceFormula.Split('+');
+        string newDice = strArray1.Where(dice => !dice.Contains('d')).Aggregate("", (current, dice) => current + dice + "+");
+        newDice = newDice.Length >= 1 ? newDice.Remove(newDice.Length - 1, 1) : newDice;
+        return newDice == "" ? null : DiceFormula.FromText(newDice, formula.Source);
     }
 }

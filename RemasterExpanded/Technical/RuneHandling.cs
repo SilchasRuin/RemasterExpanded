@@ -5,7 +5,7 @@ using Dawnsbury.Core.Mechanics.Rules;
 using Dawnsbury.Core.Mechanics.Treasure;
 using static RemasterExpanded.ModData;
 
-namespace RemasterExpanded;
+namespace RemasterExpanded.Technical;
 
 public class RuneHandling
 {

@@ -39,5 +39,5 @@ public abstract class SpellIds
     public static SpellId GluttonousGrowth { get; set; }
     public static SpellId HuntersVision { get; set; }
     public static SpellId PackBreaker { get; set; }
-    public static SpellId TerrainTransposition { get; set; } 
+    public static SpellId SpectralAdvance { get; set; } 
 }

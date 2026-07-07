@@ -29,6 +29,9 @@
     <Reference Include="Dawnsbury.Mods.LoresAndWeaknesses">
       <HintPath>D:\SteamLibrary\steamapps\workshop\content\2693730\3710730920\CustomModsV3\Dawnsbury.Mods.LoresAndWeaknesses.dll</HintPath>
     </Reference>
+    <Reference Include="Dawnsbury.Mods.MoreBasicActions">
+      <HintPath>D:\SteamLibrary\steamapps\workshop\content\2693730\3485625903\CustomModsV3\Dawnsbury.Mods.MoreBasicActions.dll</HintPath>
+    </Reference>
     <Reference Include="Dawnsbury.Mods.Remaster.FeatsDb">
       <HintPath>D:\SteamLibrary\steamapps\workshop\content\2693730\3223870401\CustomMods\Dawnsbury.Mods.Remaster.FeatsDb.dll</HintPath>
     </Reference>
@@ -43,6 +46,9 @@
     </Reference>
     <Reference Include="MonoGame.Framework">
       <HintPath>D:\SteamLibrary\steamapps\common\Dawnsbury Days\Data\MonoGame.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="PhantomSentine.Feats.GranduerChampion">
+      <HintPath>D:\SteamLibrary\steamapps\workshop\content\2693730\3603643589\CustomMods\PhantomSentine.Feats.GranduerChampion.dll</HintPath>
     </Reference>
     <Reference Include="PsychicExpanded">
       <HintPath>..\..\ClassLibrary1\PsychicExpanded\bin\Release\net10.0-windows\PsychicExpanded.dll</HintPath>

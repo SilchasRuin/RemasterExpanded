@@ -1,14 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Dawnsbury.Audio;
+﻿using Dawnsbury.Audio;
 using Dawnsbury.Auxiliary;
 using Dawnsbury.Campaign.LongTerm;
 using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.Feats;
-using Dawnsbury.Core.CharacterBuilder.FeatsDb.Alchemy;
+using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
-using Dawnsbury.Core.CharacterBuilder.Selections.Options;
 using Dawnsbury.Core.CharacterBuilder.Spellcasting;
 using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Coroutines.Options;
@@ -23,21 +19,23 @@ using Dawnsbury.Core.Mechanics.Targeting;
 using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Core.Mechanics.Treasure;
 using Dawnsbury.Core.Possibilities;
+using Dawnsbury.Core.Roller;
 using Dawnsbury.Core.Tiles;
 using Dawnsbury.Display;
 using Dawnsbury.Display.Illustrations;
-using Dawnsbury.IO;
 using Dawnsbury.Modding;
 using Dawnsbury.Mods.LoresAndWeaknesses;
 using Microsoft.Xna.Framework;
+using RemasterExpanded.Technical;
 using SpiritDamage;
 using static RemasterExpanded.ModData;
 
 namespace RemasterExpanded;
 
-public class NewItems
+public static class NewItems
 {
     public static ItemName AutoloadLeathers { get; set; }
+    public static ItemName AstralRune { get; set; }
     // public static ItemName GlueBombLesser { get; set; }
     // public static ItemName GlueBombModerate { get; set; }
     
@@ -306,7 +304,7 @@ public class NewItems
                     };
                 });
         });
-        ModManager.RegisterNewItemIntoTheShop("RE_AstralRune", name =>
+        AstralRune = ModManager.RegisterNewItemIntoTheShop("RE_AstralRune", name =>
         {
             return new Item(name, MIllustrations.CreateIllustration("AstralRune"), "runestone of {i}astral{/i}", 8, 450, Trait.Runestone, Trait.Magical, SpiritTrait.Spirit)
                 .WithItemGreaterGroup(ItemGreaterGroup.PropertyRunes)
@@ -389,12 +387,13 @@ public class NewItems
             }));
         LongTermEffects.RegisterWithNumberArgument("RETacticianCharges", LongTermEffectDuration.Forever, TacticianCharges);
         ModManager.RegisterNewItemIntoTheShop("RE_TacticiansHelm", name =>
-        {
+         {
             return new Item(name, MIllustrations.CreateIllustration("TacticiansHelm"), "tactician's helm", 5, 160,
                     Trait.Invested, Trait.Magical, Trait.Worn)
-                .WithDescription("{i}Repurposing and enchanting a helmet worn by a battlefield commander can create a tactician's helm, imparting knowledge of battlefield tactics that feeds off your minor victories.{/i}" +
-                                 "You gain a +1 item bonus to Warfare Lore. The helmet becomes gains a charge each time you hit a creature with a {tooltip:ReactiveStrike}Reactive Strike{/tooltip}. A {i}tactician's helm[/i} can hold up to 2 charges, and its charges begin at 0.\n\n" +
-                                 "{b}Activate {icon:Action}{/b} (concentrate); {b}Cost{/b} 1 charge from the helm; {b}Frequency{/b} once per encounter; {b}Effect{/b} You choose one of the following effects." +
+                .WithDescription("Repurposing and enchanting a helmet worn by a battlefield commander can create a tactician's helm, imparting knowledge of battlefield tactics that feeds off your minor victories.",
+                                 "You have a +1 item bonus to Warfare Lore.\n\n" +
+                                 "The helmet gains a charge each time you hit a creature with a {tooltip:ReactiveStrike}Reactive Strike{/tooltip}. A {i}tactician's helm{/i} can hold up to 2 charges, and its charges begin at 0.\n\n" +
+                                 "{b}Activate {icon:Action}{/b} ({tooltip:concentrate}concentrate{/tooltip}); {b}Cost{/b} 1 charge from the helm; {b}Frequency{/b} once per encounter; {b}Effect{/b} You choose one of the following effects." +
                                  "\n{b}• Charge!{/b} Stride twice." +
                                  "\n{b}• Move It!{/b} You gain a +2 status bonus to Acrobatics and Athletics checks until the end of this turn." +
                                  "\n{b}• Protect!{/b} If you're wielding a shield, Stride to a space adjacent to an ally, then Raise your Shield." +
@@ -422,16 +421,109 @@ public class NewItems
                             return null;
                         return new SubmenuPossibility(item.Illustration, "Tactician's Helm")
                         {
-                            Subsections = [new PossibilitySection("Tactician's Helm")
-                            {
-                                Possibilities = TacticianCombatActions(effect.Owner).ToList()
-                            }]
+                            Subsections = 
+                            [
+                                new PossibilitySection("Tactician's Helm")
+                                {
+                                    Possibilities = TacticianCombatActions(effect.Owner).ToList()
+                                }
+                            ]
                         };
                     };
                     qfItem.BonusToSkills = skill =>
                         skill == Lores.GetRegisteredLore("Warfare Lore", null)?.Skill
-                            ? new Bonus(1, BonusType.Item, item.BaseHumanName)
+                            ? new Bonus(1, BonusType.Item, "Tactician's Helm")
                             : null;
+                });
+        });
+        ModManager.RegisterInlineTooltip("manipulate", Trait.Manipulate.GetTraitProperties().RulesText ?? "");
+        ModManager.RegisterInlineTooltip("concentrate", "Actions with this trait cannot be used while Raging. Rarely, actions with this trait can trigger reactions.");
+        ModManager.RegisterNewItemIntoTheShop("RE_CassisianHelmet", name =>
+        {
+            return new Item(name, MIllustrations.CreateIllustration("Cassisian"), "cassisian helmet", 6, 225,
+                    Trait.Invested, Trait.Magical, Trait.Worn)
+                .WithWornAt(Trait.Headwear)
+                .WithStaticDC(20)
+                .WithDescription(
+                    "Small brass wings are attached to either side of this ornate helmet.",
+                    "You have a +1 status bonus to AC and saves against {tooltip:unholy}unholy{/tooltip} creatures and effects." +
+                    "\n\nOnce per encounter, you can activate the helm with two actions {icon:TwoActions} ({tooltip:concentrate}concentrate{/tooltip}, {tooltip:manipulate}manipulate{/tooltip}), to send out eye beams that deal your choice of 2d6 cold or fire damage (DC 20 basic Reflex save mitigates) to all creatures in a 15-foot line.")
+                .WithPermanentQEffectWhenWorn((qfItem, item) =>
+                {
+                    qfItem.Name = "Cassisian Helmet";
+                    qfItem.Description = "You have a +1 status bonus to AC and saves against unholy creatures and effects.";
+                    qfItem.BonusToDefenses = (_, action, defense) =>
+                        action is { Owner: var owner } && (owner.HasTrait(UnholyTrait.Unholy) || action.HasTrait(UnholyTrait.Unholy)) && (defense.IsSavingThrow() || defense == Defense.AC)
+                            ? new Bonus(1, BonusType.Status, "Cassisian Helmet")
+                            : null;
+                    qfItem.FixedDC = item.StaticDC;
+                    qfItem.ProvideActionIntoPossibilitySection = (effect, section) =>
+                    {
+                        if (section.PossibilitySectionId != PossibilitySectionId.ItemActions)
+                            return null;
+                        Creature self = effect.Owner;
+                        return new SubmenuPossibility(item.Illustration, "Cassisian Helmet")
+                        {
+                            Subsections = 
+                            [
+                                new PossibilitySection("Cassisian Helmet")
+                                {
+                                    Possibilities =
+                                    [
+                                        new ActionPossibility(CassisianBlast(self, IllustrationName.FireRay,
+                                            DamageKind.Fire, qfItem)),
+                                        new ActionPossibility(CassisianBlast(self, IllustrationName.RayOfFrost,
+                                            DamageKind.Cold, qfItem))
+                                    ]
+                                }
+                            ]
+                        };
+                    };
+                });
+        });
+        ModManager.RegisterNewItemIntoTheShop("RE_AspCoil", name => 
+            new Item(name, MIllustrations.CreateIllustration("AspCoil"), "asp coil", 0, 10, Trait.Reach,
+                Trait.VersatileP, Trait.Sword, Trait.Martial)
+            .WithWeaponProperties(new WeaponProperties("1d6", DamageKind.Slashing))
+            .WithMainTrait(MTraits.AspCoil));
+        ModManager.RegisterNewItemIntoTheShop("RE_Scourge", name =>
+            new Item(name, IllustrationName.Whip, "scourge", 0, 1, Trait.Agile, Trait.Disarm,
+                    Trait.Finesse, Trait.Nonlethal, Trait.Sweep, Trait.Martial, Trait.Flail)
+                .WithWeaponProperties(new WeaponProperties("1d4", DamageKind.Slashing))
+                .WithMainTrait(MTraits.Scourge));
+        ModManager.RegisterNewItemIntoTheShop("RE_MasterMagusRing", name =>
+        {
+            return new Item(name, MIllustrations.CreateIllustration("MagusRing"), "master magus ring", 11, 1250,
+                    Trait.Arcane, Trait.Invested, Trait.Worn)
+                .WithDescription("Each master magus ring has a significant metal and symbol to represent a particular hybrid study, such as a heavy iron ring with an icon of a mountain for inexorable iron, or glittering silver with a shield-like emblem for sparkling targe.",
+                    "You have a +2 item bonus to Arcana.\n\n" +
+                    "The first magus focus spell you cast each encounter doesn't cost you a focus point." +
+                    "\n\nOnce per day, you can activate the ring as a free action {icon:FreeAction} ({tooltip:concentrate}concentrate{/tooltip}) and teleport to an unoccupied space you can see within a range equal to your speed.")
+                .WithItemBonusToSkill(Skill.Arcana, 2)
+                .WithOncePerDayWhenWornAction((itm, self) =>
+                {
+                    return CombatAction.CreateAction(self, new SideBySideIllustration(itm.Illustration, IllustrationName.DimensionDoor), "Master magus ring teleport",
+                            [Trait.Concentrate],
+                            "You teleport to the chosen space.",
+                            Target.TileYouCanSeeAndTeleportTo(self.Speed), 0, SfxName.PhaseBolt, null)
+                        .WithEffectOnChosenTargets(async (creature, targets) =>
+                            await CommonSpellEffects.Teleport(creature, targets.ChosenTile!));
+                })
+                .WithOnCreatureWhenWorn((_, self) =>
+                {
+                    self.AddQEffect(new QEffect("Master magus ring",
+                        "The first conflux focus spell you cast each encounter doesn't cost you a focus point.")
+                    {
+                        AfterYouExpendSpellcastingResources = (effect, action) =>
+                        {
+                            if (!action.HasTrait(Trait.Magus) || !action.HasTrait(Trait.Focus) ||
+                                effect.ExpiresAt == ExpirationCondition.Immediately)
+                                return;
+                            if (action.Owner.Spellcasting != null)
+                                ++action.Owner.Spellcasting.FocusPoints;
+                            effect.ExpiresAt = ExpirationCondition.Immediately;
+                        }
+                    });
                 });
         });
 
@@ -1034,5 +1126,23 @@ public class NewItems
     public static bool IsInteractAction(CombatAction action)
     {
         return action.ActionId is ActionId.ReplaceItemInHand or ActionId.DrawItem or ActionId.PickUpItem || action.Name.Contains("Hand over") || action.Name.Contains("Add hand") || action.Name.Contains("Stow");
+    }
+
+    public static CombatAction CassisianBlast(Creature owner, Illustration illustration, DamageKind kind, QEffect effect)
+    {
+        return CombatAction.CreateAction(owner, illustration, $"Cassisian Blast {kind.HumanizeTitleCase2()}",
+                [Trait.Concentrate, Trait.Manipulate, Trait.Basic, Trait.DoNotRecheckTargetRequirements],
+                $"Creatures in the area take 2d6 {kind.HumanizeLowerCase2()} damage (DC {effect.FixedDC} basic Reflex save mitigates).",
+                Target.Line(3).WithAdditionalRequirementOnCaster(cr =>
+                    cr.HasEffect(MQEffectIds.Cassisian)
+                        ? Usability.NotUsable("The {i}cassisian helmet{/i} can only be activated once per encounter.")
+                        : Usability.Usable),
+                2, kind == DamageKind.Fire ? SfxName.FireRay : SfxName.RayOfFrost,
+                new SavingThrow(Defense.Reflex, effect.FixedDC))
+            .WithEffectOnSelf(self => self.AddQEffect(new QEffect {Id = MQEffectIds.Cassisian}))
+            .WithEffectOnEachTarget(async (spell, caster, target, result) =>
+            {
+                await CommonSpellEffects.DealBasicDamage(spell, caster, target, result, DiceFormula.FromText("2d6", spell.Name), kind);
+            });
     }
 }

@@ -1,11 +1,8 @@
-﻿using System.Collections.Generic;
-using Dawnsbury.Core.CharacterBuilder;
+﻿using Dawnsbury.Core.CharacterBuilder;
 using Dawnsbury.Core.CharacterBuilder.Feats;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb;
-using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
 using Dawnsbury.Core.CharacterBuilder.Selections.Options;
 using Dawnsbury.Core.CharacterBuilder.Selections.Selected;
-using Dawnsbury.Core.CharacterBuilder.Spellcasting;
 using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Mechanics.Treasure;
@@ -15,7 +12,7 @@ using Dawnsbury.Modding;
 using SpiritDamage;
 using static RemasterExpanded.ModData;
 
-namespace RemasterExpanded;
+namespace RemasterExpanded.ClassChangesAndFeats;
 
 public class Sanctification 
 {
@@ -23,26 +20,8 @@ public class Sanctification
     {
         AllFeats.GetFeatByFeatName(FeatName.Champion).WithOnSheet(values =>
         {
-            SelectionOption choose = HolyAndUnholySelection(Trait.Champion);
-            values.AddSelectionOption(choose);
             values.GrantFeat(MFeatNames.DeificWeapon);
-            SelectedChoice? choiceForKey = values.Sheet.FindChoiceForKey(choose);
-            if (choose.GetCompletionStatus(choiceForKey, values) == FeatCompletionStatus.OptionalSelectionMissing)
-            {
-                values.Sheet.SelectedFeats[choose.Key] = HolyAndUnholyFeat(values, Trait.Champion);
-            }
         });
-        if (AllFeats.GetFeatByFeatNameOrStringOptional(null, Trait.Champion.ToStringOrTechnical() + "Dedication") is {} dedication)
-            dedication.WithOnSheet(values =>
-            {
-                SelectionOption choose = HolyAndUnholySelection(Trait.Champion, values.CurrentLevel);
-                values.AddSelectionOption(choose);
-                SelectedChoice? choiceForKey = values.Sheet.FindChoiceForKey(choose);
-                if (choose.GetCompletionStatus(choiceForKey, values) == FeatCompletionStatus.OptionalSelectionMissing)
-                {
-                    values.Sheet.SelectedFeats[choose.Key] = HolyAndUnholyFeat(values, Trait.Champion);
-                }
-            });
         AllFeats.GetFeatByFeatName(FeatName.Cleric).WithOnSheet(values =>
         {
             SelectionOption choose = HolyAndUnholySelection(Trait.Cleric);
@@ -65,7 +44,6 @@ public class Sanctification
                 }
             });
     }
-
     public static IEnumerable<Feat> SanctifyFeats()
     {
         yield return new Feat(MFeatNames.HolyChampion, "You have committed to the holy cause in the struggle over the souls of all mortals.", 
@@ -111,6 +89,12 @@ public class Sanctification
                 "You gain neither benefit nor detriment.",
                 [], null)
             .WithTag("SanctificationCleric");
+        yield return new Feat(MFeatNames.ChampionSanctification,
+            "You have chosen a side in the cosmic struggle over the fate of souls.",
+            "Depending on your deity, their {tooltip:sanctify}sanctification{/tooltip} can make you {tooltip:holy}holy{/tooltip} or {tooltip:unholy}unholy{/tooltip}. Whether you become holy, unholy, or neither will limit your choice of causes, devotion spells, and feats.\n\n" +
+            "{b}Holy{/b}: You gain the holy trait and add that trait to any Strikes you make. You must be good aligned." +
+            "\n\n{b}Unholy{/b}: You gain the unholy trait and add that trait to any Strikes you make. You must be evil aligned.",
+            [], null);
     }
     
     public static QEffect SanctifiedChampion(Trait trait)
@@ -166,5 +150,19 @@ public class Sanctification
         if (trait == Trait.Champion)
             choose = new SingleFeatSelectionOption("RE_Sanctification"+clericOrChampion, "Sanctification", level, feat => feat.Tag is "SanctificationChampion").WithIsOptional();
         return choose;
+    }
+
+    public static void ChampionSanctificationChoiceLogic(Feat feat)
+    {
+        feat.WithOnSheet(values =>
+        {
+            SelectionOption choose = HolyAndUnholySelection(Trait.Champion, values.CurrentLevel);
+            values.AddSelectionOption(choose);
+            SelectedChoice? choiceForKey = values.Sheet.FindChoiceForKey(choose);
+            if (choose.GetCompletionStatus(choiceForKey, values) == FeatCompletionStatus.OptionalSelectionMissing)
+            {
+                values.Sheet.SelectedFeats[choose.Key] = HolyAndUnholyFeat(values, Trait.Champion);
+            }
+        });
     }
 }

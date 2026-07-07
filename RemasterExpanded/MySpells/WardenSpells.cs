@@ -31,6 +31,7 @@ using Dawnsbury.Modding;
 using Dawnsbury.Mods.LoresAndWeaknesses;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
+using RemasterExpanded.Technical;
 using static RemasterExpanded.ModData;
 using static RemasterExpanded.MySpells.NewSpells;
 
