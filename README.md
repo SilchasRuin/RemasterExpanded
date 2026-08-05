@@ -90,6 +90,7 @@
 * [Master Magus Ring](https://2e.aonprd.com/Equipment.aspx?ID=2327) Functionality matches the Oracle Crown implementation in Dawnsbury for the additional focus point.
 * [Holy Rune](https://2e.aonprd.com/Equipment.aspx?ID=2842) Updated to Remaster rules
 * [Unholy Rune](https://2e.aonprd.com/Equipment.aspx?ID=2851) Updated to Remaster rules
+* [Deathbane Crescent](https://2e.aonprd.com/Equipment.aspx?ID=5150) Requires the Caster's Compendium Mod
 
 ### Deities
 * Zarazrael  [based on](https://2e.aonprd.com/Deities.aspx?ID=481)
@@ -109,3 +110,4 @@
 * [Remember the Lost](https://2e.aonprd.com/Spells.aspx?ID=2420) only deals increased damage to specific enemies in the campaign. The enemies it works on have to be added individually. If you find an enemy that it should deal extra damage to per it's text, let me know and I can update it.
 * Sanctification is restricted by your alignment, rather than by the deity's allowed sanctifications
 * Some feats may require a particular alignment
+* The Major Deathbane Crescent grants Restoration instead of Sound Body.
