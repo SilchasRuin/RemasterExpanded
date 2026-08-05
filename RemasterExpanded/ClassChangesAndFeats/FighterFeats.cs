@@ -37,6 +37,7 @@ public static class FighterFeats
             "Make a melee Strike. It gains the following failure effect.\n\n" +
             "{b}Failure{/b} Your attack deals any damage it would have dealt on a hit, excluding all damage dice. (This removes damage dice from weapon runes, spells, and special abilities, in addition to weapon damage dice.)",
             [Trait.Fighter, Trait.Press])
+            .WithActionCost(1)
             .WithPermanentQEffect("You can make a Strike that deals some damage even on a miss.", 
                 qf =>
             {

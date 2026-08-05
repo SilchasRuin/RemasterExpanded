@@ -31,46 +31,6 @@ public class NewSpells5th : NewSpells
 {
     public static void Load()
     {
-        ImpalingSpike = ModManager.TryParse("ImpalingSpike", out SpellId spike) ? spike : ModManager.RegisterNewSpell("RE_ImpalingSpike", 5, (_, _, level, inCombat, _) =>
-        {
-            return Spells.CreateModern(IllustrationName.PrimalCaltrops, "Impaling Spike", [Trait.Concentrate, Trait.Manipulate, Trait.Metal, Trait.Arcane, Trait.Primal, Trait.ColdIron],
-                    "You conjure a spike that thrusts up from the earth beneath a target creature, potentially impaling it.",
-                    $"The spike is made of cold iron and deals {S.HeightenedVariable(8 + (level - 5) * 2, 8)}d6 piercing damage. The target must attempt a Reflex save." +
-                    $"{S.FourDegreesOfSuccess("The target dodges the spike and is unaffected.", "The target is struck by the spike and takes half damage.",
-                        "The target is impaled through a leg or another non-vital body part. The creature takes full damage and, if it's standing on solid ground, becomes immobilized. It can attempt to Escape (the DC is your spell DC). While it remains impaled, it takes damage from any weakness to cold iron it has at the end of each of its turns.",
-                        "As failure, but the creature is impaled through a vital organ or its center of mass, taking double damage, and it is off-guard as long as it's impaled.")}", Target.Ranged(6), level, SpellSavingThrow.Standard(Defense.Reflex))
-                .WithActionCost(2).WithSoundEffect(SfxName.ElementalBlastMetal)
-                .WithHeighteningOfDamageEveryLevel(level, 5, inCombat, "2d6")
-                .WithEffectOnEachTarget(async (spell, caster, target, result) =>
-                {
-                    if (result == CheckResult.CriticalSuccess) return;
-                    await CommonSpellEffects.DealBasicDamage(spell, caster, target, result, $"{8 + (level - 5) * 2}d6", DamageKind.Piercing);
-                    if (result == CheckResult.Success || target.HasEffect(QEffectId.Flying) || target.HasEffect(QEffectId.AquaticCombat) || !target.Space.Tiles.Any(tile => tile.IsSolidGround)) return;
-                    QEffect impaled = QEffect.Immobilized().WithExpirationNever();
-                    impaled.Name = "Impaled";
-                    impaled.Illustration = spell.Illustration;
-                    impaled.Description = $"You are immobilized. You can attempt to escape against DC {spell.SpellcastingSource!.GetSpellSaveDC()}. As long as you are impaled you take damage equal to {(result == CheckResult.CriticalFailure ? "twice " : "")}your weakness to cold iron.";
-                    impaled.ProvideContextualAction = effect => new ActionPossibility(
-                        Possibilities.CreateEscapeAgainstEffect(effect.Owner, effect, "Impaled",
-                            spell.SpellcastingSource!.GetSpellSaveDC())).WithPossibilityGroup("Remove debuff");
-                    impaled.EndOfYourTurnDetrimentalEffect = async (effect, creature) =>
-                    {
-                        if (!creature.WeaknessAndResistance.Weaknesses.Any(weak =>
-                                weak.ToWeaknessDescription().ContainsIgnoreCase("cold iron"))) return;
-                        int value = creature.WeaknessAndResistance.Weaknesses.FirstOrDefault(weak => weak.ToWeaknessDescription().ContainsIgnoreCase("cold iron"))?.Value ?? 0;
-                        int amount = value;
-                        if (result == CheckResult.CriticalFailure)
-                            amount = value * 2;
-                        await CommonSpellEffects.DealDirectDamage(null,
-                            DiceFormula.FromText(amount.ToString(), "Impaled"), effect.Owner, CheckResult.Failure,
-                            DamageKind.Untyped);
-                    };
-                    if (result == CheckResult.CriticalFailure)
-                        impaled.StateCheck += qf =>
-                            qf.Owner.AddQEffect(QEffect.FlatFooted("Impaled").WithExpirationEphemeral());
-                    target.AddQEffect(impaled);
-                });
-        });
         HowlingBlizzard = ModManager.RegisterNewSpell("RE_HowlingBlizzard", 5, (_, _, level, inCombat, _) =>
         {
             return Spells.CreateModern(MIllustrations.CreateIllustration("Blizzard"), "Howling Blizzard", [Trait.Air, Trait.Cold, Trait.Concentrate, Trait.Manipulate, Trait.Arcane, Trait.Primal],
@@ -242,49 +202,6 @@ public class NewSpells5th : NewSpells
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(result), result, null);
-                    }
-                });
-        });
-        ModManager.ReplaceExistingSpell(SpellId.DivineWrath, 4, (_, level, inCombat, _) =>
-        {
-            return Spells.CreateModern(IllustrationName.DivineWrath, "Divine Wrath",
-                    [SpiritTrait.Spirit, MTraits.Sanctified, Trait.Divine, Trait.InflictsSlow],
-                    "You channel the fury of divinity against your foes.",
-                    $"You deal {S.HeightenedVariable(level, 4)}d10 spirit damage to enemies in the area, depending on their Fortitude save."
-                    + S.FourDegreesOfSuccess("The creature is unaffected.", "The creature takes half damage.", "The creature takes full damage and is sickened 1.", "The creature takes full damage and is sickened 2; while it's sickened, it's also slowed 1."),
-                    Target.Burst(24, 4).WithIncludeOnlyIf((at, cr) => cr.EnemyOf(at.OwnerAction.Owner)), level, SpellSavingThrow.Standard(Defense.Fortitude))
-                .WithSoundEffect(SfxName.DivineLance)
-                .WithHeighteningOfDamageEveryLevel(level, 4, inCombat, "1d10")
-                .WithEffectOnEachTarget(async (spell, caster, target, result) =>
-                {
-                    if (caster.HasTrait(HolyTrait.Holy))
-                        spell.Traits.Add(HolyTrait.Holy);
-                    if (caster.HasTrait(UnholyTrait.Unholy))
-                        spell.Traits.Add(UnholyTrait.Unholy);
-                    QEffect sick = QEffect.Sickened(result == CheckResult.CriticalFailure ? 2 : 1,
-                        spell.SpellcastingSource?.FixedDC ?? 10);
-                    if (result == CheckResult.CriticalFailure)
-                    {
-                        sick.StateCheck = effect =>
-                        {
-                            effect.Owner.AddQEffect(QEffect.Slowed(1).WithExpirationEphemeral());
-                        };
-                    }
-                    switch (result)
-                    {
-                        case CheckResult.CriticalSuccess:
-                            return;
-                        case CheckResult.Success:
-                            await CommonSpellEffects.DealBasicDamage(spell, caster, target, result,
-                                DiceFormula.FromText($"{level}d10", "Divine Wrath"), DamageSpirit.Spirit);
-                            return;
-                        case CheckResult.CriticalFailure:
-                        case CheckResult.Failure:
-                        default:
-                            await CommonSpellEffects.DealBasicDamage(spell, caster, target, CheckResult.Failure,
-                                DiceFormula.FromText($"{level}d10", "Divine Wrath"), DamageSpirit.Spirit);
-                            target.AddQEffect(sick);
-                            break;
                     }
                 });
         });

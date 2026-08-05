@@ -8,15 +8,18 @@ using Dawnsbury.Core.Coroutines.Options.Reactive;
 using Dawnsbury.Core.Creatures;
 using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Core;
+using Dawnsbury.Core.Mechanics.Damage;
 using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Mechanics.Targeting;
 using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Core.Possibilities;
+using Dawnsbury.Core.Roller;
 using Dawnsbury.Core.StatBlocks;
 using Dawnsbury.Display;
 using Dawnsbury.Display.Text;
 using Dawnsbury.Modding;
 using Microsoft.Xna.Framework;
+using SpiritDamage;
 using static RemasterExpanded.ModData;
 
 namespace RemasterExpanded.MySpells;
@@ -271,6 +274,38 @@ public class NewSpells1st : NewSpells
                         });
                         return start;
                     };
+                });
+        });
+        SpellIds.InfuseVitality = ModManager.RegisterNewSpell("InfuseVitality", 1, (_, _, level, inCombat, _) =>
+        {
+            return Spells.CreateModern(IllustrationName.DisruptingWeapons, "Infuse Vitality",
+                    [Trait.Divine, Trait.DoesNotRequireAttackRollOrSavingThrow, Trait.Positive],
+                    "You empower attacks with vital energy.",
+                    $"The number of targets is equal to the number of actions you spent casting this spell. Each target's unarmed and weapon Strikes deal an extra {S.HeightenedVariable(level >= 5 ? 3 : level >= 3 ? 2 : 1, 1)}d4 vitality damage. (This damage typically damages only undead.) If you have the holy trait, you add that trait to this spell and to the Strikes affected by the spell.",
+                    Target.DependsOnActionsSpent(Target.RangedFriend(6),
+                        Target.MultipleCreatureTargets(2, () => Target.RangedFriend(6)),
+                        Target.MultipleCreatureTargets(3, () => Target.RangedFriend(6))), level, null)
+                .WithActionCost(-1)
+                .WithSoundEffect(SfxName.MagicWeapon)
+                .WithHeightenedAtSpecificLevels(level, inCombat, [3, 5], "The damage increases to 2d4 damage.",
+                    "The damage increases to 3d4 damage.")
+                .WithCreateVariantDescription((_, _) => $"Each target's unarmed and weapon Strikes deal an extra {S.HeightenedVariable(level >= 5 ? 3 : level >= 3 ? 2 : 1, 1)}d4 vitality damage. (This damage typically damages only undead.) If you have the holy trait, you add that trait to this spell and to the Strikes affected by the spell.")
+                .WithEffectOnEachTarget(async (spell, caster, target, _) =>
+                {
+                    var holy = false;
+                    if (caster.HasTrait(HolyTrait.Holy))
+                    {
+                        spell.Traits.Add(HolyTrait.Holy);
+                        holy = true;
+                    }
+                    string dice = level >= 5 ? "3d4" : level >= 3 ? "2d4" : "1d4";
+                    QEffect infuse = new("Infuse Vitality", $"Your Strikes deal an additional {dice} vitality damage" + (holy ? " and are holy." : "."), ExpirationCondition.Never, caster, IllustrationName.DisruptingWeapons)
+                    {
+                        AddExtraKindedDamageOnStrike = (_, cr) => cr.HasTrait(Trait.Undead) ? new KindedDamage(DiceFormula.FromText(dice, spell.Name), DamageKind.Positive) : null
+                    };
+                    if (holy)
+                        infuse.AdjustStrikeAction = (_, action) => action.WithExtraTrait(HolyTrait.Holy);
+                    target.AddQEffect(infuse);
                 });
         });
     }

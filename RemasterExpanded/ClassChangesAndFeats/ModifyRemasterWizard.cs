@@ -136,7 +136,7 @@ public abstract class ModifyRemasterWizard
                 [SpellId.ObscuringMist, SpellId.ResistEnergy],
                 [SpellId.CrashingWave, SpellId.Fireball],
                 [SpellId.WallOfFire, SpellIds.WeaponStorm],
-                [SpellIds.HowlingBlizzard, SpellIds.ImpalingSpike]
+                [SpellIds.HowlingBlizzard, SpellId.ImpalingSpike]
             ]
         },
         {

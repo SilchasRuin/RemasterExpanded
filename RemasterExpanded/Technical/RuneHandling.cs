@@ -78,7 +78,7 @@ public class RuneHandling
 
         internal static void HandleRune(Item handwraps, Item attack, RuneKind type)
         {
-            var runes = handwraps.Runes.Where(rune => rune.RuneProperties != null && rune.RuneProperties.RuneKind == type);
+            IEnumerable<Item> runes = handwraps.Runes.Where(rune => rune.RuneProperties != null && rune.RuneProperties.RuneKind == type);
             foreach (Item rune in runes)
             {
                 if (rune.RuneProperties?.CanBeAppliedTo?.Invoke(rune, attack) != null) continue;

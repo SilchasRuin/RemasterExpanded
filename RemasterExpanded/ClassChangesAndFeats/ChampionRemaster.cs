@@ -523,6 +523,7 @@ public static class ChampionRemaster
                 $"\n\nOnce per day, on a critical hit against an unholy creature, you can also heal HP equal to double the unholy creature's level as a reaction (concentrate, healing, vitality). If you are unholy yourself, you are enfeebled 2 while wielding this weapon.");
             holyRunestone.Prerequisites.Clear();
             holyRunestone.WithPrerequisite(values => values.HasFeat(MFeatNames.HolyChampion), "You must be sanctified as holy.");
+            holyRunestone.WithPrerequisite(FeatName.RadiantBladeSpirit, "Radiant Armament");
             holyRunestone.Traits.RemoveAll(tr => tr is Trait.Good or Trait.Evocation);
             holyRunestone.Traits.Add(HolyTrait.Holy);
             holyRunestone.Traits.Add(ModTrait);
@@ -534,6 +535,7 @@ public static class ChampionRemaster
                 $"\n\nOnce per day, on a critical hit against a holy creature, you can spend a {{icon:Reaction}} reaction (concentrate) to cause the target to take an additional 1d8 persistent bleeding damage per weapon damage die. If you are holy yourself, you are enfeebled 2 while wielding this weapon.");
             unholyRunestone.Prerequisites.Clear();
             unholyRunestone.WithPrerequisite(values => values.HasFeat(MFeatNames.UnholyChampion), "You must be sanctified as unholy.");
+            unholyRunestone.WithPrerequisite(FeatName.RadiantBladeSpirit, "Radiant Armament");
             unholyRunestone.Traits.RemoveAll(tr => tr is Trait.Evil or Trait.Evocation);
             unholyRunestone.Traits.Add(UnholyTrait.Unholy);
             unholyRunestone.Traits.Add(ModTrait);
@@ -853,40 +855,11 @@ public static class ChampionRemaster
                     cr => cr.FriendOfAndNotSelf(qf.Owner) && cr.DistanceTo(qf.Owner) <= GetChampionAuraRange(qf.Owner),
                     qfTech =>
                     {
-                        qfTech.AddGrantingOfTechnical(cr => cr.EnemyOf(qfTech.Owner) && cr.QEffects.Any(qff => qff.WhenProvoked != null), qfInner =>
-                        {
-                            var applied = false;
-                            qfInner.StateCheck += _ =>
-                            {
-                                if (applied)
-                                    return;
-                                foreach (QEffect opportunity in qfInner.Owner.QEffects.Where(qff => qff.WhenProvoked != null))
-                                {
-                                    Func<QEffect, CombatAction, Task>? provoke = opportunity.WhenProvoked;
-                                    if (provoke == null)
-                                        return;
-                                    opportunity.WhenProvoked = Delegates.SmartCombineDelegates(
-                                        async (_, provokingAction) =>
-                                        {
-                                            if (provokingAction.HasTrait(Trait.Move) &&
-                                                provokingAction.Owner == qfTech.Owner)
-                                                provokingAction.Owner.AddQEffect(
-                                                    new QEffect(ExpirationCondition.ExpiresAtEndOfAnyTurn)
-                                                    {
-                                                        BonusToDefenses = (effect, _, _) => effect.Owner.DistanceTo(qf.Owner) <= GetChampionAuraRange(qf.Owner) ?
-                                                            new Bonus(2, BonusType.Status, "Blessed Swiftness") : null,
-                                                        AfterYouTakeAction = async (effect, action) =>
-                                                        {
-                                                            if (action != provokingAction)
-                                                                return;
-                                                            effect.ExpiresAt = ExpirationCondition.Immediately;
-                                                        }
-                                                    });
-                                        }, provoke);
-                                }
-                                applied = true;
-                            };
-                        });
+                        qfTech.BonusToDefenses = (effect, action, _) =>
+                            action != null && action.Owner.EnemyOf(qf.Owner) &&
+                            effect.Owner.Battle.CombatActionsInProgressStack.Any(ca => ca.HasTrait(Trait.Move))
+                                ? new Bonus(2, BonusType.Status, "Blessed Swiftness")
+                                : null;
                     });
             });
         Spell template = AllSpells.CreateModernSpellTemplate(SpellIds.SpectralAdvance, Trait.Champion);
@@ -902,9 +875,8 @@ public static class ChampionRemaster
                 sheet.AddFocusSpellAndFocusPoint(Trait.Champion, Ability.Charisma, SpellIds.SpectralAdvance);
             })
             .WithPrerequisite(MFeatNames.BlessedSwiftness, "Blessed Swiftness");
-        Item itemTemplate = Items.CreateNew(NewItems.AstralRune);
-        RuneProperties? runeProperties = itemTemplate.RuneProperties;
-        if (runeProperties != null)
+        Item? itemTemplate = Items.CreateNew(NewItems.AstralRune);
+        if (itemTemplate is {RuneProperties: {} runeProperties})
         {
             yield return new Feat(
                     ModManager.RegisterFeatName("BladeAllyRunestone" + NewItems.AstralRune.ToStringOrTechnical(),
@@ -912,6 +884,7 @@ public static class ChampionRemaster
                     $"All weapons you wield at the start of any encounter, as well as all your unarmed Strikes, will have the effect of the {runeProperties.Prefix} property rune in addition to any property runes they actually have for that encounter. This extra effect doesn't count against the number of property runes a weapon may have.\n\n{{b}}{runeProperties.Prefix.Capitalize()}:{{/b}} " +
                     runeProperties.RulesText,
                     itemTemplate.Traits.Append(Trait.BladeAllyAdvancedPropertyRune).ToList(), null)
+                .WithPrerequisite(FeatName.RadiantBladeSpirit, "Radiant Armament")
                 .WithIllustration(itemTemplate.Illustration)
                 .WithLevel(itemTemplate.Level)
                 .WithOnSheet(values => values.Tags["BLADE_ALLY_RUNESTONE"] = NewItems.AstralRune);
@@ -924,6 +897,7 @@ public static class ChampionRemaster
             yield return new Feat(ModManager.RegisterFeatName("BladeAllyRunestone" + ItemName.BrilliantRunestone.ToStringOrTechnical(), runeProperties2.Prefix.Capitalize()), runeProperties2.FlavorText,
                     $"All weapons you wield at the start of any encounter, as well as all your unarmed Strikes, will have the effect of the {runeProperties2.Prefix} property rune in addition to any property runes they actually have for that encounter. This extra effect doesn't count against the number of property runes a weapon may have.\n\n{{b}}{runeProperties2.Prefix.Capitalize()}:{{/b}} " + runeProperties2.RulesText,
                     itemTemplate2.Traits.Append(Trait.BladeAllyAdvancedPropertyRune).ToList(), null)
+                .WithPrerequisite(FeatName.RadiantBladeSpirit, "Radiant Armament")
                 .WithIllustration(itemTemplate2.Illustration)
                 .WithLevel(itemTemplate2.Level)
                 .WithOnSheet(values => values.Tags["BLADE_ALLY_RUNESTONE"] = ItemName.BrilliantRunestone);

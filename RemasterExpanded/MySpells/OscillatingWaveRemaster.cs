@@ -109,7 +109,7 @@ public class OscillatingWaveRemaster
             spell.Traits.Add(Trait.Psi);
             spell.Target = Target.Ranged(12);
             spell.EffectOnOneTarget = null;
-            spell.WithActionId(ModData.MActionIds.PsychicIgnition);
+            spell.WithActionId(ModData.RActionIds.PsychicIgnition);
             spell.WithPrologueEffectOnChosenTargetsBeforeRolls(async (action, self, _) =>
             {
                 self.AddQEffect(new QEffect

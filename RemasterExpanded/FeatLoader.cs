@@ -13,6 +13,7 @@ using Dawnsbury.Core.Mechanics.Targeting.TargetingRequirements;
 using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Core.Mechanics.Treasure;
 using Dawnsbury.Core.Possibilities;
+using Dawnsbury.IO;
 using Dawnsbury.Modding;
 using RemasterExpanded.ClassChangesAndFeats;
 using RemasterExpanded.MyArchetypes;
@@ -25,75 +26,52 @@ public class FeatLoader
     public static IEnumerable<Feat> LoadFeats()
     {
         TrueFeat robustHealth = new(ModManager.RegisterFeatName("RE_RobustHealth", "Robust Health"), 3, "Your physiology responds well to first aid.",
-            "You gain a circumstance bonus to the number of Hit Points you regain equal to your level from a successful attempt to Treat your Wounds or use Battle Medicine on you. After you or an ally use Battle Medicine on you, you become temporarily immune to that Battle Medicine for only 1 encounter, instead of 1 day.",
+            "You gain a circumstance bonus to the number of Hit Points you regain equal to your level from a successful attempt to use Battle Medicine on you. After you or an ally use Battle Medicine on you, you become temporarily immune to that Battle Medicine for only 1 encounter, instead of 1 day.",
             [Trait.General]);
         RobustHealthLogic(robustHealth);
         yield return robustHealth;
         
         foreach (Feat feat in Pirate.PirateFeats())
-        {
             yield return feat;
-        }
         
         foreach (Feat feat in VikingGuard.VikingGuardFeats())
-        {
             yield return feat;
-        }
 
         foreach (Feat feat in BlackJacket.BlackJacketFeats())
-        {
             yield return feat;
-        }
 
         foreach (Feat feat in Viking.VikingFeats())
-        {
             yield return feat;
-        }
         
         foreach (Feat feat in NewDeities.LoadDeities())
-        {
             yield return feat;
-        }
 
         foreach (Feat feat in CampfireChronicler.CampfireFeats())
-        {
             yield return feat;
-        }
 
         foreach (Feat feat in Sanctification.SanctifyFeats())
-        {
             yield return feat;
-        }
 
         foreach (Feat feat in RangerFeats.LoadFeats())
-        {
             yield return feat;
-        }
 
         foreach (Feat feat in EagleKnight.Load())
-        {
             yield return feat;
-        }
 
         foreach (Feat feat in SkillFeats.Load())
-        {
             yield return feat;
-        }
 
         foreach (Feat feat in SisterOfTheGoldenErinys.Load())
-        {
             yield return feat;
-        }
 
         foreach (Feat feat in ChampionRemaster.LoadFeats())
-        {
             yield return feat;
-        }
 
         foreach (Feat feat in FighterFeats.LoadFeats())
-        {
             yield return feat;
-        }
+
+        foreach (Feat feat in MagusRemaster.LoadFeats())
+            yield return feat;
     }
 
     public static void ModifyFeats()
@@ -130,10 +108,19 @@ public class FeatLoader
     public static void RobustHealthLogic(TrueFeat feat)
     {
         feat.WithPermanentQEffect(
-            "You gain a circumstance bonus to the number of Hit Points you regain equal to your level from a successful attempt to use Battle Medicine on you. After you or an ally use Battle Medicine on you, you become temporarily immune to that Battle Medicine for only 1 encounter, instead of 1 day.",
+            null,
             qf =>
             {
                 Creature self = qf.Owner;
+                var description = $"You gain a {{Blue}}+{self.Level}{{/Blue}} circumstance bonus to the healing you receive from Battle Medicine. When you're temporarily immune to Battle Medicine, it lasts 1 encounter instead of 1 day.";
+                if (PlayerProfile.Instance.IsBooleanOptionEnabled("RE_UseDefenseBlock"))
+                    qf.AddToDefenseBlock = _ => "{b}Robust Health.{/b} " + description;
+                else
+                {
+                    qf.Name = "Robust Health";
+                    qf.Description = description;
+                    qf.Innate = true;
+                }
                 qf.StartOfCombat = async _ =>
                 {
                     foreach (Creature ally in self.Battle.AllCreatures.Where(creature => creature.PersistentCharacterSheet != null))

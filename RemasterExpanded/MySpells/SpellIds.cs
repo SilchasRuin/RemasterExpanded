@@ -40,4 +40,9 @@ public abstract class SpellIds
     public static SpellId HuntersVision { get; set; }
     public static SpellId PackBreaker { get; set; }
     public static SpellId SpectralAdvance { get; set; } 
+    public static SpellId WardingAggression { get; set; }
+    public static SpellId WallOfWind { get; set; }
+    public static SpellId Earthbind { get; set; }
+    public static SpellId InfuseVitality { get; set; }
+    public static SpellId VitalBeacon { get; set; }
 }

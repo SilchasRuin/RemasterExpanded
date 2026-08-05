@@ -1,4 +1,5 @@
 ﻿using Dawnsbury.Audio;
+using Dawnsbury.Auxiliary;
 using Dawnsbury.Core.CharacterBuilder.Feats;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb;
 using Dawnsbury.Core.CombatActions;
@@ -16,7 +17,8 @@ public static class ModData
     public static bool Remaster { get; } = AppDomain.CurrentDomain.GetAssemblies().Any(assembly => assembly.GetName().Name == "Dawnsbury.Mods.Remaster.FeatsDb");
     public static bool RemasterSpells { get; } = AppDomain.CurrentDomain.GetAssemblies().Any(assembly => assembly.GetName().Name == "Dawnsbury.Mods.Remaster.Spellbook");
     public static bool LoadPsychic { get; } = ModManager.TryParse("OscillatingWave", out FeatName _);
-    public static bool MoreSpells { get; } = ModManager.TryParse("OscillatingWave", out FeatName _) && ModManager.TryParse("SH_Spellheart", out Trait _);
+    public static bool SpellHearts { get; } = AppDomain.CurrentDomain.GetAssemblies().Any(assembly => assembly.GetName().Name is {} name && name.ContainsIgnoreCase("spellheart"));
+    public static bool MoreSpells { get; } = LoadPsychic && SpellHearts;
     public static bool ChampionsOfEvil { get; } = ModManager.TryParse("PS_TyrantChampionSubclass", out FeatName _);
     public static bool ShieldsOfSpirit { get; } = ModManager.TryParse("PS_GrandeurChampionSubclass", out FeatName _);
     public static readonly Trait ModTrait = ModManager.ModBeingLoadedTrait ?? Trait.None;
@@ -48,6 +50,9 @@ public static class ModData
         public static readonly ActionId ImproviseStrategy = ModManager.RegisterEnumMember<ActionId>("RE_ImproviseStrategy");
         public static readonly ActionId SeasonedCommand =  ModManager.RegisterEnumMember<ActionId>("RE_SeasonedCommand");
         public static readonly ActionId FiendishBrand = ModManager.RegisterEnumMember<ActionId>("RE_FiendishBrand");
+        public static readonly ActionId DistractingSpellstrike = ModManager.RegisterEnumMember<ActionId>("RE_DistractingSpellstrike");
+        public static readonly ActionId DevastatingSpellstrike = ModManager.RegisterEnumMember<ActionId>("RE_DevastatingSpellstrike");
+        public static readonly ActionId PsychicIgnition = ModManager.RegisterEnumMember<ActionId>("RE_PsychicIgnition");
     }
     public static class MTraits
     {
@@ -130,6 +135,10 @@ public static class ModData
         public static QEffectId ChampionReactedAgainst { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_ChampionReactedAgainst");
         public static QEffectId DefendedAgainst { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_DefendedAgainst");
         public static QEffectId InvokedOath { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_InvokedOath");
+        public static QEffectId StruckForAnalysis { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_StruckForAnalysis");
+        public static QEffectId Analyzed { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_Analyzed");
+        public static QEffectId StarlitEyes { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_StarlitEyes");
+        public static QEffectId VitalBeacon { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_VitalBeacon");
     }
 
     public static class MIllustrations
@@ -160,11 +169,6 @@ public static class ModData
     public static class MSectionIds
     {
         public static readonly PossibilitySectionId Stories = ModManager.RegisterEnumMember<PossibilitySectionId>("RE_Stories");
-    }
-
-    public static class MActionIds
-    {
-        public static readonly ActionId PsychicIgnition = ModManager.RegisterEnumMember<ActionId>("RE_PsychicIgnition"); 
     }
 
     public static DamageKind SpiritDamage => DamageSpirit.Spirit;

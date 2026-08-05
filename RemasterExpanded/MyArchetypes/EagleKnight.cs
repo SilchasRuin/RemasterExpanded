@@ -591,7 +591,7 @@ public class EagleKnight
     
     public static void StoreRespondedTo(QEffect qEffect, CombatAction combatAction)
     {
-        if (!(qEffect.Tag is List<CombatAction>))
+        if (qEffect.Tag is not List<CombatAction>)
             qEffect.Tag = new List<CombatAction>();
         ((List<CombatAction>) qEffect.Tag).Add(combatAction);
     }

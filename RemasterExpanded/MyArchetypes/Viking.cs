@@ -1,6 +1,8 @@
 ﻿using Dawnsbury;
+using Dawnsbury.Audio;
 using Dawnsbury.Auxiliary;
 using Dawnsbury.Core;
+using Dawnsbury.Core.Animations.Movement;
 using Dawnsbury.Core.CharacterBuilder.Feats;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Archetypes;
@@ -14,6 +16,7 @@ using Dawnsbury.Core.Mechanics.Core;
 using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Mechanics.Rules;
 using Dawnsbury.Core.Mechanics.Targeting;
+using Dawnsbury.Core.Mechanics.Targeting.TargetingRequirements;
 using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Core.Mechanics.Treasure;
 using Dawnsbury.Core.Possibilities;
@@ -166,17 +169,33 @@ public class Viking
                 });
         yield return vikingCombat;
 
+        const string intoTheFrayDescription = " Make two melee Strikes during this movement, one with your one-handed melee weapon and one with your shield. You can make these Strikes at any points during your movement (if you Leap, you may only make these Strikes before or after you Leap), and each must target a different enemy. Both attacks count toward your multiple attack penalty, but don't increase your penalty until you have made both attacks.";
         Feat intoTheFray = new TrueFeat(ModManager.RegisterFeatName("RE_IntoTheFray", "Into the Fray"), 8,
                 "You charge into battle with shield-splintering fury.",
-                "You Leap or Stride. Make two melee Strikes during this movement, one with your one-handed melee weapon and one with your shield. You can make these Strikes at any points during your movement, and each must target a different enemy. Both attacks count toward your multiple attack penalty, but don't increase your penalty until you have made both attacks.", [])
+                "You Leap or Stride." + intoTheFrayDescription, [])
             .WithAvailableAsArchetypeFeat(MTraits.Viking)
             .WithActionCost(2)
-            .WithPermanentQEffect("You Leap or Stride, making two melee Strikes during the movement with a one-handed melee weapon and a shield. Both attacks count toward your multiple attack penalty, but don't increase your penalty until you have made both attacks.", qf =>
+            .WithPermanentQEffect("You Leap or Stride, making two melee Strikes during the movement with a one-handed melee weapon and a shield, without increasing your multiple attack penalty until the strikes are made.", qf =>
             {
                 qf.ProvideMainAction = _ =>
                 {
-                    CombatAction fray = new CombatAction(qf.Owner, MIllustrations.CreateIllustration("IntoTheFray"), "Into the Fray",
-                        [Trait.Basic], "You Leap or Stride. Make two melee Strikes during this movement, one with your one-handed melee weapon and one with your shield. You can make these Strikes at any points during your movement, and each must target a different enemy. Both attacks count toward your multiple attack penalty, but don't increase your penalty until you have made both attacks.",
+                    CombatAction frayStride = IntoTheFray(qf.Owner, true);
+                    CombatAction frayLeap =  IntoTheFray(qf.Owner, false);
+                    return new SubmenuPossibility(MIllustrations.CreateIllustration("IntoTheFray"), "Into the Fray")
+                    {
+                        SpellIfAny = new CombatAction(qf.Owner, MIllustrations.CreateIllustration("IntoTheFray"), "Into the Fray", [],
+                            "You Leap or Stride." + intoTheFrayDescription, Target.Self()).WithActionCost(2),
+                        Subsections = [new PossibilitySection("Into the Fray")
+                        {
+                            Possibilities = [new ActionPossibility(frayStride), new ActionPossibility(frayLeap)]
+                        }]
+                        
+                    };
+
+                    static CombatAction IntoTheFray(Creature owner, bool stride)
+                    {
+                        return new CombatAction(owner, new SideBySideIllustration(MIllustrations.CreateIllustration("IntoTheFray"), stride ? IllustrationName.FleetStep : IllustrationName.Jump), "Into the Fray - " + (stride ? "Stride" : "Leap"),
+                        [Trait.Basic], (stride ? "You Stride." : "You Leap.") + (stride ? intoTheFrayDescription.Replace(" (if you Leap, you may only make these Strikes before or after you Leap)", "") : intoTheFrayDescription),
                         Target.Self()
                             .WithAdditionalRestriction(self =>
                             {
@@ -186,189 +205,162 @@ public class Viking
                                 return self.MeleeWeapons.Any(item =>
                                            item.HasTrait(Trait.Melee) && !item.HasTrait(Trait.TwoHanded) &&
                                            !item.HasTrait(Trait.Shield)) &&
-                                       self.HeldItems.Any(item => item.HasTrait(Trait.Shield))
+                                       self.HeldItems.Any(item => item.HasTrait(Trait.Shield) && item.HasTrait(Trait.Melee))
                                     ? null
                                     : "Must be wielding a one-handed melee weapon and a shield.";
                             }))
                         .WithActionCost(2)
-                        .WithEffectOnChosenTargets(async (spell, caster, _) =>
+                        .WithEffectOnChosenTargets(async (action, self, _) =>
                         {
-                            int map = caster.Actions.AttackedThisManyTimesThisTurn;
-                            List<Creature> first = [];
-                            Item? shield = caster.HeldItems.FirstOrDefault(it => it.HasTrait(Trait.Shield));
-                            if (shield == null)
-                            {
-                                spell.RevertRequested = true;
-                                return;
-                            }
-                            CombatAction shieldStrike = StrikeRules.CreateStrike(caster, shield,
-                                RangeKind.Melee, map).WithActionCost(0);
-                            if (shieldStrike.Target is not CreatureTarget shieldTarget)
-                            {
-                                spell.RevertRequested = true;
-                                return;
-                            }
-                            shieldStrike.Target = shieldTarget.WithAdditionalConditionOnTargetCreature((_, enemy) => first.Contains(enemy) ? Usability.NotUsableOnThisCreature("You cannot target the same creature.") : Usability.Usable);
-                            Item? notShield =  caster.HeldItems.FirstOrDefault(it => !it.HasTrait(Trait.Shield));
-                            if (notShield == null)
-                            {
-                                spell.RevertRequested = true;
-                                return;
-                            }
-                            CombatAction weaponStrike = StrikeRules.CreateStrike(caster, notShield,
-                                RangeKind.Melee, map).WithActionCost(0);
-                            if (weaponStrike.Target is not CreatureTarget weaponTarget)
-                            {
-                                spell.RevertRequested = true;
-                                return;
-                            }
-                            weaponStrike.Target = weaponTarget.WithAdditionalConditionOnTargetCreature((_, enemy) => first.Contains(enemy) ? Usability.NotUsableOnThisCreature("You cannot target the same creature.") : Usability.Usable);
-                            List<string> options = ["Stride", "Leap", "Cancel"];
-                            ChoiceButtonOption choice = await caster.AskForChoiceAmongButtons(MIllustrations.CreateIllustration("IntoTheFray"), "Would you like to Stride or Leap?", options.ToArray());
-                            var attackedShield = false;
-                            var attackedWeapon = false;
-                            int speed = caster.Speed;
-                            var counter = 0;
-                            switch (options[choice.Index])
-                            {
-                                case "Cancel":
-                                    spell.RevertRequested = true;
-                                    return;
-                                case "Leap":
-                                    if (!attackedWeapon && weaponStrike.CanBeginToUse(caster))
-                                    {
-                                        if (await caster.AskForConfirmation(weaponStrike.Illustration,
-                                                $"Would you like to make a Strike with {weaponStrike.Item}?",
-                                                "Yes"))
-                                        {
-                                            await caster.Battle.GameLoop.FullCast(weaponStrike);
-                                            attackedWeapon = true;
-                                            if (weaponStrike.ChosenTargets.ChosenCreature != null)
-                                                first.Add(weaponStrike.ChosenTargets.ChosenCreature);
-                                        }
-                                    }
-                                    if (!attackedShield && shieldStrike.CanBeginToUse(caster))
-                                    {
-                                        if (await caster.AskForConfirmation(shieldStrike.Illustration,
-                                                $"Would you like to make a Strike with {shieldStrike.Item}?",
-                                                "Yes"))
-                                        {
-                                            await caster.Battle.GameLoop.FullCast(shieldStrike);
-                                            attackedShield = true;
-                                            if (shieldStrike.ChosenTargets.ChosenCreature != null)
-                                                first.Add(shieldStrike.ChosenTargets.ChosenCreature);
-                                        }
-                                    }
-                                    await caster.Battle.GameLoop.FullCast(CommonCombatActions.Leap(caster).WithActionCost(0));
-                                    if (!attackedWeapon && weaponStrike.CanBeginToUse(caster))
-                                    {
-                                        if (await caster.AskForConfirmation(weaponStrike.Illustration,
-                                                $"Would you like to make a Strike with {weaponStrike.Item}?",
-                                                "Yes"))
-                                        {
-                                            await caster.Battle.GameLoop.FullCast(weaponStrike);
-                                            attackedWeapon = true;
-                                            if (weaponStrike.ChosenTargets.ChosenCreature != null)
-                                                first.Add(weaponStrike.ChosenTargets.ChosenCreature);
-                                        }
-                                    }
-                                    if (!attackedShield && shieldStrike.CanBeginToUse(caster))
-                                    {
-                                        if (await caster.AskForConfirmation(shieldStrike.Illustration,
-                                                $"Would you like to make a Strike with {shieldStrike.Item}?",
-                                                "Yes"))
-                                        {
-                                            await caster.Battle.GameLoop.FullCast(shieldStrike);
-                                            attackedShield = true;
-                                            if (shieldStrike.ChosenTargets.ChosenCreature != null)
-                                                first.Add(shieldStrike.ChosenTargets.ChosenCreature);
-                                        }
-                                    }
-                                    if (!attackedShield && !shieldStrike.CanBeginToUse(caster) && !attackedWeapon &&
-                                        !weaponStrike.CanBeginToUse(caster))
-                                    {
-                                        spell.SpentActions = 1;
-                                        spell.RevertRequested = true;
-                                        caster.Battle.Log("Into the Fray converted to Leap.");
-                                        return;
-                                    }
-                                    if ((attackedShield || shieldStrike.CanBeginToUse(caster)) &&
-                                        (attackedWeapon ||
-                                         weaponStrike.CanBeginToUse(caster))) break;
-                                    caster.Battle.Log("Unable to make all Strikes.");
-                                    break;
-                                case "Stride":
-                                    caster.AddQEffect(Counter());
-                                    do
-                                    {
-                                        if (counter < speed)
-                                        {
-                                            await LimitedStride(counter, caster, "Stride to a point where you could Strike. You will be able to continue to Stride afterwards if you do not move the full distance.");
-                                            counter += caster.FindQEffect(MQEffectIds.Counter)!.Value;
-                                        }
-                                        if (!attackedWeapon && weaponStrike.CanBeginToUse(caster))
-                                        {
-                                            if (await caster.AskForConfirmation(weaponStrike.Illustration,
-                                                    $"Would you like to make a Strike with {weaponStrike.Item}?",
-                                                    "Yes"))
-                                            {
-                                                await caster.Battle.GameLoop.FullCast(weaponStrike);
-                                                attackedWeapon = true;
-                                                if (weaponStrike.ChosenTargets.ChosenCreature != null)
-                                                    first.Add(weaponStrike.ChosenTargets.ChosenCreature);
-                                            }
-                                            else
-                                            {
-                                                continue;
-                                            }
-                                        }
+                            int map = self.Actions.AttackedThisManyTimesThisTurn;
+                            QEffect counter = Counter();
+                            self.AddQEffect(counter);
+                            var movedSoFar = 0;
+                            var leaped = 0;
+                            Option chosen;
+                            List<Item> weaponsAvailable = [self.HeldItems[0], self.HeldItems[1]];
+                            HashSet<Creature> attacked = [];
+                            var canRevert = true;
 
-                                        if (!attackedShield && shieldStrike.CanBeginToUse(caster))
-                                        {
-                                            if (await caster.AskForConfirmation(shieldStrike.Illustration,
-                                                    $"Would you like to make a Strike with {shieldStrike.Item}?",
-                                                    "Yes"))
-                                            {
-                                                await caster.Battle.GameLoop.FullCast(shieldStrike);
-                                                attackedShield = true;
-                                                if (shieldStrike.ChosenTargets.ChosenCreature != null)
-                                                    first.Add(shieldStrike.ChosenTargets.ChosenCreature);
-                                            }
-                                            else
-                                            {
-                                                continue;
-                                            }
-                                        }
-                                        if (attackedWeapon && attackedShield)
-                                        {
-                                            if (!await caster.AskForConfirmation(IllustrationName.FleetStep,
-                                                    "Would you like to continue Striding?", "Yes", "No"))
-                                                break;
-                                        }
-                                        if (!attackedShield && !shieldStrike.CanBeginToUse(caster) && !attackedWeapon &&
-                                            !weaponStrike.CanBeginToUse(caster) &&
-                                            counter >= speed)
-                                        {
-                                            spell.SpentActions = 1;
-                                            spell.RevertRequested = true;
-                                            caster.RemoveAllQEffects(qff => qff.Id == MQEffectIds.Counter);
-                                            caster.Battle.Log("Into the Fray converted to Stride.");
-                                            return;
-                                        }
+                            // Do once, showing movement options and strike options.
+                            do
+                            {
+                                movedSoFar += counter.Value + leaped;
+                                counter.Value = 0; // Reset so it doesn't keep adding
 
-                                        if (((attackedShield || shieldStrike.CanBeginToUse(caster)) &&
-                                             (attackedWeapon ||
-                                              weaponStrike.CanBeginToUse(caster))) ||
-                                            counter < speed) continue;
-                                        caster.Battle.Log("Unable to make all Strikes.");
+                                if (weaponsAvailable.Count < 2
+                                    || movedSoFar > 0)
+                                    canRevert = false;
+
+                                List<Option> options =
+                                [
+                                    new CancelOption(true),
+                                    new PassViaButtonOption(canRevert ? "Cancel" : "Pass")
+                                ];
+                                CombatAction leapAction = CommonCombatActions.Leap(self).WithActionCost(0)
+                                    .With(ca =>
+                                    {
+                                        ca.WithEffectOnChosenTargets(async (_, _, _) =>
+                                        {
+                                            leaped += 1;
+                                        });
+                                        if (ca.Target is TileTarget tileTarget)
+                                            tileTarget.WithAdditionalSelfRequirement(_ =>
+                                                leaped == 0 ? Usability.Usable : Usability.NotUsable("Unusable"));
+                                    });
+                                switch (stride)
+                                {
+                                    // Get the hidden basic Stride from your possibilities
+                                    // // Add move options to the list
+                                    case true when Possibilities.Create(self).Filter(ap =>
+                                                       {
+                                                           if (ap.CombatAction.ActionId != ActionId.Stride)
+                                                               return false;
+                                                           ap.CombatAction.ActionCost = 0;
+                                                           ap.RecalculateUsability();
+                                                           return true;
+                                                       })
+                                                       .CreateActions(true)
+                                                       .FirstOrDefault(ica =>
+                                                           ica.Action.ActionId == ActionId.Stride) is CombatAction moveAction
+                                                   && moveAction.Target.CanBeginToUse(self):
+                                    {
+                                        IList<Tile> floodfill = Pathfinding
+                                            .Floodfill(
+                                                self, self.Battle,
+                                                new PathfindingDescription
+                                                {
+                                                    Squares = self.Speed - movedSoFar,
+                                                    Style = new MovementStyle
+                                                        { MaximumSquares = self.Speed - movedSoFar }
+                                                })
+                                            .Where(tile => tile.LooksFreeTo(self))
+                                            .ToList();
+
+                                        options.AddRange(floodfill
+                                            .Select(tile => moveAction
+                                                .CreateUseOptionOn(tile)
+                                                .WithIllustration(moveAction.Illustration))
+                                            .ToList());
                                         break;
-                                    } while (!attackedShield || !attackedWeapon ||
-                                             counter < speed);
-                                    caster.RemoveAllQEffects(qff => qff.Id == MQEffectIds.Counter);
-                                    break;
+                                    }
+                                    case false when leapAction.CanBeginToUse(self):
+                                        IList<Tile> floodfill2 = Pathfinding
+                                            .Floodfill(
+                                                self, self.Battle,
+                                                new PathfindingDescription
+                                                {
+                                                    Squares = CommonCombatActions.DetermineLeapDistance(self)
+                                                })
+                                            .Where(tile => tile.LooksFreeTo(self))
+                                            .ToList();
+                                        options.AddRange(floodfill2
+                                            .Select(tile => leapAction
+                                                .CreateUseOptionOn(tile)
+                                                .WithIllustration(leapAction.Illustration))
+                                            .ToList());
+                                        break;
+                                }
+                                // Add both weapons to the list
+                                foreach (Item weapon in weaponsAvailable)
+                                {
+                                    // Get strike options that use this weapon
+                                    options.AddRange(GetStrikePossibilities(
+                                            self,
+                                            strike =>
+                                                strike.Item == weapon
+                                                && strike.HasTrait(Trait.Melee),
+                                        strike =>
+                                            strike.WithEffectOnEachTarget(async (_, _, target, _) =>
+                                            {
+                                                weaponsAvailable.Remove(weapon);
+                                                attacked.Add(target);
+                                            }),
+                                        cr => !attacked.Contains(cr), null, map));
+                                }
+
+                                if (options.Count == 2)
+                                    chosen = options[0];
+                                else
+                                    chosen = (await self.Battle.SendRequest(new AdvancedRequest(
+                                            self,
+                                            $"Choose where to {(stride ? "move" : "leap to")} and who to Strike with Into the Fray, or right-click to cancel.",
+                                            options)
+                                        {
+                                            IsMainTurn = false,
+                                            IsStandardMovementRequest = true,
+                                            TopBarIcon = action.Illustration,
+                                            TopBarText =
+                                                $"Choose where to {(stride ? "move" : "leap to")} and who to Strike with Into the Fray."
+                                        }))
+                                        .ChosenOption;
+
+                                if (chosen is CancelOption or PassViaButtonOption)
+                                {
+                                    if (canRevert)
+                                        action.RevertRequested = true;
+                                    else if (weaponsAvailable.Count == 1 && movedSoFar == 0) // Only struck once
+                                    {
+                                        action.RevertRequested = true;
+                                        action.SpentActions = 1;
+                                        self.Battle.Log("Into the Fray converted into a simple Strike.");
+                                    }
+                                    else if (weaponsAvailable.Count == 2 && movedSoFar > 0) // Only moved
+                                    {
+                                        action.RevertRequested = true;
+                                        action.SpentActions = 1;
+                                        self.Battle.Log($"Into the Fray converted into a simple {(stride ? "Stride" : "Leap")}.");
+                                    }
+                                    return;
+                                }
+
+                                await chosen.Action();
                             }
+                            // End loop whenever you cancel it.
+                            while (chosen is not CancelOption and not PassViaButtonOption);
+                            counter.ExpiresAt = ExpirationCondition.Immediately;
                         });
-                    return new ActionPossibility(fray).WithPossibilityGroup("Abilities");
+                    }
                 };
             });
         yield return intoTheFray;
@@ -376,12 +368,12 @@ public class Viking
 
     public static QEffect Counter()
     {
-        return new QEffect()
+        return new QEffect
         {
-            StateCheckWithVisibleChanges = qff =>
+            StateCheck = qff =>
             {
                 Creature innerSelf = qff.Owner;
-                if (innerSelf.AnimationData.LongMovement?.Path == null) return Task.CompletedTask;
+                if (innerSelf.AnimationData.LongMovement?.Path == null) return;
                 var move = 0;
                 var diagonals = 0;
                 for (var index = 0;
@@ -426,7 +418,6 @@ public class Viking
                 }
                 if (diagonals > 1) move += diagonals / 2;
                 qff.Value = move;
-                return Task.CompletedTask;
             },
             Id = MQEffectIds.Counter
         };
@@ -449,7 +440,7 @@ public class Viking
             }).CreateActions(true).FirstOrDefault(pw =>
                 pw.Action.ActionId == ActionId.Stride) as CombatAction;
         IList<Tile> floodFill = Pathfinding.Floodfill(mover, mover.Battle,
-                new PathfindingDescription()
+                new PathfindingDescription
                 {
                     Squares = mover.Speed - value,
                     Style = { MaximumSquares = mover.Speed - value }
@@ -483,5 +474,55 @@ public class Viking
                 return true;
         }
         return false;
+    }
+    
+    public static List<Option> GetStrikePossibilities(
+        Creature self,
+        Func<CombatAction, bool>? isValidStrike,
+        Action<CombatAction>? adjustStrike,
+        Func<Creature, bool>? isValidTarget,
+        StrikeModifiers? strikeModifiers = null,
+        int map = -1)
+    {
+        List<Option> options = [];
+        foreach (Item item in self.Weapons)
+        {
+            CombatAction strike = StrikeRules.CreateStrike(
+                self,
+                item,
+                item.HasTrait(Trait.Ranged)
+                    ? RangeKind.Ranged
+                    : RangeKind.Melee,
+                map, item.WeaponProperties!.Throwable && !item.HasTrait(Trait.Melee), strikeModifiers);
+            FilterAndAdd(strike);
+            // If this is a melee weapon that can be thrown, add another possibility
+            if (item.HasTrait(Trait.Melee) && item.WeaponProperties!.Throwable)
+            {
+                CombatAction thrown = StrikeRules.CreateStrike(
+                    self,
+                    item,
+                    RangeKind.Ranged,
+                    map,
+                    true, strikeModifiers);
+                FilterAndAdd(thrown);
+            }
+        }
+        return options;
+
+        void FilterAndAdd(CombatAction strike)
+        {
+            strike.WithActionCost(0);
+            if (strike.Item!.HasTrait(Trait.Ranged))
+                strike.WithSoundEffect(strike.SoundEffectName ?? SfxName.Bow);
+            if (isValidStrike?.Invoke(strike) is false)
+                return;
+            adjustStrike?.Invoke(strike);
+            if (isValidTarget != null)
+                ((CreatureTarget) strike.Target).CreatureTargetingRequirements.Add(new LegacyCreatureTargetingRequirement((a, d) =>
+                    !isValidTarget(d)
+                        ? Usability.NotUsableOnThisCreature("excluded")
+                        : Usability.Usable));
+            GameLoop.AddDirectUsageOnCreatureOptions(strike, options);
+        }
     }
 }

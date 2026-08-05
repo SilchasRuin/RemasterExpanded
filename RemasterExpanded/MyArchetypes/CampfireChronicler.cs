@@ -111,7 +111,7 @@ public static class CampfireChronicler
         yield return new TrueFeat(ModManager.RegisterFeatName("RE_ListenersBoon", "Listener's Boon"), 4,
                 "The Chronicler has given you a gift to assist you on your journey.",
                 $"You gain the Domain Initiate feat for the domain of fire, knowledge,{(ModManager.TryParse("Protection", out FeatName _) || ModManager.TryParse("PS_Protection", out FeatName _) ? " protection," : "")} or travel. You gain the trained proficiency rank in spell attack modifier and spell DC, increasing to expert at 11th level.",
-                [], DuplicateDomains().ToList())
+                [], [.. DuplicateDomains()])
             .WithAvailableAsArchetypeFeat(MTraits.CampfireChronicler)
             .WithMultipleSelection()
             .WithOnSheet(values =>
@@ -128,10 +128,10 @@ public static class CampfireChronicler
         yield return DuplicateDomain(FeatName.DomainFire, SpellId.FireRay);
         yield return DuplicateDomain(MFeatNames.Knowledge, SpellIds.ScholarlyRecollection);
         yield return DuplicateDomain(FeatName.DomainTravel, SpellId.AgileFeet);
-        if (ModManager.TryParse("Protection", out FeatName protection) && ModManager.TryParse("ProtectorsSacrifice", out SpellId sacrifice))
-            yield return DuplicateDomain(protection, sacrifice);
-        else if (ModManager.TryParse("PS_Protection", out FeatName protection2) && ModManager.TryParse("PS_ProtectorsSacrifice", out SpellId sacrifice2))
+        if (ModManager.TryParse("PS_Protection", out FeatName protection2) && ModManager.TryParse("PS_ProtectorsSacrifice", out SpellId sacrifice2))
             yield return DuplicateDomain(protection2, sacrifice2);
+        else if (ModManager.TryParse("Protection", out FeatName protection) && ModManager.TryParse("ProtectorsSacrifice", out SpellId sacrifice))
+            yield return DuplicateDomain(protection, sacrifice);
     }
 
     public static IEnumerable<Feat> DuplicateAdvancedDomains()

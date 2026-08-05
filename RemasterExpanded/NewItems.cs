@@ -312,6 +312,8 @@ public static class NewItems
                     "This weapon deals an extra 1d6 spirit damage, and bypasses the damage resistance of incorporeal creatures.",
                     item =>
                     {
+                        if (item.WeaponProperties == null)
+                            return;
                         item.Traits.Add(Trait.GhostTouch);
                         item.WithAdditionalWeaponProperties(properties =>
                         {
@@ -822,27 +824,27 @@ public static class NewItems
                 CombatAction harmOrHeal = !heal ? AllSpells.CreateMonsterSpellInCombat(SpellId.Harm, creature, rank, dc) : AllSpells.CreateMonsterSpellInCombat(SpellId.Heal, creature, rank, dc);
                 harmOrHeal.CastFromScroll = item;
                 AddCastRestriction(harmOrHeal, "faith symbol");
-                CombatAction deitySpellAction = CombatAction.CreateSimple(creature, "Placeholder");
+                CombatAction deitySpellAction;
                 QEffect cast = new(ExpirationCondition.Ephemeral)
                 {
                     ProvideSectionIntoSubmenu = (_, section) =>
                     {
                         if (section.SubmenuId != MSubmenuIds.FaithSymbol)
                             return null;
+                        PossibilitySection symbol = new("Faith Symbol");
                         if (sheet.Calculated.Deity is {} deity)
                         {
-                            SpellId? deitySpell = deity.GrantedSpells.FirstOrDefault(sp =>
+                            SpellId deitySpell = deity.GrantedSpells.FirstOrDefault(sp =>
                                 AllSpells.CreateModernSpellTemplate(sp, Trait.Innate).MinimumSpellLevel == 1);
-                            if (deitySpell != null)
+                            if (deitySpell != SpellId.None)
                             {
-                                deitySpellAction = AllSpells.CreateMonsterSpellInCombat(deitySpell.Value, creature, rank, dc);
+                                deitySpellAction = AllSpells.CreateMonsterSpellInCombat(deitySpell, creature, rank, dc);
                                 deitySpellAction.CastFromScroll = item;
                                 AddCastRestriction(deitySpellAction, "faith symbol");
+                                symbol.AddPossibility(Possibilities.CreateSpellPossibility(deitySpellAction));
                             }
                         }
-                        PossibilitySection symbol = new("Faith Symbol");
                         symbol.AddPossibility(Possibilities.CreateSpellPossibility(harmOrHeal));
-                        symbol.AddPossibility(Possibilities.CreateSpellPossibility(deitySpellAction));
                         return symbol;
                     }
                 };
@@ -981,9 +983,13 @@ public static class NewItems
                     return;
                 if (effect.Owner.LongTermEffects is not {} lte)
                     return;
-                lte.Effects.RemoveAll(lt => lt.Text == "RETacticianCharges");
                 if (WellKnownLongTermEffects.CreateLongTermEffect("RETacticianCharges", null, newValue) is {} charges)
-                    lte.Add(charges);
+                {
+                    if (lte.Effects.FirstOrDefault(lt => lt.Id == charges.Id) is {} charge)
+                        charge.Number = newValue;
+                    else
+                        lte.Add(charges);
+                }
             },
             StateCheck = qf =>
             {
