@@ -1,3 +1,20 @@
+### Archetypes
+* [Pirate](https://2e.aonprd.com/Archetypes.aspx?ID=258)
+* [Viking](https://2e.aonprd.com/Archetypes.aspx?ID=268)
+* [Viking Guard](https://2e.aonprd.com/Archetypes.aspx?ID=320)
+* [Blackjacket](https://2e.aonprd.com/Archetypes.aspx?ID=316)
+* [Campfire Chronicler](https://2e.aonprd.com/Archetypes.aspx?ID=300)
+* [Eagle Knight](https://2e.aonprd.com/Archetypes.aspx?ID=314)
+* [Sister of the Golden Erinys](https://2e.aonprd.com/Archetypes.aspx?ID=380)
+
+### Miscellaneous Feats
+* [Robust Health](https://2e.aonprd.com/Feats.aspx?ID=6499)
+* [Advanced School Spell](https://2e.aonprd.com/Feats.aspx?ID=5036) Implemented with Remaster Feats and replaces the base game version.
+* [Experienced Tracker](https://2e.aonprd.com/Feats.aspx?ID=5146) With a Homebrew effect (+2 initiative when taking the Track exploration activity)
+* [Seasoned Command](https://2e.aonprd.com/Feats.aspx?ID=8983)
+* [Improvise Strategy](https://2e.aonprd.com/Feats.aspx?ID=8982)
+* [Certain Strike](https://2e.aonprd.com/Feats.aspx?ID=4820)
+
 ### Champion Remaster
 * Updated names of various champion features and causes to match the remaster
 * Champion dedication is updated to use remastered rules.
@@ -20,7 +37,6 @@
 * [Aura of Faith](https://2e.aonprd.com/Feats.aspx?ID=5913) Now functions as per Remaster rules
 * [Aura of Righteousness](https://2e.aonprd.com/Feats.aspx?ID=5921)
 
-
 ### Ranger Feats
 * [Initiate Warden](https://2e.aonprd.com/Feats.aspx?ID=4862) Basegame feats which are duplicated here can be removed via Mod Option
 * [Advanced Warden](https://2e.aonprd.com/Feats.aspx?ID=4870) Does not include Canopy Crawler or Imitate Fauna
@@ -34,6 +50,26 @@
 * [Nature Prowler](https://2e.aonprd.com/Feats.aspx?ID=5411) Applies when in outdoor environments
 * [Swift Tracker](https://2e.aonprd.com/Feats.aspx?ID=4882) Portions relevant for dawnsbury were implemented
 * [Second Sting](https://2e.aonprd.com/Feats.aspx?ID=4895)
+
+### Magus Remaster
+* Magus now gains spells similar to Psychic at 2 spell slots per spell level (except no level 10 spells)
+* Arcane Cascade can now be entered freely and gives resistance to damage from spells = to the base damage it gives.
+* Studious spells are no longer spells you can prepare for lower level slots, but instead allow you to enter arcane cascade as a free action after casting them.
+* You can now Spellstrike with Saving Throw based spells without needing Expansive Spellstrike (though expansive spellstrike is still required to use the area of effect for area of effect spells)
+* [Dimensional Assault](https://2e.aonprd.com/Spells.aspx?ID=2877) Now scales to match your speed when cast at 5th rank or higher.
+* [Conjurer's Countermeasure](https://2e.aonprd.com/Feats.aspx?ID=9061) Replaces Cascade Countermeasure and no longer requires being in Arcane Cascade to function.
+* [Hasted Assault](https://2e.aonprd.com/Spells.aspx?ID=2880) The quickened action now includes Striding as well as Striking.
+* [Distracting Spellstrike](https://2e.aonprd.com/Feats.aspx?ID=9053) No longer requires being in Arcane Cascade stance, but grants a status bonus to the deception check = to the base damage of Arcane Cascade if you are.
+* [Devastating Spellstrike](https://2e.aonprd.com/Feats.aspx?ID=9052) No longer requires being in Arcane Cascade stance, but grants a status bonus to the area damage dealt by it = to the base damage of Arcane Cascade if you are.
+
+### Magus Feats
+* [Magus's Analysis](https://2e.aonprd.com/Feats.aspx?ID=9045)
+* [Running Recharge](https://2e.aonprd.com/Feats.aspx?ID=9057)
+* [Starlit Eyes](https://2e.aonprd.com/Feats.aspx?ID=9058)
+* [Spell Crash](https://2e.aonprd.com/Feats.aspx?ID=9064)
+* [Knowledge is Power](https://2e.aonprd.com/Feats.aspx?ID=9062)
+* [Fused Staff](https://2e.aonprd.com/Feats.aspx?ID=9067)
+* [Sprinting Spellstrike](https://2e.aonprd.com/Feats.aspx?ID=9082)
 
 ### Additional Items
 * [Trusty Helmet](https://2e.aonprd.com/Equipment.aspx?ID=3983)
@@ -54,6 +90,16 @@
 * [Master Magus Ring](https://2e.aonprd.com/Equipment.aspx?ID=2327) Functionality matches the Oracle Crown implementation in Dawnsbury for the additional focus point.
 * [Holy Rune](https://2e.aonprd.com/Equipment.aspx?ID=2842) Updated to Remaster rules
 * [Unholy Rune](https://2e.aonprd.com/Equipment.aspx?ID=2851) Updated to Remaster rules
+* [Deathbane Crescent](https://2e.aonprd.com/Equipment.aspx?ID=5150) Requires the Caster's Compendium Mod
+
+### Deities
+* Zarazrael  [based on](https://2e.aonprd.com/Deities.aspx?ID=481)
+* The World Serpent [based on](https://2e.aonprd.com/Deities.aspx?ID=459)
+* The Lost Lord [based on](https://2e.aonprd.com/Deities.aspx?ID=456)
+* The Traveler [based on](https://2e.aonprd.com/Deities.aspx?ID=534)
+* The Watcher [based on](https://2e.aonprd.com/Deities.aspx?ID=646)
+* The Pranksters [based on](https://2e.aonprd.com/Deities.aspx?ID=370)
+* The Sovereign Sword [based on](https://2e.aonprd.com/Deities.aspx?ID=699)
 
 ### Differences from Tabletop:  
 * Pirate and Viking grant Maritime Lore, a lore focused on various water based creatures, instead of Sailing Lore.  
@@ -64,3 +110,4 @@
 * [Remember the Lost](https://2e.aonprd.com/Spells.aspx?ID=2420) only deals increased damage to specific enemies in the campaign. The enemies it works on have to be added individually. If you find an enemy that it should deal extra damage to per it's text, let me know and I can update it.
 * Sanctification is restricted by your alignment, rather than by the deity's allowed sanctifications
 * Some feats may require a particular alignment
+* The Major Deathbane Crescent grants Restoration instead of Sound Body.
