@@ -1,3 +1,12 @@
+### Archetypes
+* [Pirate](https://2e.aonprd.com/Archetypes.aspx?ID=258)
+* [Viking](https://2e.aonprd.com/Archetypes.aspx?ID=268)
+* [Viking Guard](https://2e.aonprd.com/Archetypes.aspx?ID=320)
+* [Blackjacket](https://2e.aonprd.com/Archetypes.aspx?ID=316)
+* [Campfire Chronicler](https://2e.aonprd.com/Archetypes.aspx?ID=300)
+* [Eagle Knight](https://2e.aonprd.com/Archetypes.aspx?ID=314)
+* [Sister of the Golden Erinys](https://2e.aonprd.com/Archetypes.aspx?ID=380)
+
 ### Miscellaneous Feats
 * [Robust Health](https://2e.aonprd.com/Feats.aspx?ID=6499)
 * [Advanced School Spell](https://2e.aonprd.com/Feats.aspx?ID=5036) Implemented with Remaster Feats and replaces the base game version.
