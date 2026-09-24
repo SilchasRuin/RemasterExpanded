@@ -71,6 +71,29 @@
 * [Fused Staff](https://2e.aonprd.com/Feats.aspx?ID=9067)
 * [Sprinting Spellstrike](https://2e.aonprd.com/Feats.aspx?ID=9082)
 
+### Oracle Remastered
+* Implements the Remastered Oracle as a separate class. The base game Oracle can be removed via a mod option.
+* Remastered Oracle is a 4 slot caster as opposed to pre-remaster's 3 slot.
+* Remastered Oracle's focus spells are not cursebound, instead certain feats grant cursebound actions that increase the severity of the curse.
+* All base game mysteries are remastered.
+* All base game feats that still exist for remastered Oracle are implemented.
+
+### Remastered Oracle Feats
+* [Foretell Harm](https://2e.aonprd.com/Feats.aspx?ID=6053)
+* [Nudge the Scales](https://2e.aonprd.com/Feats.aspx?ID=6055)
+* [Oracular Warning](https://2e.aonprd.com/Feats.aspx?ID=6056)
+* [Trance of Celerity](https://2e.aonprd.com/Feats.aspx?ID=8526)
+* [Whispers of Weakness](https://2e.aonprd.com/Feats.aspx?ID=6057) The target takes a -2 circumstance penalty to the next saving throw it makes instead of you learning it's weakest save and weaknesses.
+* [Meddling Futures](https://2e.aonprd.com/Feats.aspx?ID=6060)
+* [Knowledge of Shapes](https://2e.aonprd.com/Feats.aspx?ID=6061)
+* [Gifted Power](https://2e.aonprd.com/Feats.aspx?ID=6064)
+* [Water Walker](https://2e.aonprd.com/Feats.aspx?ID=6069) Full water walking is gained at cursebound 1.
+* [Roll the Bones of Fate](https://2e.aonprd.com/Feats.aspx?ID=6070)
+* [The Dead Walk](https://2e.aonprd.com/Feats.aspx?ID=6071)
+* [Trial by Skyfire](https://2e.aonprd.com/Feats.aspx?ID=6072)
+* [Waters of Creation](https://2e.aonprd.com/Feats.aspx?ID=6073)
+* [Lighter than Air](https://2e.aonprd.com/Feats.aspx?ID=6078)
+
 ### Additional Items
 * [Trusty Helmet](https://2e.aonprd.com/Equipment.aspx?ID=3983)
 * [Autoload Leathers](https://2e.aonprd.com/Equipment.aspx?ID=3803)
