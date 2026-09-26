@@ -77,6 +77,7 @@
 * Remastered Oracle's focus spells are not cursebound, instead certain feats grant cursebound actions that increase the severity of the curse.
 * All base game mysteries are remastered.
 * All base game feats that still exist for remastered Oracle are implemented.
+* Cosmos Oracle grants the Daze cantrip instead of Light, Obscuring Mist instead of Darkness and Cloak of Colors instead of Moon Frenzy unless Junabell Spells is installed.
 
 ### Remastered Oracle Feats
 * [Foretell Harm](https://2e.aonprd.com/Feats.aspx?ID=6053)
@@ -114,6 +115,7 @@
 * [Holy Rune](https://2e.aonprd.com/Equipment.aspx?ID=2842) Updated to Remaster rules
 * [Unholy Rune](https://2e.aonprd.com/Equipment.aspx?ID=2851) Updated to Remaster rules
 * [Deathbane Crescent](https://2e.aonprd.com/Equipment.aspx?ID=5150) Requires the Caster's Compendium Mod
+* Heavy Mail an item equivalent to [Chain Mail](https://2e.aonprd.com/Armor.aspx?ID=46) with an [Armored Skirt](https://2e.aonprd.com/Equipment.aspx?ID=514) equipped.
 
 ### Deities
 * Zarazrael  [based on](https://2e.aonprd.com/Deities.aspx?ID=481)
