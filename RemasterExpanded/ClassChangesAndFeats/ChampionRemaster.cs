@@ -372,7 +372,7 @@ public static class ChampionRemaster
             Feat oath = AllFeats.GetFeatByFeatName(FeatName.Oath);
             oath.WithRulesTextCreator(_ =>
                 "Choose an oath to swear. Oaths can grant you benefits versus specific types of foes or more general benefits.")
-                .With(ft => ft.FlavorText = "You swear an oath, binding you to a particular cause.");
+                .WithAction(ft => ft.FlavorText = "You swear an oath, binding you to a particular cause.");
             if (PlayerProfile.Instance.IsBooleanOptionEnabled("HideLegacyFeats"))
             {
                 oath.Subfeats = [];
@@ -399,7 +399,7 @@ public static class ChampionRemaster
                                 "When you make your daily preparations, choose one property rune from the following: disrupting, ghost touch, returning, fearsome, or shifting. All weapons you wield at the start of any encounter that day, as well as all your unarmed Strikes, will gain that property rune as an extra rune for that encounter, even if they already have the maximum possible of property runes.\n\n" +
                                 "If you don't make a choice, your weapons will count as disrupting (if you are good aligned) or fearsome (if you are evil aligned).";
         AllFeats.GetFeatByFeatName(Champion.BladeAllyFeatName).WithCustomName("Blessed Armament")
-            .With(ft =>
+            .WithAction(ft =>
             {
                 ft.RulesText = armament;
                 if (!ChampionsOfEvil)
@@ -436,7 +436,7 @@ public static class ChampionRemaster
                 }
             })
             .WithRulesTextCreator(_ => "Choose a second blessing of the devoted (different from your first one) and gain its benefits.")
-            .With(ft => ft.FlavorText = "Your continued service grants you another boon.");
+            .WithAction(ft => ft.FlavorText = "Your continued service grants you another boon.");
         AllFeats.GetFeatByFeatName(FeatName.DivineAlly).WithCustomName("Devout Blessing")
             .WithRulesTextCreator(_ => "You gain a blessing of the devoted of your choice.");
         AllFeats.GetFeatByFeatName(FeatName.ChampionsReaction).WithRulesTextCreator(sheet =>
@@ -543,7 +543,7 @@ public static class ChampionRemaster
 
         AllFeats.GetFeatByFeatName(FeatName.RadiantBladeSpirit)
             .WithCustomName("Radiant Armament")
-            .With(ft =>
+            .WithAction(ft =>
             {
                 bool hideLegacy = PlayerProfile.Instance.IsBooleanOptionEnabled("HideLegacyFeats");
                 ft.FlavorText = "Your blessed armament radiates power, further enhancing your chosen weapon.";
@@ -561,14 +561,14 @@ public static class ChampionRemaster
             !ModManager.TryParse("PS_LayOnHands", out FeatName layOnHands) ||
             AllFeats.GetFeatByFeatNameOptional(layOnHands) is not { } layOnHands2) return;
         touchOfTheVoid.WithCustomName("Touch of the Void")
-            .With(ft =>
+            .WithAction(ft =>
             {
                 ft.Prerequisites.RemoveAll(prq => prq.Description.Contains("Evil"));
                 ft.WithPrerequisite(
                     values => values.Deity is { } deity && deity.AllowedFonts.Contains(FeatName.HarmfulFont),
                     "Your deity's divine font must allow harm.");
             });
-        layOnHands2.With(ft =>
+        layOnHands2.WithAction(ft =>
         {
             ft.Prerequisites.RemoveAll(pr => pr.Description.Contains("Good"));
             ft.WithPrerequisite(
@@ -585,7 +585,7 @@ public static class ChampionRemaster
             .WithRulesTextCreator(_ => "Choose an animal companion. If you have the holy or unholy trait, your companion gains it as well, as do the companion's Strikes." +
                                        "\r\n\r\nAt the beginning of each encounter, the animal companion begins combat next to you. The animal companion can't take actions on its own but you can spend 1 action once per turn to Command an Animal. This will allow the animal companion to spend 2 actions (you will control how the animal companion spends them)." +
                                        "\r\n\r\nIf your animal companion dies, a new animal companion will come to you after your next long rest.")
-            .With(ft =>
+            .WithAction(ft =>
             {
                 ft.Traits.RemoveAll(tr => tr == Trait.DivineAlly);
                 ft.FlavorText = "You gain the services of a young animal companion who travels with you on your adventures.";

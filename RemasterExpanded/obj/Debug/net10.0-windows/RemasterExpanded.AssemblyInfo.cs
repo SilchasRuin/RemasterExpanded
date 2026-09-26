@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Dawnsbury.Mods.RemasterExpanded")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+776b75558a51bba99f962383f2652e1badc8ab07")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f3c98864398a839e117d864e84960523393d0e74")]
 [assembly: System.Reflection.AssemblyProductAttribute("Dawnsbury.Mods.RemasterExpanded")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Dawnsbury.Mods.RemasterExpanded")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

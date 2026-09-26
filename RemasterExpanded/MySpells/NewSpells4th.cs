@@ -331,8 +331,6 @@ public abstract class NewSpells4th : NewSpells
                     2 => 6,
                     _ => 4
                 };
-                // if (qf.Description != null && qf.Description.Contains("d" + diceSize))
-                //     return;
                 qf.Description = $"Once per round, either you or an ally can use a single action with the manipulate trait to regain {diceCount}d{diceSize} Hit Points. {(qf.Value == 3 ? "The next usage will end the spell." : $"The next usage will reduce the future healing to {diceCount}d{diceSize - 2}.")}";
             },
             Id = MQEffectIds.VitalBeacon

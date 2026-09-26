@@ -21,6 +21,7 @@ using Dawnsbury.Display.Illustrations;
 using Dawnsbury.Display.Text;
 using Dawnsbury.Modding;
 using Microsoft.Xna.Framework;
+using RemasterExpanded.Technical;
 using SpiritDamage;
 using static RemasterExpanded.ModData;
 using static RemasterExpanded.MySpells.SpellIds;
@@ -202,6 +203,44 @@ public class NewSpells5th : NewSpells
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(result), result, null);
+                    }
+                });
+        });
+        GrislyGrowths = ModManager.RegisterNewSpell("GrislyGrowths", 5, (_, _, level, inCombat, _) =>
+        {
+            return Spells.CreateModern(MIllustrations.CreateIllustration("GrislyGrowths"), "Grisly Growths",
+                [Trait.Arcane, Trait.Primal],
+                "This gruesome spell causes the target to grow excess limbs and organs, whether it be fingers multiplying until hands resemble bushes, eyes popping open in bizarre places, legs sprouting from the side of the body, or some other result. ",
+                $"The target takes {S.HeightenedVariable(level * 2, 10)}d6 piercing damage (basic Fortitude save mitigates). This spell has no effect on a target with a mutable anatomy or no limbs, such as an ooze or a protean." +
+                "\n\nIn addition, unless the initial target critically succeeds, creatures within 30 feet of the target, including the target, must attempt Will saves, after which they're temporarily immune to this secondary effect of grisly growths for the rest of the encounter. This additional effect is a mental and visual effect.",
+                Target.Ranged(12)
+                    .WithAdditionalConditionOnTargetCreature((_, enemy) =>
+                    enemy.HasTrait(Trait.Incorporeal)
+                        ? Usability.NotUsableOnThisCreature("Target is incorporeal.")
+                        : Usability.Usable)
+                    .WithAdditionalConditionOnTargetCreature((_, enemy) =>
+                        !enemy.Characteristics.HasASkeleton
+                    ? Usability.NotUsableOnThisCreature("Target is amorphous.")
+                    : Usability.Usable),
+                level, SpellSavingThrow.Basic(Defense.Fortitude))
+                .WithSoundEffect(SfxName.ExoskeletonExtrude)
+                .WithActionCost(2)
+                .WithHeighteningOfDamageEveryLevel(level, 5, inCombat, "2d6")
+                .WithEffectOnEachTarget(async (spell, caster, target, result) =>
+                {
+                    await CommonSpellEffects.DealBasicDamage(spell, caster, target, result, $"{2 * level}d6",
+                        DamageKind.Piercing);
+                    if (result == CheckResult.CriticalSuccess)
+                        return;
+                    foreach (Creature creature in caster.Battle.AllCreatures.Where(cr => cr.DistanceTo(target) <= 6 && !cr.IsImmuneTo(Trait.Mental) && !cr.IsImmuneTo(Trait.Visual) && !cr.HasEffect(MQEffectIds.Grisly)))
+                    {
+                        creature.AddQEffect(new QEffect {Id = MQEffectIds.Grisly});
+                        CombatAction fakeSpell = Spell.DuplicateSpell(spell).CombatActionSpell.WithExtraTrait(Trait.Mental).WithExtraTrait(Trait.Visual);
+                        CheckResult newResult = await CommonSpellEffects.RollSpellSavingThrowAsync(creature, fakeSpell, Defense.Will);
+                        if (newResult > CheckResult.Failure)
+                            continue;
+                        creature.AddQEffect(QEffect.Sickened(newResult == CheckResult.CriticalFailure ? 2 : 1,
+                            spell.SpellcastingSource?.GetSpellSaveDC(spell) ?? 10));
                     }
                 });
         });

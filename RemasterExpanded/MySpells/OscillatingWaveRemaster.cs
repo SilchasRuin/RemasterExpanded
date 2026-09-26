@@ -11,19 +11,18 @@ using Dawnsbury.Core.Mechanics.Targeting;
 using Dawnsbury.Core.Roller;
 using Dawnsbury.Display.Text;
 using Dawnsbury.Modding;
-using Dawnsbury.Mods.Remaster.Spellbook;
 using PsychicExpanded;
 using static PsychicExpanded.ConsciousMind;
 
 namespace RemasterExpanded.MySpells;
 
-public class OscillatingWaveRemaster
+public abstract class OscillatingWaveRemaster
 {
     public static void RemasterOscillatingWave()
     {
         ModManager.RegisterActionOnEachSpell(spell =>
         {
-            if (spell.SpellId.ToStringOrTechnical() != "Frostbite")
+            if (spell.SpellId != SpellIds.Frostbite)
                 return;
             spell.Traits.Add(Trait.Level1PsychicCantrip);
             SpellInformation? spellInformation = spell.SpellInformation;
@@ -80,7 +79,7 @@ public class OscillatingWaveRemaster
         });
         ModManager.RegisterActionOnEachSpell(spell =>
         {
-            if (spell.SpellId.ToStringOrTechnical() != "Ignition")
+            if (spell.SpellId != SpellIds.Ignition)
                 return;
             spell.Traits.Add(Trait.Level1PsychicCantrip);
             SpellInformation? spellInformation = spell.SpellInformation;
@@ -149,8 +148,8 @@ public class OscillatingWaveRemaster
         });
         LoadOrder.WhenFeatsBecomeLoaded += () =>
         {
-            SpellId frostbite = RemasterSpells.GetSpellIdByName("Frostbite");
-            SpellId ignition = RemasterSpells.GetSpellIdByName("Ignition");
+            SpellId frostbite = SpellIds.Frostbite;
+            SpellId ignition = SpellIds.Ignition;
             WaveSpells.AddRange([frostbite, ignition, SpellIds.HowlingBlizzard, SpellIds.IceStorm]);
             WaveSpells.RemoveAll(spell =>
                 spell is SpellId.ProduceFlame or SpellId.RayOfFrost or SpellId.FireShield or SpellId.ConeOfCold);

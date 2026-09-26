@@ -3,6 +3,7 @@ using Dawnsbury.Campaign.LongTerm;
 using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
+using Dawnsbury.Core.CharacterBuilder.Spellcasting;
 using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Coroutines.Options.Reactive;
 using Dawnsbury.Core.Creatures;
@@ -16,6 +17,7 @@ using Dawnsbury.Core.Possibilities;
 using Dawnsbury.Core.Roller;
 using Dawnsbury.Core.StatBlocks;
 using Dawnsbury.Display;
+using Dawnsbury.Display.Illustrations;
 using Dawnsbury.Display.Text;
 using Dawnsbury.Modding;
 using Microsoft.Xna.Framework;
@@ -308,6 +310,84 @@ public class NewSpells1st : NewSpells
                     target.AddQEffect(infuse);
                 });
         });
+        const string flavorText = "You call down a tendril of lightning that cracks with thunder.";
+        Illustration thunderstrike = MIllustrations.CreateIllustration("Thunderstrike");
+        if (ModManager.TryParse("Thunderstrike", out SpellId thunder))
+        {
+            SpellIds.Thunderstrike = thunder;
+            ModManager.RegisterActionOnEachSpell(spell =>
+            {
+               if (spell.SpellId != thunder)
+                   return;
+               // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+               bool inCombat = spell.Owner != null && spell.Owner.Battle != TBattle.Pseudobattle;
+               int level = spell.SpellLevel;
+               spell.EffectOnOneTarget = null;
+               spell.Description = $"{{i}}{flavorText}{{/i}}\n\n" +
+                                   "{b}Range{/b} 120 feet\n" +
+                                   "{b}Saving throw{/b} basic Reflex\n\n" +
+                                   $"You deal {S.HeightenedVariable(spell.SpellLevel, 1)}d12 electricity damage and {S.HeightenedVariable(spell.SpellLevel, 1)}d4 sonic damage to the target (basic Reflex save mitigates)." +
+                                   "\nA target wearing metal armor or made of metal takes a –1 circumstance penalty to its save, and if damaged by the spell is {r}clumsy 1{/r} for 1 round.";
+               spell.WithSoundEffect(SfxName.ElectricBlast)
+                   .WithHeighteningNumerical(level, 1, inCombat, 1, "The damage increases by 1d12 electricity and 1d4 sonic.")
+                   .WithActionCost(2)
+                   .WithBonusToSave((_, _, enemy) => (enemy.Armor.Item?.HasTrait(Trait.MetalArmor) ?? false) || enemy.HasTrait(Trait.Metal) ? new Bonus(-1, BonusType.Circumstance, "Thunderstrike", false) : null)
+                   .WithEffectOnEachTarget(async (sp, caster, target, result) =>
+                   {
+                       var applied = false;
+                       QEffect blasted = new()
+                       {
+                           AfterYouTakeDamage = async (_, _, _, action, _) =>
+                           {
+                               if (action != sp || applied)
+                                   return;
+                               target.AddQEffect(QEffect.Clumsy(1).WithExpirationInOneRound(caster));
+                               applied = true;
+                           }
+                       };
+                       if ((target.Armor.Item?.HasTrait(Trait.MetalArmor) ?? false) || target.HasTrait(Trait.Metal))
+                           target.AddQEffect(blasted);
+                       await CommonSpellEffects.DealBasicDamage(sp, caster, target, result,
+                           new KindedDamage(DiceFormula.FromText($"{level}d12", sp.Name), DamageKind.Electricity),
+                           new KindedDamage(DiceFormula.FromText($"{level}d4", sp.Name), DamageKind.Sonic));
+                       blasted.ExpiresAt = ExpirationCondition.Immediately;
+                   });
+               spell.Illustration = thunderstrike;
+            });
+        }
+        else
+            SpellIds.Thunderstrike = ModManager.RegisterNewSpell("Thunderstrike", 1, (_, _, level, inCombat, _) =>
+            {
+                return Spells.CreateModern(thunderstrike, "Thunderstrike",
+                    [Trait.Electricity, Trait.Sonic, Trait.Arcane, Trait.Primal],
+                    flavorText,
+                    $"You deal {S.HeightenedVariable(level, 1)}d12 electricity damage and {S.HeightenedVariable(level, 1)}d4 sonic damage to the target (basic Reflex save mitigates).\n\nA target wearing metal armor or made of metal takes a –1 circumstance penalty to its save, and if damaged by the spell is {{r}}clumsy 1{{/r}} for 1 round.",
+                    Target.Ranged(24), level, SpellSavingThrow.Basic(Defense.Reflex))
+                    .WithSoundEffect(SfxName.ElectricBlast)
+                    .WithHeighteningNumerical(level, 1, inCombat, 1, "The damage increases by 1d12 electricity and 1d4 sonic.")
+                    .WithActionCost(2)
+                    .WithBonusToSave((_, _, enemy) => (enemy.Armor.Item?.HasTrait(Trait.MetalArmor) ?? false) || enemy.HasTrait(Trait.Metal) ? new Bonus(-1, BonusType.Circumstance, "Thunderstrike", false) : null)
+                    .WithEffectOnEachTarget(async (spell, caster, target, result) =>
+                    {
+                        var applied = false;
+                        QEffect blasted = new()
+                        {
+                            AfterYouTakeDamage = async (_, _, _, action, _) =>
+                            {
+                                if (action != spell || applied)
+                                    return;
+                                target.AddQEffect(QEffect.Clumsy(1).WithExpirationInOneRound(caster));
+                                applied = true;
+                            }
+                        };
+                        if ((target.Armor.Item?.HasTrait(Trait.MetalArmor) ?? false) || target.HasTrait(Trait.Metal))
+                            target.AddQEffect(blasted);
+                        await CommonSpellEffects.DealBasicDamage(spell, caster, target, result,
+                            new KindedDamage(DiceFormula.FromText($"{level}d12", spell.Name), DamageKind.Electricity),
+                            new KindedDamage(DiceFormula.FromText($"{level}d4", spell.Name), DamageKind.Sonic));
+                        blasted.ExpiresAt = ExpirationCondition.Immediately;
+                    });
+            });
     }
 
     public static QEffect Tailwind(bool longTerm = false)

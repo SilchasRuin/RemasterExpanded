@@ -410,6 +410,15 @@ internal static class PatchCheckForMissChance
     }
 }
 
+[HarmonyPatch(typeof(QEffect), nameof(QEffect.SpellImmunity))]
+internal static class PatchSpellImmunity
+{
+    public static void Postfix(QEffect? __instance)
+    {
+        __instance?.Id = MQEffectIds.ImmunityToSpell;
+    }
+}
+
 internal static class Tasks
 {
     internal static async Task AltCrit(CombatAction strike, Creature target)

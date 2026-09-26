@@ -1,11 +1,14 @@
-﻿using Dawnsbury.Core.CharacterBuilder.Feats;
+﻿using Dawnsbury.Core.CharacterBuilder;
+using Dawnsbury.Core.CharacterBuilder.Feats;
 using Dawnsbury.Core.CombatActions;
+using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Core;
 using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Mechanics.Targeting;
 using Dawnsbury.Core.Mechanics.Targeting.TargetingRequirements;
 using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Modding;
+using RemasterExpanded.OracleRemastered;
 
 namespace RemasterExpanded.Technical;
 
@@ -49,6 +52,13 @@ public static class Extensions
             return new CombatAction(combatAction.Owner, combatAction.Illustration, combatAction.Name,
                 [.. combatAction.Traits], combatAction.Description, combatAction.Target);
         }
+        public CombatAction WithAction(Action<CombatAction> action)
+        {
+            action(combatAction);  
+            return combatAction;
+        }
+        public bool HasAnyTraits(Trait[] traits) =>
+            combatAction.Traits.Any(traits.Contains);
     }
 
     extension(NineCornerAlignment alignment)
@@ -62,11 +72,11 @@ public static class Extensions
 
     extension(Feat feat)
     {
-        // public Feat With(Action<Feat> action)
-        // {
-        //     action(feat);
-        //     return feat;
-        // }
+        public Feat WithAction(Action<Feat> action)
+        {
+            action(feat);
+            return feat;
+        }
 
         public Feat WithModifiedRulesText(string toReplace, string modifiedRulesText)
         {
@@ -95,6 +105,15 @@ public static class Extensions
         public string AsBlue()
         {
             return $"{{Blue}}{text}{{/Blue}}";
+        }
+    }
+
+    extension(QEffect effect)
+    {
+        public QEffect WithAction(Action<QEffect> action)
+        {
+            action(effect);
+            return effect;
         }
     }
 }

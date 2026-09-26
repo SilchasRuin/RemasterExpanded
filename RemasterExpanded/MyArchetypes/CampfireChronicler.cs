@@ -119,7 +119,8 @@ public static class CampfireChronicler
                 values.AddFeatForPurposesOfPrerequisitesOnly(FeatName.DomainInitiate);
                 values.IncreaseProficiency(11, Trait.Spell, Proficiency.Expert);
             });
-        yield return ArchetypeFeats.DuplicateFeatAsArchetypeFeat(FeatName.AdvancedDomain, MTraits.CampfireChronicler, 8).WithSubfeats(DuplicateAdvancedDomains().ToList());
+        yield return ArchetypeFeats.DuplicateFeatAsArchetypeFeat(FeatName.AdvancedDomain, MTraits.CampfireChronicler, 8).WithSubfeats(
+            [.. DuplicateAdvancedDomains(MTraits.CampfireChronicler)]);
         
     }
 
@@ -134,19 +135,13 @@ public static class CampfireChronicler
             yield return DuplicateDomain(protection, sacrifice);
     }
 
-    public static IEnumerable<Feat> DuplicateAdvancedDomains()
+    public static IEnumerable<Feat> DuplicateAdvancedDomains(Trait classTrait)
     {
-        List<Feat>? enumerable = AllFeats.GetFeatByFeatName(FeatName.Cleric).Subfeats;
-        if (enumerable == null) yield break;
-        List<FeatName> domains = [];
-        foreach (Feat deity in enumerable)
+        List<Feat> domains =
+            [.. AllFeats.All.Where(ft => ft.HasTrait(Trait.ClericDomain))];
+        foreach (Feat domain in domains)
         {
-            if (deity is not DeitySelectionFeat aDeity) continue;
-            domains.AddRange(aDeity.AllowedDomains);
-        }
-        foreach (FeatName domain in domains.Distinct())
-        {
-            yield return NewDeities.CreateAdvancedDomainFeat(MTraits.CampfireChronicler, AllFeats.GetFeatByFeatName(domain));
+            yield return NewDeities.CreateAdvancedDomainFeat(classTrait, domain);
         }
     }
 
@@ -234,23 +229,29 @@ public static class CampfireChronicler
         {
             ProvideMainAction = effect =>
             {
-                List<Possibility> storyAction = [];
-                storyAction.AddRange(stories.Select(qf => 
-                        new CombatAction(effect.Owner, qf.Illustration ?? IllustrationName.None, qf.Name ?? "placeholder", 
-                                [Trait.Auditory, Trait.Concentrate, Trait.Linguistic, Trait.Mental, Trait.Basic, qf.Name switch
+                List<Possibility> storyAction =
+                [
+                    .. stories.Select(qf =>
+                            new CombatAction(effect.Owner, qf.Illustration ?? IllustrationName.None,
+                                    qf.Name ?? "placeholder",
+                                    [
+                                        Trait.Auditory, Trait.Concentrate, Trait.Linguistic, Trait.Mental, Trait.Basic,
+                                        qf.Name switch
+                                        {
+                                            "Raging Stories" => Trait.Fire,
+                                            "Flickering Stories" => Trait.Shadow,
+                                            _ => Trait.None
+                                        }
+                                    ], qf.Description?.Replace("have", "gain") ?? "", Target.Self())
+                                .WithActionCost(1)
+                                .WithSoundEffect(SfxName.BookClosed)
+                                .WithEffectOnChosenTargets(async (self, _) =>
                                 {
-                                    "Raging Stories" => Trait.Fire,
-                                    "Flickering Stories" => Trait.Shadow,
-                                    _ => Trait.None
-                                }], qf.Description?.Replace("have", "gain") ?? "", Target.Self())
-                        .WithActionCost(1)
-                        .WithSoundEffect(SfxName.BookClosed)
-                        .WithEffectOnChosenTargets(async (self, _) =>
-                        {
-                            self.AddQEffect(qf.WithSource(source));
-                            effect.ExpiresAt = ExpirationCondition.Immediately;
-                        }))
-                    .Select(offer => new ActionPossibility(offer).WithPossibilityGroup("Stories")));
+                                    self.AddQEffect(qf.WithSource(source));
+                                    effect.ExpiresAt = ExpirationCondition.Immediately;
+                                }))
+                        .Select(offer => new ActionPossibility(offer).WithPossibilityGroup("Stories"))
+                ];
                 SubmenuPossibility storyBoard =
                     new(MIllustrations.CreateIllustration("OfferStories"), "Respond to Story")
                     {
@@ -342,6 +343,7 @@ public static class CampfireChronicler
             ModManager.RegisterFeatName("RE_Domain"+domain, domain.HumanizeTitleCase2()), 0);
         duplicateDomain.LevelIfAny = null;
         duplicateDomain.OnSheet = null;
+        duplicateDomain.Traits.Remove(Trait.ClericDomain);
         duplicateDomain.WithOnSheet(sheet =>
         {
             sheet.AddFeatForPurposesOfPrerequisitesOnly(domain);

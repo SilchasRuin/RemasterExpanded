@@ -139,6 +139,7 @@ public static class NewDeities
         Feat advancedDomain = new Feat(ModManager.TryParse("AdvancedDomain:" + forClass.HumanizeTitleCase2() + ":" + name, out FeatName featName) ? featName : ModManager.RegisterFeatName("AdvancedDomain:" + forClass.HumanizeTitleCase2() + ":" + name, name + ": " + spell.Name), "Your studies or prayers have unlocked deeper secrets of the " + name.ToLower() + " domain.",
                 $"You learn the {forClass.HumanizeTitleCase2().ToLower()} focus spell " + AllSpells.CreateSpellLink(advancedSpell, forClass) + ", and you gain 1 focus point, up to a maximum 3.", [], null)
             .WithIllustration(spell.Illustration)
+            .WithTag(domainFeat)
             .WithRulesBlockForSpell(advancedSpell, forClass)
             .WithPrerequisite(values => values.HasFeat(domainFeat.FeatName), "You must have the " + name + " domain.")
             .WithOnSheet(sheet =>
@@ -155,7 +156,10 @@ public static class NewDeities
                         sheet.AddFocusSpellAndFocusPoint(Trait.Champion, Ability.Charisma, advancedSpell);
                         break;
                     default:
-                        sheet.AddFocusSpellAndFocusPoint(MTraits.CampfireChronicler, Ability.Charisma, advancedSpell);
+                        sheet.AddFocusSpellAndFocusPoint(
+                            sheet.Sheet.Class?.ClassTrait == MTraits.CampfireChronicler
+                                ? MTraits.CampfireChronicler
+                                : MTraits.RemasterOracle, Ability.Charisma, advancedSpell);
                         break;
                 }
             });

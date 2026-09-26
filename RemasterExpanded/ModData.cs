@@ -8,6 +8,7 @@ using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Possibilities;
 using Dawnsbury.Display.Illustrations;
 using Dawnsbury.Modding;
+using RemasterExpanded.OracleRemastered;
 using SpiritDamage;
 
 namespace RemasterExpanded;
@@ -53,6 +54,10 @@ public static class ModData
         public static readonly ActionId DistractingSpellstrike = ModManager.RegisterEnumMember<ActionId>("RE_DistractingSpellstrike");
         public static readonly ActionId DevastatingSpellstrike = ModManager.RegisterEnumMember<ActionId>("RE_DevastatingSpellstrike");
         public static readonly ActionId PsychicIgnition = ModManager.RegisterEnumMember<ActionId>("RE_PsychicIgnition");
+        public static readonly ActionId ForetellHarm = ModManager.RegisterEnumMember<ActionId>("RE_ForetellHarm");
+        public static readonly ActionId WhispersOfWeakness = ModManager.RegisterEnumMember<ActionId>("RE_WhispersOfWeakness");
+        public static readonly ActionId MeddlingFutures = ModManager.RegisterEnumMember<ActionId>("RE_MeddlingFutures");
+        public static readonly ActionId KnowledgeOfShapes = ModManager.RegisterEnumMember<ActionId>("RE_KnowledgeOfShapes");
     }
     public static class MTraits
     {
@@ -68,6 +73,11 @@ public static class ModData
         public static readonly Trait AnimalWeapon = ModManager.RegisterTrait("RE_AnimalNaturalWeapon", new TraitProperties("Animal Natural Weapon", false));
         public static readonly Trait AspCoil = ModManager.RegisterTrait("RE_AspCoil", new TraitProperties("Asp Coil", false));
         public static readonly Trait Scourge = ModManager.RegisterTrait("RE_Scourge", new TraitProperties("Scourge", false));
+        public static readonly Trait RemasterOracle = ModManager.RegisterTrait("RE_RemasterOracle", new TraitProperties("Oracle", false) { IsClassTrait = true });
+        public static readonly Trait VisualOracle = ModManager.RegisterTrait("RE_VisualOracle", new TraitProperties("Oracle", true));
+        public static readonly Trait GiftedPower = ModManager.RegisterTrait("RE_GiftedPower", new TraitProperties("Gifted Power", false));
+        public static readonly Trait DoNotReduce = ModManager.RegisterTrait("RE_DoNotReduce", new TraitProperties("DoNotReduce", false));
+        public static readonly Trait Equivalent = ModManager.RegisterTrait("RE_Equivalent", new TraitProperties("Equivalent", true, "This homebrew item is equivalent to a legal printed item combination."));
     }
 
     public static class MFeatNames
@@ -95,6 +105,15 @@ public static class ModData
         public static readonly FeatName BlessedCounterstrike = ModManager.RegisterFeatName("RE_BlessedCounterstrike", "Blessed Counterstrike");
         public static readonly FeatName ExpandAura = ModManager.RegisterFeatName("RE_ExpandAura", "Expand Aura");
         public static readonly FeatName BlessedSwiftness = ModManager.RegisterFeatName("RE_BlessedSwiftness", "Blessed Swiftness");
+        public static readonly FeatName RemasterOracle = ModManager.RegisterFeatName("RE_RemasterOracle", "Oracle");
+        public static readonly FeatName OracularWarning = ModManager.RegisterFeatName("RE_OracularWarning", "Oracular Warning");
+        public static readonly FeatName ForetellHarm = ModManager.RegisterFeatName("RE_ForetellHarm", "Foretell Harm");
+        public static readonly FeatName NudgeTheScales = ModManager.RegisterFeatName("RE_NudgeTheScales", "Nudge the Scales");
+        public static readonly FeatName WhispersOfWeakness = ModManager.RegisterFeatName("RE_WhispersOfWeakness", "Whispers of Weakness");
+        public static readonly FeatName TranceOfCelerity = ModManager.RegisterFeatName("RE_TranceOfCelerity", "Trance of Celerity");
+        public static readonly FeatName DomainAcumen = ModManager.RegisterFeatName("RE_DomainAcumen", "Domain Acumen");
+        public static readonly FeatName FirstRevelation = ModManager.RegisterFeatName("RE_FirstRevelation", "First Revelation");
+        public static readonly FeatName WaterWalker = ModManager.RegisterFeatName("RE_WaterWalker", "Water Walker");
     }
 
     public static class MQEffectIds
@@ -139,6 +158,17 @@ public static class ModData
         public static QEffectId Analyzed { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_Analyzed");
         public static QEffectId StarlitEyes { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_StarlitEyes");
         public static QEffectId VitalBeacon { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_VitalBeacon");
+        public static QEffectId OracleCurse {get;} = ModManager.RegisterEnumMember<QEffectId>("RE_OracleCurse");
+        public static QEffectId ForetellHarm { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_ForetellHarm");
+        public static QEffectId WeaponTrance { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_WeaponTrance");
+        public static QEffectId MortalWarrior { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_MortalWarrior");
+        public static QEffectId ImmunityToSpell { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_ImmunityToSpell");
+        public static QEffectId LivingDeath { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_LivingDeath");
+        public static QEffectId KnowledgeOfShapes { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_KnowledgeOfShapes");
+        public static QEffectId Grisly { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_Grisly");
+        public static QEffectId BonesOfFate { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_BonesOfFate");
+        public static QEffectId Suppressed { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_Suppressed");
+        public static QEffectId Forestalled { get; } = ModManager.RegisterEnumMember<QEffectId>("RE_Forestalled");
     }
 
     public static class MIllustrations
@@ -177,5 +207,9 @@ public static class ModData
     {
         public static DamageKind Spirit => SpiritDamage;
     }
-    
+
+    extension(Trait)
+    {
+        public static Trait RemasterOracle => MTraits.RemasterOracle;
+    }
 }

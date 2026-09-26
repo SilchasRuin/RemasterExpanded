@@ -17,6 +17,7 @@ using Dawnsbury.IO;
 using Dawnsbury.Modding;
 using RemasterExpanded.ClassChangesAndFeats;
 using RemasterExpanded.MyArchetypes;
+using RemasterExpanded.OracleRemastered;
 using static RemasterExpanded.ModData;
 
 namespace RemasterExpanded;
@@ -72,6 +73,10 @@ public class FeatLoader
 
         foreach (Feat feat in MagusRemaster.LoadFeats())
             yield return feat;
+        foreach (Feat feat in OracleClass.LoadOracle())
+        {
+            yield return feat;
+        }
     }
 
     public static void ModifyFeats()
@@ -103,6 +108,7 @@ public class FeatLoader
             }
             feat.RulesText += " If you are at least 13th level, you become an expert in this armor type.";
         }
+        ModManager.RegisterActionOnEachActionPossibility(action => action.Traits.Remove(Trait.Open));
     }
     
     public static void RobustHealthLogic(TrueFeat feat)

@@ -6,7 +6,6 @@ using Dawnsbury.Modding;
 using RemasterExpanded.MySpells;
 using SpellsAndSpellhearts;
 using static RemasterExpanded.ModData;
-using RemasterSpells = Dawnsbury.Mods.Remaster.Spellbook.RemasterSpells;
 
 namespace RemasterExpanded;
 
@@ -48,6 +47,6 @@ public abstract class NewSpellhearts
             $"After you cast a vitality spell by Activating the crescent, your Strikes with the weapon deal an additional {dice} vitality damage until the end of your next turn.",
             dc - 10, dc, level, price, DeathbaneCrescentArmor(resistance, name), dice, DamageKind.Positive, [Trait.Positive], "deathbane",
             "This crescent moon carved out of bone holds the power to turn back the undead. This spellheart covers any item it's affixed to with spiderwebs that reappear even if damaged or removed.",
-            RemasterSpells.GetSpellIdByName("VitalityLash"), greater, major, false, MIllustrations.CreateIllustration("DeathbaneCrescent"));
+            SpellIds.VitalityLash, greater, major, false, MIllustrations.CreateIllustration("DeathbaneCrescent"));
     }
 }

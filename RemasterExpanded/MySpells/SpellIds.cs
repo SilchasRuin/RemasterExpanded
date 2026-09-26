@@ -45,4 +45,11 @@ public abstract class SpellIds
     public static SpellId Earthbind { get; set; }
     public static SpellId InfuseVitality { get; set; }
     public static SpellId VitalBeacon { get; set; }
+    public static SpellId GhostlyCarrier { get; set; }
+    public static SpellId VoidWarp { get; set; }
+    public static SpellId Ignition { get; set; }
+    public static SpellId VitalityLash { get; set; }
+    public static SpellId GrislyGrowths { get; set; }
+    public static SpellId Thunderstrike { get; set; }
+    public static SpellId Frostbite { get; set; }
 }

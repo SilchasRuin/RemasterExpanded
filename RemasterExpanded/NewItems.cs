@@ -36,8 +36,7 @@ public static class NewItems
 {
     public static ItemName AutoloadLeathers { get; set; }
     public static ItemName AstralRune { get; set; }
-    // public static ItemName GlueBombLesser { get; set; }
-    // public static ItemName GlueBombModerate { get; set; }
+    public static ItemName TacticiansHelm { get; set; }
     
     public static void LoadItems()
     {
@@ -388,7 +387,7 @@ public static class NewItems
                 IsMetal = true
             }));
         LongTermEffects.RegisterWithNumberArgument("RETacticianCharges", LongTermEffectDuration.Forever, TacticianCharges);
-        ModManager.RegisterNewItemIntoTheShop("RE_TacticiansHelm", name =>
+        TacticiansHelm = ModManager.RegisterNewItemIntoTheShop("RE_TacticiansHelm", name =>
          {
             return new Item(name, MIllustrations.CreateIllustration("TacticiansHelm"), "tactician's helm", 5, 160,
                     Trait.Invested, Trait.Magical, Trait.Worn)
@@ -502,6 +501,8 @@ public static class NewItems
                     "The first magus focus spell you cast each encounter doesn't cost you a focus point." +
                     "\n\nOnce per day, you can activate the ring as a free action {icon:FreeAction} ({tooltip:concentrate}concentrate{/tooltip}) and teleport to an unoccupied space you can see within a range equal to your speed.")
                 .WithItemBonusToSkill(Skill.Arcana, 2)
+                .WithHasLimitedEffectOnlyFor((sheet, _) => sheet.Class is {} classFeat &&
+                                                           (classFeat.ClassTrait == Trait.Magus || sheet.AdditionalClassTraits.Contains(Trait.Magus)) ? null : "You get the +2 bonus to Arcana and you can use the once per day teleport, but you are not a Magus so you do not benefit from the free focus spell.")
                 .WithOncePerDayWhenWornAction((itm, self) =>
                 {
                     return CombatAction.CreateAction(self, new SideBySideIllustration(itm.Illustration, IllustrationName.DimensionDoor), "Master magus ring teleport",
@@ -528,6 +529,12 @@ public static class NewItems
                     });
                 });
         });
+        ModManager.RegisterNewItemIntoTheShop("RE_HeavyMail", name => new Item(name, MIllustrations.CreateIllustration("HeavyMail"), "heavy mail", 0, 8,
+                Trait.HeavyArmor, Trait.MetalArmor, Trait.Noisy, Trait.Flexible, Trait.Chain, MTraits.Equivalent)
+            .WithArmorProperties(new ArmorProperties(5, 0, -3, -1, 18)
+            {
+                IsMetal = true
+            }));
 
         #region removed
 
@@ -974,6 +981,7 @@ public static class NewItems
             Id = MQEffectIds.TacticianCharges,
             Value = value,
             Name = "Tactician Charges",
+            Key = "TacticianCharges",
             Description = $"Your {{i}}tactician's helm{{/i}} has {oValue} charge{(oValue == 1 ? "" : "s")}.",
             Illustration = MIllustrations.CreateIllustration("TacticiansHelm"),
             EndOfCombat = async (effect, b) =>
@@ -1002,6 +1010,16 @@ public static class NewItems
                     >= 1 => MIllustrations.CreateIllustration("TacticiansHelm"),
                     _ => qf.Illustration
                 };
+            },
+            StartOfCombat = async qf =>
+            {
+                if (!qf.Owner.CarriesItem(TacticiansHelm) ||
+                    !qf.Owner.CarriedItems.Any(it => it.ItemName == TacticiansHelm && it.IsWorn))
+                {
+                    if (WellKnownLongTermEffects.CreateLongTermEffect("RETacticianCharges", null, 1) is {} charges)
+                        qf.Owner.LongTermEffects?.Effects.RemoveAll(it => it.Id == charges.Id);
+                    qf.ExpiresAt = ExpirationCondition.Immediately;
+                }
             }
         };
     }

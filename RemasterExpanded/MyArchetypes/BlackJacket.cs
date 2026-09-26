@@ -130,17 +130,15 @@ public class BlackJacket
             Creature self = qf.Owner;
             qf.AddGrantingOfTechnical(cr => cr.FriendOfAndNotSelf(self) && cr.DistanceTo(self) <= 6, qfTech =>
             {
-                int map = 0;
-                qfTech.StartOfYourEveryTurn = (_, _) =>
+                var map = 0;
+                qfTech.StartOfYourEveryTurn = async (_, _) =>
                 {
                     map = 0;
-                    return Task.CompletedTask;
                 };
-                qfTech.YouBeginAction = (_, action) =>
+                qfTech.YouBeginAction = async (_, action) =>
                 {
-                    if (!action.HasTrait(Trait.Strike)) return Task.CompletedTask;
+                    if (!action.HasTrait(Trait.Strike)) return;
                     map = action.Owner.Actions.AttackedThisManyTimesThisTurn;
-                    return Task.CompletedTask;
                 };
                 qfTech.AfterYouTakeAction = async (_, action) =>
                 {
@@ -149,20 +147,18 @@ public class BlackJacket
                     if (!await self.AskToUseReaction($"{ally} has critically missed with a Strike, would you like to use a {{icon:Reaction}} reaction to use Belay That!? ", self.Illustration)) return;
                     ally.AddQEffect(new QEffect("Belay That!", "The next attack", ExpirationCondition.ExpiresAtEndOfAnyTurn, self)
                     {
-                        YouBeginAction = (_, strike) =>
+                        YouBeginAction = async (_, strike) =>
                         {
                             if (!strike.HasTrait(Trait.Strike))
-                                return Task.CompletedTask;
+                                return;
                             strike.Owner.Actions.AttackedThisManyTimesThisTurn = map;
-                            return Task.CompletedTask;
                         },
-                        AfterYouTakeAction = (qf2, strike) =>
+                        AfterYouTakeAction = async (qf2, strike) =>
                         {
                             if (!strike.HasTrait(Trait.Strike))
-                                return Task.CompletedTask;
+                                return;
                             strike.Owner.Actions.AttackedThisManyTimesThisTurn += 1;
                             qf2.ExpiresAt = ExpirationCondition.Immediately;
-                            return Task.CompletedTask;
                         },
                         Illustration = IllustrationName.Swords
                     });

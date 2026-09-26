@@ -1,6 +1,5 @@
-﻿C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\Common.dll
+C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\Common.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\Dawnsbury Days.dll
-C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\Dawnsbury.Mods.Classes.Witch.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\Dawnsbury.Mods.DawnniExpanded.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\Dawnsbury.Mods.Remaster.FeatsDb.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\Dawnsbury.Mods.Remaster.Spellbook.dll
@@ -29,7 +28,6 @@ C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\SharpDX.MediaFoundation.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\SharpDX.XInput.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\SharpDX.XAudio2.dll
-C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\RemasterExpanded.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\System.Private.Windows.Core.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\Accessibility.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\System.Private.Windows.GdiPlus.dll
@@ -40,7 +38,6 @@ C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\System.CodeDom.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\SharpDX.Direct3D9.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\SharpDX.Mathematics.dll
-C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\MorePsychicConscious.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\System.Diagnostics.EventLog.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\System.Security.Cryptography.ProtectedData.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\Dawnsbury Days.pdb
@@ -48,7 +45,6 @@ C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\Dawnsbury Days.dll.config
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\PsychicExpanded.pdb
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\SpiritDamage.pdb
-C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\RemasterExpanded.pdb
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\cs\System.Windows.Forms.resources.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\de\System.Windows.Forms.resources.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\es\System.Windows.Forms.resources.dll
@@ -106,3 +102,8 @@ C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\obj\Debug\net10.0
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\obj\Debug\net10.0-windows\ref\Dawnsbury.Mods.RemasterExpanded.dll
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\Dawnsbury.Mods.LoresAndWeaknesses.pdb
 C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\obj\Debug\net10.0-windows\RemasterExpanded.sourcelink.json
+C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\Dawnsbury.Mods.MoreBasicActions.dll
+C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\HereThereBeDragons.dll
+C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\PhantomSentine.Feats.GranduerChampion.dll
+C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\HereThereBeDragons.pdb
+C:\Users\jcbco\RiderProjects\DawnniExPatchMod\RemasterExpanded\bin\Debug\net10.0-windows\SpellsAndSpellhearts.pdb

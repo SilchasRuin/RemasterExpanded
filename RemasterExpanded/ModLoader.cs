@@ -23,6 +23,7 @@ using HarmonyLib;
 using RemasterExpanded.ClassChangesAndFeats;
 using RemasterExpanded.MyArchetypes;
 using RemasterExpanded.MySpells;
+using RemasterExpanded.OracleRemastered;
 using static RemasterExpanded.ModData;
 using NewSpells = RemasterExpanded.MySpells.NewSpells;
 
@@ -46,11 +47,12 @@ public class ModLoader
         Inkdrop.AddInkdrop();
         NewSpells.LoadSpells();
         TangibleDreamFigment.LoadFigment();
-        if (RemasterSpells && LoadPsychic)
+        if (LoadPsychic)
         {
             OscillatingWaveRemaster.RemasterOscillatingWave();
         }
         NewDeities.LoadDomains();
+        OracleClass.Load();
         foreach (Feat feat in FeatLoader.LoadFeats())
         {
             ModManager.AddFeat(feat);
@@ -86,7 +88,7 @@ public class ModLoader
             RangerFeats.HideWardenFeats();
         }
 
-        if (RemasterSpells && SpellHearts)
+        if (SpellHearts)
         {
             NewSpellhearts.Load();
         }
@@ -176,7 +178,10 @@ public class ModLoader
             }
             if (PlayerProfile.Instance.IsBooleanOptionEnabled("RE_AlchemicalOrganization"))
                 AlchemicalOrganization.LoadOrganization();
-            
+            foreach (Feat feat in AllFeats.All)
+            {
+                feat.Traits.Remove(Trait.Open);
+            }
         };
     }
 }

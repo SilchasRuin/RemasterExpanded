@@ -2,6 +2,7 @@
 using Dawnsbury.Auxiliary;
 using Dawnsbury.Core;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
+using Dawnsbury.Core.CharacterBuilder.FeatsDb.Kineticist;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
 using Dawnsbury.Core.CharacterBuilder.Spellcasting;
 using Dawnsbury.Core.CombatActions;
@@ -12,13 +13,16 @@ using Dawnsbury.Core.Mechanics.Core;
 using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Mechanics.Rules;
 using Dawnsbury.Core.Mechanics.Targeting;
+using Dawnsbury.Core.Mechanics.Targeting.TargetingRequirements;
 using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Core.Mechanics.Zoning;
 using Dawnsbury.Core.Tiles;
 using Dawnsbury.Display.Illustrations;
+using Dawnsbury.Display.Text;
 using Dawnsbury.IO;
 using Dawnsbury.Modding;
 using Microsoft.Xna.Framework;
+using RemasterExpanded.Technical;
 using SpiritDamage;
 using static RemasterExpanded.ModData;
 using static RemasterExpanded.MySpells.SpellIds;
@@ -236,6 +240,109 @@ public abstract class NewCantrips : NewSpells
                 }
             };
         });
+        if (ModManager.TryParse("VoidWarp", out SpellId voidWarp))
+            VoidWarp = voidWarp;
+        else
+        {
+            VoidWarp = ModManager.RegisterNewSpell("VoidWarp", 0,
+                (_, _, level, inCombat, _) =>
+                {
+                    return Spells.CreateModern(IllustrationName.GrimTendrils, "Void Warp",
+                            [Trait.Arcane, Trait.Divine, Trait.Occult, Trait.Cantrip, Trait.Negative],
+                            "You call upon the Void to harm life force.",
+                            $"The target takes {S.HeightenedVariable(level + 1, 2)}d4 void damage (basic Fortitude save mitigates). On a critical failure, the target is also enfeebled 1 until the start of your next turn.",
+                            Target.Ranged(6)
+                                .WithAdditionalConditionOnTargetCreature(new LivingCreatureTargetingRequirement()),
+                            level, SpellSavingThrow.Basic(Defense.Fortitude))
+                        .WithSoundEffect(SfxName.ChillTouch)
+                        .WithHeighteningOfDamageEveryLevel(level, 1, inCombat, "1d4")
+                        .WithEffectOnEachTarget(async (spell, caster, target, result) =>
+                        {
+                            await CommonSpellEffects.DealBasicDamage(spell, caster, target, result, $"{level + 1}d4",
+                                DamageKind.Negative);
+                            if (result == CheckResult.CriticalFailure)
+                                target.AddQEffect(QEffect.Enfeebled(1).WithDispellable(spell)
+                                    .WithExpirationAtStartOfSourcesTurn(caster, 1));
+                        });
+                });
+        }
+        if (ModManager.TryParse("Ignition", out SpellId ignition))
+            Ignition = ignition;
+        else
+        {
+            Ignition = ModManager.RegisterNewSpell("Ignition", 0, (_, _, level, inCombat, _) =>
+            {
+                return Spells.CreateModern(IllustrationName.ProduceFlame, "Ignition",
+                        [Trait.Attack, Trait.Cantrip, Trait.Fire, Trait.Arcane, Trait.Primal, Trait.VersatileMelee],
+                        "You snap your fingers and point at a target, which begins to smolder.",
+                        $"Make a spell attack roll against the target's AC, dealing {S.HeightenedVariable(level + 1, 2)}d4 fire damage on a hit. If the target is within your melee reach, you can choose to make a melee spell attack with the flame instead of a ranged spell attack, which increases all the spell's damage dice to d6s." +
+                        S.FourDegreesOfSuccess(
+                            $"The target takes double damage and {S.HeightenedVariable(level, 1)}d4 persistent fire damage.",
+                            "The target takes full damage.", null, null), Target.Ranged(6), level, null)
+                    .WithSpellAttackRoll()
+                    .WithHeighteningNumerical(level, 1, inCombat, 1,
+                        "The initial damage increases by 1d4 and the persistent fire damage on a critical hit increases by 1d4.")
+                    .WithSoundEffect(SfxName.FireRay)
+                    .WithActionCost(2)
+                    .WithEffectOnEachTarget(async (spell, caster, target, result) =>
+                    {
+                        string dice = spell.HasTrait(Trait.Melee) ? $"{level + 1}d6" : $"{level + 1}d4";
+                        await CommonSpellEffects.DealAttackRollDamage(spell, caster, target, result, dice,
+                            DamageKind.Fire);
+                        string persistent = spell.HasTrait(Trait.Melee) ? $"{level}d6" : $"{level}d4";
+                        if (result == CheckResult.CriticalSuccess)
+                            await CommonSpellEffects.DealAttackRollPersistentDamage(target, CheckResult.Success,
+                                persistent, DamageKind.Fire);
+                    });
+            });
+        }
+        if (ModManager.TryParse("VitalityLash", out SpellId lash))
+            VitalityLash = lash;
+        else
+        {
+            VitalityLash = ModManager.RegisterNewSpell("VitalityLash", 0, (_, caster, level, inCombat, information) =>
+            {
+                return AllSpells.CreateModernSpell(SpellId.DisruptUndead, caster, level, inCombat, information)
+                    .CombatActionSpell.WithAction(sp =>
+                    {
+                        sp.Description = $"You deal {sp.SpellLevel + 1}d6 vitality damage with a basic Fortitude save. If the creature critically fails the save, it is also enfeebled 1 until the start of your next turn.";
+                        sp.WithFullRename("Vitality Lash");
+                        sp.Traits.Remove(Trait.Necromancy);
+                        sp.EffectOnOneTarget = null;
+                        sp.WithEffectOnEachTarget(async (spell, creature, target, result) =>
+                        {
+                            await CommonSpellEffects.DealBasicDamage(spell, creature, target, result, $"{spell.SpellLevel + 1}d6", DamageKind.Positive);
+                            if (result == CheckResult.CriticalFailure)
+                                target.AddQEffect(QEffect.Enfeebled(1).WithDispellable(spell)
+                                    .WithExpirationInOneRound(creature));
+                        });
+                    });
+            });
+        }
+
+        if (ModManager.TryParse("Frostbite", out SpellId frostbite))
+            Frostbite = frostbite;
+        else
+        {
+            Frostbite = ModManager.RegisterNewSpell("Frostbite", 0, (_, _, level, inCombat, _) =>
+            {
+                return Spells.CreateModern(IllustrationName.RayOfFrost, "Frostbite",
+                        [Trait.Arcane, Trait.Primal, Trait.Cold],
+                        "An orb of biting cold coalesces around your target, freezing its body.",
+                        $"The target takes {S.HeightenedVariable(level + 1 , 2)}d4 cold damage with a basic Fortitude save. On a critical failure, the target also gains weakness {S.HeightenedVariable(level, 1)} to bludgeoning until the start of your next turn.",
+                        Target.Ranged(12), level, SpellSavingThrow.Basic(Defense.Fortitude))
+                    .WithSoundEffect(SfxName.RayOfFrost)
+                    .WithActionCost(2)
+                    .WithHeighteningNumerical(level, 1, inCombat, 1, "The damage increases by 1d4 and the weakness on a critical failure increases by 1.")
+                    .WithEffectOnEachTarget(async (spell, caster, target, result) =>
+                    {
+                        await CommonSpellEffects.DealBasicDamage(spell, caster,  target, result, $"{level + 1}d4", DamageKind.Cold);
+                        if (result == CheckResult.CriticalFailure)
+                            target.AddQEffect(QEffect.DamageWeakness(DamageKind.Bludgeoning, level)
+                                .WithExpirationInOneRound(caster));
+                    });
+            });
+        }
     }
 
     private static QEffect FlankingFig(Creature caster, Creature figment, CombatAction spell)

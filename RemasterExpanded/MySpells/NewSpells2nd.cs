@@ -4,6 +4,7 @@ using Dawnsbury.Core;
 using Dawnsbury.Core.Animations;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
+using Dawnsbury.Core.CharacterBuilder.Spellcasting;
 using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Coroutines.Options;
 using Dawnsbury.Core.Coroutines.Options.Reactive;
@@ -15,6 +16,8 @@ using Dawnsbury.Core.Mechanics.Core;
 using Dawnsbury.Core.Mechanics.Damage;
 using Dawnsbury.Core.Mechanics.Enumerations;
 using Dawnsbury.Core.Mechanics.Targeting;
+using Dawnsbury.Core.Mechanics.Targeting.TargetingRequirements;
+using Dawnsbury.Core.Mechanics.Targeting.Targets;
 using Dawnsbury.Core.Mechanics.Treasure;
 using Dawnsbury.Core.Mechanics.Zoning;
 using Dawnsbury.Core.Possibilities;
@@ -611,7 +614,83 @@ public class NewSpells2nd : NewSpells
                     }, $"Sustain the spell to continue the duration and deal {heighten/2}d10 damage to all creatures in the area.");
 
                 });
+        });
+        if (!ModManager.TryParse("LaughingFit", out SpellId laugh))
+        {
+            ModManager.RegisterNewSpell("LaughingFit", 2, (_, caster, level, inCombat, information) =>
+            {
+                CombatAction spell = AllSpells
+                    .CreateModernSpell(SpellId.HideousLaughter, caster, level, inCombat, information).CombatActionSpell
+                    .WithName("Laughing Fit");
+                return Spell.DuplicateSpell(spell).CombatActionSpell;
+            });
+        }
+        else
+        {
+            ModManager.RegisterActionOnEachSpell(action =>
+            {
+                if (action.SpellId != laugh)
+                    return;
+                action.EffectOnChosenTargets = null;
+                action.EffectOnOneTarget = null;
+                int level = action.SpellLevel;
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+                bool inCombat = action.Owner != null && action.Owner.Battle != TBattle.Pseudobattle;
+                CombatAction spell = AllSpells
+                    .CreateModernSpell(SpellId.HideousLaughter, action.Owner, level, inCombat, action.SpellInformation ?? new SpellInformation()).CombatActionSpell
+                    .WithName("Laughing Fit");
+                action.EffectOnChosenTargets = spell.EffectOnChosenTargets;
+                action.EffectOnOneTarget = spell.EffectOnOneTarget;
+                action.Description = spell.Description;
+            });
+        }
 
+        GhostlyCarrier = ModManager.RegisterNewSpell("GhostlyCarrier", 2, (_, _, level, _, _) =>
+        {
+            return Spells.CreateModern(MIllustrations.CreateIllustration("GhostlyCarrier"), "Ghostly Carrier",
+                    [Trait.Arcane, Trait.Occult, Trait.SpellWithDuration, Trait.Rebalanced],
+                    "You create an incorporeal hand to deliver spells for you.",
+                    "Whenever you Cast a Spell with a range of touch, you can instead use a range of up to 120 feet.",
+                    Target.Self(), level, null)
+                .WithSoundEffect(SfxName.Summoning)
+                .WithEffectOnSelf(async (spell, self) =>
+                {
+                    self.AddQEffect(new QEffect("Ghostly Carrier", "Touch spells instead use a range of up to 120 feet.", spell.Illustration)
+                    {
+                        MetamagicProvider = new MetamagicProvider("Ghostly Carrier", spell.Illustration, false, sp =>
+                        {
+                            CombatAction metamagicSpell = Spell.DuplicateSpell(sp).CombatActionSpell;
+                            if (metamagicSpell.Target is not CreatureTarget touch || !touch.CreatureTargetingRequirements.Any(req => req is NaturalReachCreatureTargetingRequirement))
+                                return null;
+                            metamagicSpell.Name = "Carried " + metamagicSpell.Name;
+                            IncreaseTarget(touch);
+                            string? description = metamagicSpell.Target.ToDescription();
+                            int num = description?.Count(c => c == '\n') ?? 0;
+                            string[] strArray = metamagicSpell.Description.Split('\n', 4 + num);
+                            if (strArray.Length >= 4)
+                                metamagicSpell.Description = $"{strArray[0]}\n{strArray[1]}\n{{Blue}}{metamagicSpell.Target.ToDescription()}{{/Blue}}\n{strArray[3 + num]}";
+                            return metamagicSpell;
+                            void IncreaseTarget(CreatureTarget creatureTarget)
+                            {
+                                metamagicSpell.Traits = new Traits(metamagicSpell.Traits
+                                    .Except([Trait.Melee])
+                                    .Concat([Trait.Ranged]), metamagicSpell);
+                                creatureTarget.RangeKind = RangeKind.Ranged;
+                                creatureTarget.CreatureTargetingRequirements.RemoveAll(ctr =>
+                                {
+                                    return ctr switch
+                                    {
+                                        AdjacencyCreatureTargetingRequirement or AdjacentOrSelfTargetingRequirement or NaturalReachCreatureTargetingRequirement => true,
+                                        _ => ctr is MeleeReachCreatureTargetingRequirement
+                                    };
+                                });
+                                creatureTarget.CreatureTargetingRequirements.Add(new MaximumRangeCreatureTargetingRequirement(24));
+                                creatureTarget.CreatureTargetingRequirements.Add(new UnblockedLineOfEffectCreatureTargetingRequirement());
+                                creatureTarget.OverriddenFullTargetLine = null;
+                            }
+                        })
+                    });
+                });
         });
     }
 }

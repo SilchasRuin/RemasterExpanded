@@ -12,6 +12,8 @@ using Dawnsbury.Core.CharacterBuilder.FeatsDb.Common;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Kineticist;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook;
 using Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb;
+using Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Archetypes;
+using Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Archetypes.Multiclass;
 using Dawnsbury.Core.CharacterBuilder.Spellcasting;
 using Dawnsbury.Core.CombatActions;
 using Dawnsbury.Core.Coroutines.Options;
@@ -107,7 +109,7 @@ public class MagusRemaster
                     cascade.Target = Target.Self();
                     Creature magus = effect.Owner;
                     CombatAction? triggeringSpell =
-                        magus.Actions.ActionHistoryThisTurn.LastOrDefault(sp => sp.HasTrait(Trait.Spell));
+                        magus.Actions.ActionHistoryThisTurn.LastOrDefault(sp => sp.HasTrait(Trait.Spell) || sp.HasTrait(Trait.Spellstrike));
                     ModifyCascade(cascade, triggeringSpell);
                 },
                 AfterYouTakeAction = async (effect, triggeringSpell) =>
@@ -181,7 +183,7 @@ public class MagusRemaster
                     studiousSpells.Add(SpellId.DimensionDoor);
             });
         })
-        .With(ft =>
+        .WithAction(ft =>
         {
             ft.RulesText += $"\nAt level 7, add {AllSpells.CreateSpellLink(SpellId.Blur, Trait.Magus, 2)} to your list of studious spells. At level 11, add {AllSpells.CreateSpellLink(SpellId.GhostlyWeapon, Trait.Magus, 3)}. At level 13, add {AllSpells.CreateSpellLink(SpellId.DimensionDoor, Trait.Magus, 4)}.";
         });
@@ -203,7 +205,7 @@ public class MagusRemaster
                 if (values.Tags["StudiousSpells"] is List<SpellId> studiousSpells)
                     studiousSpells.Add(SpellId.DimensionalAnchor);
             });
-        }).With(ft =>
+        }).WithAction(ft =>
         {
             ft.RulesText += $"\nAt level 7, add {AllSpells.CreateSpellLink(SpellId.Enlarge, Trait.Magus, 2)} to your list of studious spells. At level 11, add {AllSpells.CreateSpellLink(SpellIds.Earthbind, Trait.Magus, 3)}. At level 13, add {AllSpells.CreateSpellLink(SpellId.DimensionalAnchor, Trait.Magus, 4)}.";
         });
@@ -225,7 +227,7 @@ public class MagusRemaster
                 if (values.Tags["StudiousSpells"] is List<SpellId> studiousSpells)
                     studiousSpells.Add(SpellId.Stoneskin);
             });
-        }).With(ft =>
+        }).WithAction(ft =>
         {
             ft.RulesText += $"\nAt level 7, add {AllSpells.CreateSpellLink(SpellId.ResistEnergy, Trait.Magus, 2)} to your list of studious spells. At level 11, add {AllSpells.CreateSpellLink(SpellIds.WardingAggression, Trait.Magus, 3)}. At level 13, add {AllSpells.CreateSpellLink(SpellId.Stoneskin, Trait.Magus, 4)}.";
         });
@@ -247,12 +249,12 @@ public class MagusRemaster
                 if (values.Tags["StudiousSpells"] is List<SpellId> studiousSpells)
                     studiousSpells.Add(SpellId.FreedomOfMovement);
             });
-        }).With(ft =>
+        }).WithAction(ft =>
         {
             ft.RulesText += $"\nAt level 7, add {AllSpells.CreateSpellLink(SpellId.TelekineticManeuver, Trait.Magus, 2)} to your list of studious spells. At level 11, add {AllSpells.CreateSpellLink(SpellIds.WallOfWind, Trait.Magus, 3)}. At level 13, add {AllSpells.CreateSpellLink(SpellId.FreedomOfMovement, Trait.Magus, 4)}.";
         });
         ConfluxSpells.Load();
-        AllFeats.GetFeatByFeatName(FeatName.ExpansiveSpellstrike).With(ft =>
+        AllFeats.GetFeatByFeatName(FeatName.ExpansiveSpellstrike).WithAction(ft =>
         {
             ft.OnCreature = null;
             ft.WithPermanentQEffect("Spellstrikes made with area spells affect an area, instead of only the target of your Spellstrike.", qf =>
@@ -397,16 +399,32 @@ public class MagusRemaster
 
         AllFeats.GetFeatByFeatName(FeatName.SpellSwipe).WithModifiedRulesText("If you have Expansive Spellstrike and use a ", "If you use a ");
         AllFeats.GetFeatByFeatName(FeatName.CascadeCountermeasure).WithModifiedRulesText("cascade countermeasure", "conjurer's countermeasure")
-            .With(ft => ft.FlavorText = "Using your knowledge of how to battle enemy mages, you create a barrier to protect yourself from spells.")
+            .WithAction(ft => ft.FlavorText = "Using your knowledge of how to battle enemy mages, you create a barrier to protect yourself from spells.")
             .WithCustomName("Conjurer's Countermeasure")
             .WithIllustration(IllustrationName.SpellImmunity);
+        AllFeats.GetFeatByFeatName(FeatName.BasicMagusSpellcasting).WithAction(ft =>
+        {
+            Feat replace = MulticlassArchetypeFeats.CreateBasicSpellcastingBenefitsFeat(Trait.Magus, Trait.Prepared);
+            ft.OnSheet = replace.OnSheet;
+            ft.RulesText = replace.RulesText;
+        });
+        AllFeats.GetFeatByFeatName(FeatName.ExpertMagusSpellcasting).WithAction(ft =>
+        {
+            Feat replace = MulticlassArchetypeFeats.CreateExpertSpellcastingBenefitsFeat(Trait.Magus, Trait.Prepared);
+            ft.OnSheet = replace.OnSheet;
+            ft.RulesText = replace.RulesText;
+        });
+        AllFeats.GetFeatByFeatName(FeatName.MasterMagusSpellcasting).WithAction(ft =>
+        {
+            Feat replace = MulticlassArchetypeFeats.CreateMasterSpellcastingBenefitsFeat(Trait.Magus, Trait.Prepared);
+            ft.OnSheet = replace.OnSheet;
+            ft.RulesText = replace.RulesText;
+        });
         ModManager.RegisterBooleanSettingsOption("RE_RemoveHomebrewMagus", "Remaster Expanded: Remove Homebrew Magus Feats", "If this option is enabled, homebrew feats for the Magus class added by Dawnsbury Days are removed. {b}NOTE:{/b} You must restart the game for this to take place.", false);
         if (!PlayerProfile.Instance.IsBooleanOptionEnabled("RE_RemoveHomebrewMagus")) return;
+        foreach (Feat vFeat in AllFeats.All.Where(ft => ft.HasTrait(Trait.Homebrew) && ft.HasTrait(Trait.Magus)))
         {
-            foreach (Feat vFeat in AllFeats.All.Where(ft => ft.HasTrait(Trait.Homebrew) && ft.HasTrait(Trait.Magus)))
-            {
-                vFeat.Traits.Clear();
-            }
+            vFeat.Traits.Clear();
         }
     }
 
@@ -1130,10 +1148,12 @@ public class MagusRemaster
                 if (action.HasTrait(Trait.Melee))
                     action.WithExtraTrait(Trait.Arcane);
             };
-            effect.StateCheck = _ =>
+            Action<QEffect>? state = effect.StateCheck;
+            effect.StateCheck = (_ =>
             {
-                magus.WeaknessAndResistance.AddSpecialResistance("Damage from spells", (action, _) => action != null && action.HasTrait(Trait.Spell), bonus, null);
-            };
+                magus.WeaknessAndResistance.AddSpecialResistance("Damage from spells",
+                    (action, _) => action != null && action.HasTrait(Trait.Spell), bonus, null);
+            }) + state;
             if (magus.HasEffect(QEffectId.LaughingShadow))
                 effect.BonusToAllSpeeds = qfArcaneCascade => qfArcaneCascade.Owner.Armor.WearsArmor ? new Bonus(1, BonusType.Status, "Laughing Shadow") : new Bonus(2, BonusType.Status, "Laughing Shadow");
             if (self.HasEffect(QEffectId.InexorableIron))
@@ -1179,6 +1199,15 @@ public class MagusRemaster
 
     public static HashSet<DamageKind> DetermineDamageKindFromSpell(CombatAction spell, bool arcaneCascade = true)
     {
+        if (spell.HasTrait(Trait.Spellstrike))
+        {
+            spell = spell.Tag switch
+            {
+                CombatAction spellTag => spellTag,
+                Tuple<CombatAction, Func<Creature, Creature, CheckResult, Task>> tuple => tuple.Item1,
+                _ => spell
+            };
+        }
         string s = spell.Description;
         HashSet<DamageKind> set = [];
         if (arcaneCascade)
@@ -1195,6 +1224,8 @@ public class MagusRemaster
     
     internal static bool SpellDealsDamage(CombatAction action)
     {
+        if (!action.HasTrait(Trait.Spell))
+            return false;
         if ((!action.Description.ContainsIgnoreCase("deal") &&
              !action.Description.ContainsIgnoreCase("attack") &&
              !action.Description.ContainsIgnoreCase("take") &&
@@ -1290,6 +1321,7 @@ public class MagusRemaster
                 .WithAdditionalRestrictionsOnEachTarget((_, earlierCreatures, newCreature) => earlierCreatures.All(acr => acr != newCreature && acr.IsAdjacentTo(newCreature))))
             .WithTargetingTooltip((_, _, n) => n == 0 ? "Strike this creature as the first target (1/2). If you hit both targets, the spell will prioritize affecting this target." : "Strike this creature as the second target (2/2).")
             .WithActionCost(3)
+            .WithTag(spell)
             .WithEffectOnChosenTargets(async (fighter, targets) =>
             {
                 int map = fighter.Actions.AttackedThisManyTimesThisTurn;
@@ -1355,6 +1387,7 @@ public class MagusRemaster
                       )
                   .WithActionCost(2)
                   .WithItem(weapon)
+                  .WithTag(spell)
                   .WithSoundEffect(spell.SoundEffectName)
                   .WithProjectileCone(spell.Illustration, spell.ProjectileCount, spell.ProjectileKind)
                   .WithEffectOnChosenTargets(async (action, caster, targets) =>
@@ -1434,12 +1467,12 @@ public class MagusRemaster
       strike.Traits.Add(Trait.Basic);
       strike.ActionCost = spellcastingStrikeKind == SpellcastingStrikeKind.EldritchShot ? 3 : 2;
       AddAdditionalRestrictions((CreatureTarget) strike.Target);
-      strike.StrikeModifiers.OnEachTarget = (Func<Creature, Creature, CheckResult, Task>) (async (a, d, result) =>
+      strike.StrikeModifiers.OnEachTarget = async (a, d, result) =>
       {
-        await ApplySpellToTargets(a, d, result, null, CheckResult.CriticalFailure);
-        postSpellcast();
-        ++a.Actions.AttackedThisManyTimesThisTurn;
-      });
+          await ApplySpellToTargets(a, d, result, null, CheckResult.CriticalFailure);
+          postSpellcast();
+          ++a.Actions.AttackedThisManyTimesThisTurn;
+      };
       StrikeModifiers strikeModifiers = strike.StrikeModifiers;
       if (aftertext == "Enemies adjacent to the target take splash damage equal to 2 plus the extra damage from Arcane Cascade. The damage type is the same as Arcane Cascade.")
       {
@@ -1452,6 +1485,10 @@ public class MagusRemaster
               strikeModifiers.OnEachTarget);
           strike.WithTag(tuple);
           strike.ContextMenuName = $"Devastating Spellstrike ({spell.Name})";
+      }
+      else
+      {
+          strike.WithTag(spell);
       }
       var str1 = $"{prologue}{(prologue != null ? " " : "")}Using {name} increases your multiple attack penalty twice.";
       string? str2 = isSavingThrowSpellStrike ? $"You cast {spell.Name} at the target." : null;
@@ -1488,22 +1525,20 @@ public class MagusRemaster
                   a.Spellcasting == null || a.Spellcasting.FocusPoints == 0
                       ? Usability.CommonReasons.NoFocusPoints
                       : Usability.Usable);
-          if (finalSpellTarget != null)
+          if (finalSpellTarget == null) return strikeTarget;
+          foreach (CreatureTargetingRequirement targetingRequirement in finalSpellTarget
+                       .CreatureTargetingRequirements)
           {
-              foreach (CreatureTargetingRequirement targetingRequirement in finalSpellTarget
-                           .CreatureTargetingRequirements)
+              switch (targetingRequirement)
               {
-                  switch (targetingRequirement)
-                  {
-                      case AdjacencyCreatureTargetingRequirement _:
-                      case MaximumRangeCreatureTargetingRequirement _:
-                      case MeleeReachCreatureTargetingRequirement _:
-                      case NaturalReachCreatureTargetingRequirement _:
-                          continue;
-                      default:
-                          strikeTarget.WithAdditionalConditionOnTargetCreature(targetingRequirement);
-                          continue;
-                  }
+                  case AdjacencyCreatureTargetingRequirement _:
+                  case MaximumRangeCreatureTargetingRequirement _:
+                  case MeleeReachCreatureTargetingRequirement _:
+                  case NaturalReachCreatureTargetingRequirement _:
+                      continue;
+                  default:
+                      strikeTarget.WithAdditionalConditionOnTargetCreature(targetingRequirement);
+                      continue;
               }
           }
           return strikeTarget;
@@ -1525,7 +1560,7 @@ public class MagusRemaster
               effectuatedSpell.Traits.Add(Trait.FromSpellcastingStrike);
               if (overwhelmingSpellstrike)
                   effectuatedSpell.Traits.Add(Trait.Overwhelming);
-              if ((isSavingThrowSpellStrike && result > CheckResult.CriticalFailure) || result >= CheckResult.Success)
+              if ((isSavingThrowSpellStrike && result > CheckResult.CriticalFailure) || result >= CheckResult.Success || (spell.Name == "Live Wire" && result == CheckResult.Failure))
               {
                   var flag = false;
                   QEffect? qeffect = a.FindQEffect(QEffectId.Stupefied);

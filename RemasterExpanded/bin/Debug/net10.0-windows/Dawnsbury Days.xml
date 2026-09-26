@@ -88,11 +88,18 @@
             </summary>
             <param name="song">The music track to play.</param>
         </member>
-        <member name="M:Dawnsbury.Audio.Sfxs.SlideIntoSong(FmodForFoxes.Sound)">
+        <member name="M:Dawnsbury.Audio.Sfxs.SlideIntoSong(Dawnsbury.Audio.FmodSound)">
             <summary>
             Cross-fades out of the currently playing music track, if any, into a new music track.
             </summary>
-            <param name="newSong">The music track to play, given as a Sound object, which allows for resuming a previously loaded music track.</param>
+            <param name="fmodSound">The music track to play, given as a FmodSound object, which allows for resuming a previously loaded music track.</param>
+        </member>
+        <member name="M:Dawnsbury.Audio.Sfxs.SlideIntoSong(FmodForFoxes.Sound,Dawnsbury.Audio.Songname)">
+            <summary>
+            Cross-fades out of the currently playing music track, if any, into a new music track.
+            </summary>
+            <param name="newSong">The music track to play, given as a FmodSound object, which allows for resuming a previously loaded music track.</param>
+            <param name="songname">Name of the new song.</param>
         </member>
         <member name="M:Dawnsbury.Audio.Sfxs.Silence">
             <summary>
@@ -248,7 +255,22 @@
             Invokes a delegate with the given arguments and returns its task, if the delegate is not null, otherwise returns a completed task. 
             </summary>
         </member>
+        <member name="M:Dawnsbury.Auxiliary.ExtensionMethods.InvokeIfNotNull``6(System.Func{``0,``1,``2,``3,``4,``5,System.Threading.Tasks.Task},``0,``1,``2,``3,``4,``5)">
+            <summary>
+            Invokes a delegate with the given arguments and returns its task, if the delegate is not null, otherwise returns a completed task. 
+            </summary>
+        </member>
         <member name="M:Dawnsbury.Auxiliary.ExtensionMethods.InvokeIfNotNull``4(System.Func{``0,``1,``2,``3,System.Threading.Tasks.Task},``0,``1,``2,``3)">
+            <summary>
+            Invokes a delegate with the given arguments and returns its task, if the delegate is not null, otherwise returns a completed task. 
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Auxiliary.ExtensionMethods.InvokeIfNotNull(Dawnsbury.Delegates.EffectOnEachTarget,Dawnsbury.Core.CombatActions.CombatAction,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Mechanics.Core.CheckResult)">
+            <summary>
+            Invokes a delegate with the given arguments and returns its task, if the delegate is not null, otherwise returns a completed task. 
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Auxiliary.ExtensionMethods.InvokeIfNotNull(Dawnsbury.Delegates.EffectOnChosenTargets,Dawnsbury.Core.CombatActions.CombatAction,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Mechanics.Targeting.ChosenTargets)">
             <summary>
             Invokes a delegate with the given arguments and returns its task, if the delegate is not null, otherwise returns a completed task. 
             </summary>
@@ -485,6 +507,12 @@
             Provides randomness.
             </summary>
         </member>
+        <member name="M:Dawnsbury.Auxiliary.R.Next(System.Int32,System.Int32)">
+            <summary>
+            Returns a random number between MIN (inclusive) and MAX (exclusive). For example, use <c>R.Next(1, 5)</c> to roll a 1d4. This counts as a rules roll
+            for the purposes of deterministic randomness. 
+            </summary>
+        </member>
         <member name="T:Dawnsbury.Auxiliary.Resolution">
             <summary>
             Represents a display resolution.
@@ -682,13 +710,19 @@
             </summary>
             <param name="gameTime">gameTime parameter from the Game.Update() method.</param>
         </member>
+        <member name="M:Dawnsbury.Auxiliary.Root.WasKeyPressedDown(Microsoft.Xna.Framework.Input.Keys,Dawnsbury.Auxiliary.ModifierKey[])">
+            <summary>
+            Returns true only if this key or key combination became pressed this frame and was not pressed in the preceding frame.
+            </summary>
+            <param name="key">We test whether this key is pressed this frame.</param>
+            <param name="modifiersPressed">This combination of keys must also be pressed this frame.</param>
+        </member>
         <member name="M:Dawnsbury.Auxiliary.Root.WasKeyPressed(Microsoft.Xna.Framework.Input.Keys,Dawnsbury.Auxiliary.ModifierKey[])">
             <summary>
             Returns true only if a key was just pressed down and released.
             </summary>
             <param name="key">We test whether this key was pressed and released</param>
             <param name="modifiersPressed">This combination of keys must have been pressed at the time of release</param>
-            <returns></returns>
         </member>
         <member name="P:Dawnsbury.Auxiliary.Root.WasMouseLeftClick">
             <summary>
@@ -784,6 +818,12 @@
             Returns a hard-coded list of common PC monitor resolutions.
             </summary>
         </member>
+        <member name="M:Dawnsbury.Campaign.Encounters.Doors.CreateBasicDoor">
+            <summary>
+            Creates an indestructible out-of-combat door that reveals fog-of-war when it's opened.
+            </summary>
+            <returns></returns>
+        </member>
         <member name="P:Dawnsbury.Campaign.Encounters.Encounter.CharacterLevel">
             <summary>
             The level of player characters, which is suggested by the encounter itself but may be overridden by the player in random encounter mode.
@@ -797,6 +837,12 @@
         <member name="M:Dawnsbury.Campaign.Encounters.Encounter.ModifyCreatureSpawningIntoTheEncounter(Dawnsbury.Core.Creatures.Creature)">
             <summary>
             Applies to each creature as it begins to exist, whether it exists from the very beginning, is summoned, is spawned later or is a pet.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Campaign.Encounters.Encounter.FindSpeaker(System.String,Dawnsbury.Core.TBattle)">
+            <summary>
+            If the Ink script for this encounter tries to find a character with the given script name, it first tries to find it using this encounter-specific
+            code before going for the defaults.
             </summary>
         </member>
         <member name="F:Dawnsbury.Campaign.Encounters.TriggerName.StartOfEncounter">
@@ -848,6 +894,21 @@
             <param name="deserialize">Loading long-term effect using <see cref="M:Dawnsbury.Campaign.LongTerm.LongTermEffects.Add(System.String)"/> or loading it from a save file or character library will produce a result here. The first argument is the serialized text. If it doesn't match what you expect, return null: the long-term effect is probably registered by someone else. The second argument is the kind you must use in the returned long-term effect.</param>
             <returns>The unique long-term effect ID that was created for this registration. You probably don't need to use this.</returns>
         </member>
+        <member name="M:Dawnsbury.Campaign.Mansion.MansionImprovement.WithOnCreature(System.Action{Dawnsbury.Campaign.Path.CampaignState,Dawnsbury.Core.Creatures.Creature})">
+            <summary>
+            Applies to each member of the Dawnsbury Four as they're being constructed in <see cref="M:Dawnsbury.Core.CharacterBuilder.CharacterSheet.ToCreature(System.Int32)"/>.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Campaign.MidgameSaving.DecisionPoints.RepresentsMansionScene">
+            <summary>
+            This is a mid-encounter save represent the mansion scene with the given ID.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Campaign.MidgameSaving.DecisionPoints.ReplayingAtLeast(System.Int32)">
+            <summary>
+            Returns true if we are <b>not</b> in action replay or if we are replaying a save file created with at least the given Decision Points version.
+            </summary>
+        </member>
         <member name="T:Dawnsbury.Campaign.Path.AdventurePath">
             <summary>
             Represents an adventure in Story mode.
@@ -896,6 +957,20 @@
         <member name="P:Dawnsbury.Campaign.Path.AdventurePath.BansLootReport">
             <summary>
             This adventure path doesn't support post-encounter loot report.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Campaign.Path.AdventurePath.HeroCampaignTraits">
+            <summary>
+            If not null, then this adventure path uses characters with names, personalities, and other features set by the adventure designer. The first element
+            corresponds to the first character, the second to the second, the third to third, and the fourth to the fourth. The array, if not null, should
+            have exactly four elements.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Campaign.Path.AdventurePath.CreateQuickstartCharacterSheets">
+            <summary>
+            Creates a new set of four character sheets that will be used if the player chooses "Quick start" from the campaign start menu. By default, this
+            creates the default Dawnsbury Four party. You should always instantiate a new set of character sheets in this method. Do not
+            reuse existing character sheets. 
             </summary>
         </member>
         <member name="F:Dawnsbury.Campaign.Path.CampaignState.commonGold">
@@ -949,7 +1024,6 @@
         <member name="P:Dawnsbury.Campaign.Path.CampaignState.CurrentLevel">
             <summary>
             The current intended level of heroes.
-            TODO: When does this change.
             </summary>
         </member>
         <member name="P:Dawnsbury.Campaign.Path.CampaignState.BoughtSomethingInShop">
@@ -1007,9 +1081,15 @@
             Returns the encounter that blocks onward progress, if any.
             </summary>
         </member>
-        <member name="M:Dawnsbury.Campaign.Path.CampaignState.AdvanceToNextStop">
+        <member name="M:Dawnsbury.Campaign.Path.CampaignState.AdvanceToNextStop2(Dawnsbury.Core.TBattle)">
             <summary>
             Advances up to the final blocking stop in this open sequence, then skips over it and activates the first stop after that.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Campaign.Path.CampaignState.RemoveFirstInventoryItem(System.Func{Dawnsbury.Core.Mechanics.Treasure.Item,System.Boolean})">
+            <summary>
+            Removes the first item that matches the predicate from your inventory, preferring to remove from common loot if possible, then from heroes in order
+            from left to right. Returns the removed item, if any was removed. Unattaches the item from the holder if it was, for example, in a bag of holding.
             </summary>
         </member>
         <member name="P:Dawnsbury.Campaign.Path.CampaignStops.CampaignStop.Index">
@@ -1091,6 +1171,13 @@
             Gets data on mid-game saves.
             </summary>
         </member>
+        <member name="M:Dawnsbury.Campaign.Stories.InkStandardKeywords.Register(System.String,System.Func{Dawnsbury.Campaign.Stories.BattleAssociatedDawninkStory,System.String,System.Threading.Tasks.Task})">
+            <summary>
+            Registers a new keyword accessible from Ink scripts.
+            </summary>
+            <param name="keyword">A keyword, such as "TRIGGER" or "MUSIC".</param>
+            <param name="keywordAction">Effect of the keyword, taking into account THE STORY and the TEXT AFTER THE KEYWORD, excluding the opening space.</param>
+        </member>
         <member name="F:Dawnsbury.Constants.ACTION_COST_VARIABLE_ACTION_COST_ONE_TWO_OR_THREE">
             <summary>
             The user can choose to spend 1 action, 2 actions or 3 actions on this.
@@ -1147,6 +1234,45 @@
             This movement doesn't trigger balance checks for either ice or grease.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Animations.Movement.MovementStyle.FirstDiagonalCountsAsDoubleMovement">
+            <summary>
+            The first diagonal movement during this pathfinding counts as double movement. Use this if you're doing a pathfinding following a partial pathfinding that used the first,
+            "free" diagonal but not yet the expensive one. 
+            </summary>
+        </member>
+        <member name="T:Dawnsbury.Core.Animations.Movement.NoPressureMovement">
+            <summary>
+            Contains functionality for exploration maps where you can take any number of actions in a turn.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Animations.Movement.NoPressureMovement.PressureExists(Dawnsbury.Core.Mechanics.QEffect)">
+            <summary>
+            Returns true if we are currently "out of combat" in an exploration map.
+            </summary>
+            <param name="anyQEffectInThisBattle">Any QEffect on any creature in the current battle.</param>
+        </member>
+        <member name="M:Dawnsbury.Core.Animations.Movement.NoPressureMovement.PressureExists(Dawnsbury.Core.Creatures.Creature)">
+            <summary>
+            Returns true if we are currently "out of combat" in an exploration map.
+            </summary>
+            <param name="anyCreatureInThisBattle">Any creature in the current battle.</param>
+        </member>
+        <member name="M:Dawnsbury.Core.Animations.Movement.NoPressureMovement.PressureExists(Dawnsbury.Core.TBattle)">
+            <summary>
+            Returns true if we are currently "out of combat" in an exploration map.
+            </summary>
+            <param name="battle">The current battle.</param>
+        </member>
+        <member name="M:Dawnsbury.Core.Animations.Movement.NoPressureMovement.CreateNoPressureOutOfCombat">
+            <summary>
+            Creates the QEffect that means that the owner of the QEffect may take any number of actions when we're out-of-combat in this battle. 
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Animations.Movement.NoPressureMovement.PossiblyAllowCreatureToDoNoPressureMovement(Dawnsbury.Core.Creatures.Creature)">
+            <summary>
+            Gives the given creature the no-pressure QEffect (<see cref="M:Dawnsbury.Core.Animations.Movement.NoPressureMovement.CreateNoPressureOutOfCombat"/>) if it's a hero.
+            </summary>
+        </member>
         <member name="M:Dawnsbury.Core.CharacterBuilder.AbilityScores.AbilityBoost.GetOptions">
             <summary>
             Gets all the abilitise that you could possibly get from this ability boost. Meant for use to determine possible key abilities for archetypes.
@@ -1175,12 +1301,12 @@
         </member>
         <member name="P:Dawnsbury.Core.CharacterBuilder.CalculatedCharacterSheetValues.AtEndOfRecalculation">
             <summary>
-            Triggers after recalculation completes, including after morning and precombat preparations.
+            Triggers after recalculation completes, including after downtime, morning and precombat preparations.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.CharacterBuilder.CalculatedCharacterSheetValues.AtEndOfRecalculationBeforeMorningPreparations">
             <summary>
-            Triggers after main levels recalculation completes, before morning preparations are processed.
+            Triggers after main levels recalculation completes, before downtime, morning and precombat preparations are processed.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.CharacterBuilder.CalculatedCharacterSheetValues.RangerBenefitsToCompanion">
@@ -1236,6 +1362,28 @@
             adds a selection option to choose any substitute skill to become proficient in.
             </summary>
         </member>
+        <member name="T:Dawnsbury.Core.CharacterBuilder.CampaignTraits">
+            <summary>
+            Defines designer-chosen characteristics of a player character for a specific campaign.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.CharacterBuilder.CampaignTraits.AllowRename">
+            <summary>
+            If true, then even though this is a campaign character with a specific personality or features, the player should still be able to rename the
+            character even without checking the box "Allow me to change character names"
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.CampaignTraits.CreateCanonicalDawnsburyFourCampaignTraits">
+            <summary>
+            Creates the basic array of campaign traits that corresponds to Anna, Scarlet, Tok'dar, and Saffi from the main Dawnsbury Days storyline.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.CharacterBuilder.CharacterSheet.HistoryFeats">
+            <summary>
+            List of extra technical notes associated with this sheet, usually added by a specific adventure path. These notes survive even in free encounter mode. They do nothing on their own,
+            the campaign that added them must also add functionality for them, usually with <see cref="M:Dawnsbury.Modding.ModManager.RegisterActionOnEachCharacterSheet(System.Action{Dawnsbury.Core.CharacterBuilder.CharacterSheet})"/>.
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.CharacterBuilder.CharacterSheet.LinkedHero">
             <summary>
             If this sheet is part of a campaign, then this is a link to information about that character, used to access its persisted used-up values.
@@ -1271,6 +1419,12 @@
         <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.CommonAbilityEffects.Grapple(Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Creatures.Creature,System.Boolean)">
             <summary>
             Causes the TARGET to become grabbed (or RESTRAINED) by the GRAPPLER.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.CommonCinematicActions.BreakSecretDoor(Dawnsbury.Core.Tiles.Tile)">
+            <summary>
+            Causes the wall on the given tile to be transformed into free space. That tile must be annotated as "Breakable" in the map editor on the map, or
+            else this won't work.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.CommonCombatActions.GetStrikePossibilities(Dawnsbury.Core.Creatures.Creature,System.Func{Dawnsbury.Core.Creatures.Creature,System.Boolean})">
@@ -1314,9 +1468,19 @@
         </member>
         <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.CommonSpellEffects.DealDirectSplashDamage(Dawnsbury.Core.CombatActions.CombatAction,Dawnsbury.Core.Roller.DiceFormula,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Mechanics.Enumerations.DamageKind)">
             <summary>
-            Inflicts damage, marking it splash damage, meaning that it won't receive bonuses to damage.
+            Inflicts damage, marking it as "splash damage", meaning that it won't receive bonuses to damage. In Dawnsbury Days terms, this is
+            "non-interactible" damage, but it's not true splash damage. For that, use <see cref="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.CommonSpellEffects.DealTrueDirectSplashDamage(Dawnsbury.Core.CombatActions.CombatAction,Dawnsbury.Core.Roller.DiceFormula,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Mechanics.Enumerations.DamageKind)"/>.
             </summary>
             <param name="power">The combat action that caused the damage to be inflicted (can be null).</param>
+            <param name="damage">The damage to be dealt.</param>
+            <param name="targetCreature">The creature to receive the damage.</param>
+            <param name="damageKind">Damage type, for the purposes of weakness, resistance and other effects.</param>
+        </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.CommonSpellEffects.DealTrueDirectSplashDamage(Dawnsbury.Core.CombatActions.CombatAction,Dawnsbury.Core.Roller.DiceFormula,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Mechanics.Enumerations.DamageKind)">
+            <summary>
+            Inflicts splash damage. Splash damage doesn't trigger some reactions; and triggers the weaknesses of troops and swarms.
+            </summary>
+            <param name="spell">The combat action that caused the damage to be inflicted (can be null).</param>
             <param name="damage">The damage to be dealt.</param>
             <param name="targetCreature">The creature to receive the damage.</param>
             <param name="damageKind">Damage type, for the purposes of weakness, resistance and other effects.</param>
@@ -1329,8 +1493,27 @@
         </member>
         <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.CommonSpellEffects.CumulativeDrain(Dawnsbury.Core.Creatures.Creature,System.Int32,System.Int32)">
             <summary>
-            Increases the Drained condition of <paramref name="target"/> by <paramref name="value"/>, up to a maximum of <paramref name="maximum"/> (normally 4),
-            and returns the number by which the condition was actually increased.
+            Inflicts drained X on the target, or if it's already drained, increases its drained value by X, up to the given maximum (default maximum 4). Returns the amount by which the target's condition was actually increased.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.CommonSpellEffects.CumulativeEnfeebled(Dawnsbury.Core.Creatures.Creature,System.Int32,System.Int32)">
+            <summary>
+            Inflicts enfeebled X on the target, or if it's already enfeebled, increases its enfeebled value by X, up to the given maximum (default maximum 4). Returns the amount by which the target's condition was actually increased.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.CommonSpellEffects.CumulativeClumsy(Dawnsbury.Core.Creatures.Creature,System.Int32,System.Int32)">
+            <summary>
+            Inflicts clumsy X on the target, or if it's already clumsy, increases its clumsy value by X, up to the given maximum (default maximum 4). Returns the amount by which the target's condition was actually increased.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.CommonSpellEffects.CumulativeStupefied(Dawnsbury.Core.Creatures.Creature,System.Int32,System.Int32)">
+            <summary>
+            Inflicts stupefied X on the target, or if it's already stupefied, increases its stupefied value by X, up to the given maximum (default maximum 4). Returns the amount by which the target's condition was actually increased.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.CommonSpellEffects.CumulativeDoomed(Dawnsbury.Core.Creatures.Creature,System.Int32,System.Int32)">
+            <summary>
+            Inflicts doomed X on the target, or if it's already doomed, increases its doomed value by X, up to the given maximum (typically 5, unless otherwise specified by the ability). Returns the amount by which the target's condition was actually increased.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.CommonSpellEffects.RemoveFromPlay(Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Creatures.Creature,System.String,System.String,System.String,System.Func{Dawnsbury.Core.Tiles.Tile},Microsoft.Xna.Framework.Color)">
@@ -1344,6 +1527,21 @@
             <param name="additionalRules">Additional text to be appended to the description of the QEffect, e.g. "You can't take any actions."</param>
             <param name="whereToReturnTo">Produces a tile where the target should be ejected when the returned QEffect expires. This will also destroy the surface.</param>
             <param name="teleportColor">Color with which the target should blink when being transported into or ejected from the surface.</param>
+        </member>
+        <member name="P:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.GrappleTag.Reach">
+            <summary>
+            Grapple reach of the grappling creature.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.GrappleTag.NaturalGrapple">
+            <summary>
+            This grapple is a natural grapple that depends on the grappler's hands, as opposed to a magical grapple.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.CharacterBuilder.FeatsDb.Common.GrappleTag.EscapeDC">
+            <summary>
+            If not zero, then this is the static DC that the grappled creature must beat instead of the grappler's Athletics DC.
+            </summary>
         </member>
         <member name="P:Dawnsbury.Core.CharacterBuilder.FeatsDb.Kineticist.KineticistChoices.KineticActivation">
             <summary>
@@ -1396,6 +1594,18 @@
             <param name="flavorText">Italics text at the top.</param>
             <param name="rulesText">Rules text of the impulse and the feat.</param>
             <param name="target">Targeting requirements of the impulse.</param>
+        </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook.Battleforms.BattleformDefinition.WithAttacks(System.Func{System.Int32,Dawnsbury.Core.Mechanics.Treasure.Item[]})">
+            <summary>
+            Sets this battleform with its natural attacks. Note that you MUST recreate the attacks on each call of the method, you can't keep returning
+            the same pre-instantiated items or else it will interact weirdly with handwraps of mighty blows.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook.Battleforms.BattleformDefinition.WithAttacks(System.Func{System.Int32,Dawnsbury.Core.Mechanics.Treasure.Item})">
+            <summary>
+            Sets this battleform with its single natural attack. Note that you MUST recreate the attack on each call of the method, you can't keep returning
+            the same pre-instantiated item or else it will interact weirdly with handwraps of mighty blows.
+            </summary>
         </member>
         <member name="M:Dawnsbury.Core.CharacterBuilder.FeatsDb.Spellbook.Spells.CreateModern(Dawnsbury.Display.Illustrations.Illustration,System.String,Dawnsbury.Core.Mechanics.Enumerations.Trait[],System.String,System.String,Dawnsbury.Core.Mechanics.Targeting.Target,System.Int32,Dawnsbury.Core.Mechanics.Core.SpellSavingThrow)">
             <summary>
@@ -1470,6 +1680,46 @@
             Returns true if ATTACKER is the RANGER, or that ranger's animal companion, or is benefitting from that ranger's Warden's Boon and DEFENDER is that ranger's prey.
             </summary>
         </member>
+        <member name="F:Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Specific.TerrainKind.Aquatic">
+            <summary>
+            We're underwater. This never happens automatically.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Specific.TerrainKind.Arctic">
+            <summary>
+            We're in the Frozen North. This happens if we're outdoors and there is at least 20 snows or ices.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Specific.TerrainKind.Civilization">
+            <summary>
+            We're in a city or human building. This never happens automatically.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Specific.TerrainKind.Forest">
+            <summary>
+            We're in a forest. This happens if we're outdoors and there is at least 20 trees.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Specific.TerrainKind.Plains">
+            <summary>
+            We're in plains. This happens if we're outdoors but not in a forest.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Specific.TerrainKind.Sky">
+            <summary>
+            We're in the skies or in Heaven. This happens if we're outdoors and there is at least 1 cloud.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Specific.TerrainKind.Swamp">
+            <summary>
+            We're in a swamp. This happens if we're outdoors and there is at least 20 muds.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.CharacterBuilder.FeatsDb.TrueFeatDb.Specific.TerrainKind.Underground">
+            <summary>
+            We're in a dungeon. This happens if we're indoors.
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.CharacterBuilder.Feats.AncestrySelectionFeat.PreventUsageAsMixedHeritage">
             <summary>
             If true, then this ancestry will not be available as an option for mixed heritage; and you won't be able to give it a mixed heritage.
@@ -1497,9 +1747,19 @@
             <param name="newFeatName">Name of the new, returned, feat.</param>
             <param name="newLevel">The new level requirement of the returned feat.</param>
         </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.Feats.CommonFeatTemplates.CreateDuplicateFeatForDifferentClass(Dawnsbury.Core.CharacterBuilder.Feats.FeatName,Dawnsbury.Core.CharacterBuilder.Feats.FeatName,System.Int32,Dawnsbury.Core.Mechanics.Enumerations.Trait)">
+            <summary>
+            Creates a new feat that's a copy of the template feat, except it has a different technical name (FeatName), a different level, and belongs to a different class INSTEAD of the previous class.
+            You can still make changes to the feat afterward before you register it.
+            </summary>
+            <param name="templateFeatName">Name of the template feat, which must already be registered by the time you call this method.</param>
+            <param name="newFeatName">Name of the new, returned, feat.</param>
+            <param name="newLevel">The new level requirement of the returned feat.</param>
+            <param name="newClassTrait">The class trait of the class which owns the new feat.</param>
+        </member>
         <member name="P:Dawnsbury.Core.CharacterBuilder.Feats.Feat.ZOrder">
             <summary>
-            If this is a subfeat, then it will display in ascending order of this value (default 0), and only then alphabetically.
+            Feats and subfeats will display in this order in preference to alphabetically, in ascending order of this value (default 0), and only then alphabetically.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.CharacterBuilder.Feats.Feat.FeatGroup">
@@ -1511,6 +1771,12 @@
         <member name="P:Dawnsbury.Core.CharacterBuilder.Feats.Feat.Tag">
             <summary>
             Any object attached to this feat, to be referenced by other related feats.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.CharacterBuilder.Feats.Feat.InappropriateBecauseOfBadInventory">
+            <summary>
+            If the CHARACTER with a given INVENTORY is unable to use this feat, returns the full reason for why this feat is unusable,
+            otherwise returns null. If this is null, then this feat is always appropriate.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.CharacterBuilder.Feats.Feat.WithOnSheet(System.Action{Dawnsbury.Core.CharacterBuilder.CalculatedCharacterSheetValues})">
@@ -1536,9 +1802,26 @@
             Consider using <see cref="M:Dawnsbury.Modding.ModManager.RegisterFeatName(System.String,System.String)"/> instead of <see cref="M:Dawnsbury.Core.CharacterBuilder.Feats.Feat.WithCustomName(System.String)"/> for new feats.
             </summary>
         </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.Feats.Feat.WithInappropriateBecauseOfBadInventory(System.Func{Dawnsbury.Core.CharacterBuilder.CalculatedCharacterSheetValues,Dawnsbury.Core.CharacterBuilder.Inventory,System.String})">
+            <summary>
+            Sets that this feat should display a "Mismatching inventory" warning to the user if their inventory doesn't match the feat's requirements.
+            </summary>
+            <param name="inappropriateBecauseOfBadInventory">If the CHARACTER with a given INVENTORY is unable to use this feat, returns the full reason for why this feat is unusable, otherwise returns null.</param>
+        </member>
         <member name="T:Dawnsbury.Core.CharacterBuilder.Feats.FeatGrant">
             <summary>
             Represents that you gained the feat <see cref="P:Dawnsbury.Core.CharacterBuilder.Feats.FeatGrant.GrantedFeat"/> at character level <see cref="P:Dawnsbury.Core.CharacterBuilder.Feats.FeatGrant.AtLevel"/>.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.Feats.FeatInventoryRequirements.RequiresOne(Dawnsbury.Core.CharacterBuilder.Inventory,System.Func{Dawnsbury.Core.Mechanics.Treasure.Item,System.Boolean},System.String)">
+            <summary>
+            This feat works if you wield at least one item that MATCHES the predicate; otherwise the error message says that you need the YOU-MUST-WIELD-WHAT item.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CharacterBuilder.Feats.FeatInventoryRequirements.RequiresOneOrFreeHand(Dawnsbury.Core.CharacterBuilder.Inventory,System.Func{Dawnsbury.Core.Mechanics.Treasure.Item,System.Boolean},System.Boolean,System.String)">
+            <summary>
+            This feat works if you wield at least one item that MATCHES the predicate or your have a free hand; if FREE HAND CONJUCTIVE is true,
+            then you must have both such an item AND a free hand; otherwise the error message says that you need the YOU-MUST-WIELD-WHAT item.
             </summary>
         </member>
         <member name="F:Dawnsbury.Core.CharacterBuilder.Feats.FeatName.CustomFeat">
@@ -1591,6 +1874,11 @@
         </member>
         <member name="M:Dawnsbury.Core.CharacterBuilder.Feats.TrueFeat.WithPermanentQEffectAndSameRulesText(System.Action{Dawnsbury.Core.Mechanics.QEffect})">
             <inheritdoc cref="M:Dawnsbury.Core.CharacterBuilder.Feats.Feat.WithPermanentQEffectAndSameRulesText(System.Action{Dawnsbury.Core.Mechanics.QEffect})"/>
+        </member>
+        <member name="P:Dawnsbury.Core.CharacterBuilder.Feats.TrueFeat.DedicationFor">
+            <summary>
+            If this is not <see cref="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.None"/>, then this is a dedication feat for the given archetype.
+            </summary>
         </member>
         <member name="T:Dawnsbury.Core.CharacterBuilder.Feats.FeatNameExtensions">
             <summary>
@@ -2335,6 +2623,11 @@
             represents the unarmed attack. For spells, this can be a fictitious item. Many actions do not have an associated item at all.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.CombatActions.CombatAction.ActionCost">
+            <summary>
+            Gets or sets the number of actions that it costs to fullcast this action. This may be 0, 1, 2, 3, or it may be a special number from <see cref="T:Dawnsbury.Constants"/> such as <see cref="F:Dawnsbury.Constants.ACTION_COST_REACTION"/>.
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.CombatActions.CombatAction.ImpulseInformation">
             <summary>
             If this combat action, represents an impulse, then this has further kineticist-specific information about it; otherwise returns null.
@@ -2366,9 +2659,21 @@
             this integer excludes that additional cost. (So you may spend three actions, but the SpentActions property will still show only 2.) 
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.CombatActions.CombatAction.IsDeterminedToBeRangedAttack">
+            <summary>
+            This property is set as this action begins to be cast and is true if this action represents a ranged attack, taking into account versatile melee,
+            weapon infusion, throwing, etc.
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.CombatActions.CombatAction.ActionCostIncreasedByOneByMeta">
             <summary>
             Whether this is an action whose cost was increased by 1 because of metamagic or Trick Magic Item.  
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.CombatActions.CombatAction.ActionCostMetaModification">
+            <summary>
+            Gets or sets an additional cost in actions added to this action on top of its standard cost by metaeffects such as metamagic and Trick Magic Item. This may also be negative in case of effects that reduce the action cost
+            of an action.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.CombatActions.CombatAction.CheckResult">
@@ -2389,6 +2694,11 @@
         <member name="M:Dawnsbury.Core.CombatActions.CombatAction.WithSoundEffect(Dawnsbury.Audio.SfxName)">
             <summary>
             Adds a sound effect that is played when a creature uses this action, just after targets are selected.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CombatActions.CombatAction.WithSoundEffect(System.Nullable{Dawnsbury.Audio.SfxName})">
+            <summary>
+            Adds a sound effect that is played when a creature uses this action, just after targets are selected. If you supply null, then erases the sound effect.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.CombatActions.CombatAction.WithNoSaveFor(System.Func{Dawnsbury.Core.CombatActions.CombatAction,Dawnsbury.Core.Creatures.Creature,System.Boolean})">
@@ -2421,6 +2731,43 @@
             <summary>
             Is this action likely to provoke an attack of opportunity? This is used for display in the bottom bar and for AI thinking.
             </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CombatActions.CombatAction.WithBonusToSave(System.Func{Dawnsbury.Core.CombatActions.CombatAction,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Mechanics.Core.Bonus})">
+            <summary>
+            When this ACTION is cast by CASTER against a TARGET, and that target makes a saving throw against it, the target gets this bonus on its save (or no bonus if null is returned).
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CombatActions.CombatAction.WithAdjustSavingThrowResult(System.Func{Dawnsbury.Core.CombatActions.CombatAction,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Mechanics.Core.CheckResult,Dawnsbury.Core.Mechanics.Core.CheckResult})">
+            <summary>
+            When this ACTION is cast against a TARGET and would result in a saving throw result of ORIGINAL RESULT, it results in the returned result instead. Use for
+            spells such as Litany against Wrath and wrathful creatures.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CombatActions.CombatAction.WithStrikeNameAndIllustrationChange(System.String,Dawnsbury.Display.Illustrations.Illustration,System.Boolean)">
+            <summary>
+            Renames the action according to name, and makes a side-by-side illustration using illustration.
+            If thrown is true, then renames the action as "name (thrown)" and creates an illustration with the item, the thrown illustration, and "illustration".
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CombatActions.CombatAction.WithCountersAlsoAndAddsToDescription(Dawnsbury.Core.CharacterBuilder.Spellcasting.SpellId,System.String)">
+            <summary>
+            This doesn't do anything currently, but it's here in case we decide to add this feature later, bringing "opposed spells" back from First Edition.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.CombatActions.CombatAction.WithDisplayChanceInNameAndDescription">
+            <summary>
+            Adds the percentage chance of success to the name, and the full breakdown of the roll into the description. Useful (and usable only) for
+            self actions such as "Retch" which have no target.
+            </summary>
+            <exception cref="T:System.InvalidOperationException">If you use this on an action that doesn't have a self roll.</exception>
+        </member>
+        <member name="M:Dawnsbury.Core.CombatActions.CombatAction.WithDisplayChanceInNameAndDescription(Dawnsbury.Core.Creatures.Creature)">
+            <summary>
+            Adds the percentage chance of success to the name, and the full breakdown of the roll into the description. Useful (and usable only) for
+            self actions such as "Escape" which have a virtual target (the grappler).
+            </summary>
+            <param name="virtualTarget">If this is an attack roll, it goes against this target. If null, then it goes against the caster.</param>
+            <exception cref="T:System.InvalidOperationException">If you use this on an inappropriate action.</exception>
         </member>
         <member name="M:Dawnsbury.Core.CombatActions.CombatActionExecution.ExpendResources">
             <summary>
@@ -2498,17 +2845,82 @@
         </member>
         <member name="T:Dawnsbury.Core.Coroutines.Options.Reactive.DeathEvent">
             <summary>
-            Contains information about a creature about to become dead due to being at Dying 4.
+            Contains information about a creature about to become dead due to being at Dying 4 or because it is reduced to 0 HP by damage and is a monster.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Coroutines.Options.Reactive.DeathEvent.Dying">
             <summary>
-            Gets the <see cref="F:Dawnsbury.Core.Mechanics.QEffectId.Dying"/> effect on the dying creature. You need to adjust this.
+            Gets the <see cref="F:Dawnsbury.Core.Mechanics.QEffectId.Dying"/> effect on the dying creature, if any. You need to adjust this.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Coroutines.Options.Reactive.DeathEvent.PreventDeath">
             <summary>
             Gets or sets whether death should be prevented. You need to set this to true.
+            </summary>
+        </member>
+        <member name="T:Dawnsbury.Core.Coroutines.Options.Reactive.ReactionOption">
+            <summary>
+            Represents a proposed response to a reaction-collecting event. It may be a reaction, a free action or a technical action.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Coroutines.Options.Reactive.ReactionOption.Index">
+            <summary>
+            Zero-based index of this response, from top to bottom, used during action replay.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Coroutines.Options.Reactive.ReactionOption.ReactingCreature">
+            <summary>
+            Gets or sets the creature that takes this response.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Coroutines.Options.Reactive.ReactionOption.MouseOverStatblock">
+            <summary>
+            Hovering over this response will show this stat block to the player.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Coroutines.Options.Reactive.ReactionOption.IsPass">
+            <summary>
+            This response represents the basic "Pass" response which means the player does not wish to take any more responses.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Coroutines.Options.Reactive.ReactionOption.IsReaction">
+            <summary>
+            This response is a true reaction, will only appear if the player has a reaction available and will spend that reaction.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Coroutines.Options.Reactive.ReactionOption.Caption">
+            <summary>
+            Gets or sets the bold caption, such as "Battle Cry" or "Blood Vendetta".
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Coroutines.Options.Reactive.ReactionOption.EffectSummary">
+            <summary>
+            Gets or sets the detailed explanation, written in imperative mood, such as "Prevent 20 of that damage."
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Coroutines.Options.Reactive.ReactionOption.ReactionIdentifier">
+            <summary>
+            Gets or sets the technical identifier that represents this response's source for the purposes of a single creature being unable to use the same source twice during the
+            same reaction offer, especially at start of combat. For example, if you put "Battle Cry" here, then a single creature won't be able to take two "Battle Cry" responses at
+            start of combat, even if they're free actions.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Coroutines.Options.Reactive.ReactionOption.TriggerReason">
+            <summary>
+            This replaces the the primary prompt if the only options are options with that trigger reason. If there are options with varied TriggerReasons,
+            it gets added as a parenthetical. You can describe here what caused this response option to trigger, e.g. "You scored a critical hit against Kobold A, who is flat-footed."
+            Do this especially if the collecting event is generic, such as <see cref="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouTakeActionAgainstTargetReaction"/>.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Coroutines.Options.Reactive.ReactionOption.DoesNotCountAsYourTriggerResponse">
+            <summary>
+            Tabletop rules normally require that a single creature can respond to a single trigger with one response only, whether it's a free action or a reaction. If this is true, then it means that this reaction option is a technical choice that "doesn't count" as that unique response, and so you can take both this option and another option.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Coroutines.Options.TileOption.ShowTooltipEvenForSingleTileOptionAlways">
+            <summary>
+            If true, then even if there is only one <see cref="T:Dawnsbury.Core.Coroutines.Options.TileOption"/> available for a tile, if it's this one, then its <see cref="P:Dawnsbury.Core.Coroutines.Options.Option.Tooltip"/> will appear as a
+            tooltip to the player when they're hovering over this tile. (Option.Tooltip usually comes from <see cref="P:Dawnsbury.Core.Coroutines.Options.Option.Text"/>)
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Coroutines.Requests.AdvancedRequest.DisplacedCreature">
@@ -2991,8 +3403,12 @@
         </member>
         <member name="P:Dawnsbury.Core.Creatures.Creature.IsNamedMonster">
             <summary>
-            If true, then this monster's name is a proper name ("The Final Death" or "The Inevitable Death") rather than a descriptor ("Orc Warrior", "Brimorak") and so shouldn't be modified
-            to say "Weak" or "Elite" and such.
+            If true, then this monster's name is a proper name ("The Final Death" or "The Inevitable Death") or a unique creature rather than a descriptor ("Orc Warrior", "Brimorak") and so shouldn't be modified with modifiers, plus it shouldn't be summonable.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Creature.IsOutsider">
+            <summary>
+            Returns true if this creature comes from another plane and so can be banished.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Creatures.Creature.ScriptName">
@@ -3003,6 +3419,27 @@
         <member name="P:Dawnsbury.Core.Creatures.Creature.MustSurviveOrPlayerLoses">
             <summary>
             Returns true if the final death of this creature causes the player to lose the encounter.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Creature.DoesNotProvideSoftCoverToEnemies">
+            <summary>
+            As long as this is true, this creature doesn't provide a +1 soft cover bonus to enemies if it stands between an allied archer and the enemy. Used by the aim-aiding rune.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Creature.EligibleForPetrification">
+            <summary>
+            Gets whether this creature is made of flesh and so can be petrified.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Creature.AiLevelMinimum1">
+            <summary>
+            Returns this creature's level or 1, whichever is higher. Used mostly for AI goodness calculations.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Creature.AdditionalAdjustments">
+            <summary>
+            If not null and this creature is modified with Inferior, Weak, Elite, or Supreme, then this code runs and further modifies the creature,
+            e.g. by giving it additional abilities.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Creatures.Creature.ExitAndRemoveHeldItem(Dawnsbury.Core.Mechanics.Treasure.Item)">
@@ -3048,6 +3485,14 @@
             take reactions, this returns false.
             </summary>
             <param name="question">Text of the dialog box.</param>
+        </member>
+        <member name="M:Dawnsbury.Core.Creatures.Creature.AskToUseReaction(System.String,Dawnsbury.Core.Mechanics.Enumerations.Trait[])">
+            <summary>
+            Asks the controller of this creature if they want to take a reaction in response to an event. The AI will always choose to take a reaction. If this creature can't currently
+            take reactions, this returns false.
+            </summary>
+            <param name="question">Text of the dialog box.</param>
+            <param name="reactionTraits">Traits of the reaction action, used to determine when you can use a bonus reaction for this.</param>
         </member>
         <member name="M:Dawnsbury.Core.Creatures.Creature.AskToUseReaction(System.String,Dawnsbury.Core.CombatActions.CombatAction)">
             <summary>
@@ -3163,17 +3608,43 @@
         </member>
         <member name="M:Dawnsbury.Core.Creatures.Impulsing.ImpulseSavingThrow">
             <summary>
-            Returns this creatures flat impulse saving throw DC, before dynamic bonuses from feats or conditions
+            Returns this creatures flat impulse saving throw DC, before dynamic bonuses from feats or conditions.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Creatures.Impulsing.GetImpulseAttack">
             <summary>
-            Returns this creatures impulse attack modifier, including bonuses
+            Get this creature's impulse attack modifier, including bonuses.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Creatures.Impulsing.GetImpulseSaveDC">
             <summary>
-            Returns this creatures impulse saving throw DC, including bonuses
+            Get this creature's impulse saving throw DC, including bonuses.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Parts.CreatureCache.ActualReach">
+            <summary>
+            Gets or sets the creature's theatening reach.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Parts.CreatureCache.PermitLunge">
+            <summary>
+            This temporary technical flag is turned on during combat maneuver generation of possibilities regeneration to allow you to use Lunge with combat maneuvers during your main
+            turn only.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Creatures.Parts.CreatureCache.Clear">
+            <summary>
+            Clears actual reach, and everything that flows from it.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Parts.CreatureNeighbours.Creatures">
+            <summary>
+            Gets all creatures on all adjacent tiles, but not creatures that are only on this tile.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Parts.CreatureNeighbours.CreaturesPlusCreatureOnSelf">
+            <summary>
+            Gets all creatures on all adjacent tiles plus all creatures on this tile.
             </summary>
         </member>
         <member name="F:Dawnsbury.Core.Creatures.Parts.Proficiencies.traitProficiencies">
@@ -3298,12 +3769,13 @@
         </member>
         <member name="P:Dawnsbury.Core.Creatures.Parts.Space.StandardSizeInSquares">
             <summary>
-            Gets the standard rules-based width of this creature, in squares, as <see cref="P:Dawnsbury.Core.Creatures.Parts.Space.SizeInSquares"/> but excluding effect from squeezing.
+            Gets the standard rules-based width of this creature, in squares, as <see cref="P:Dawnsbury.Core.Creatures.Parts.Space.SizeInSquares"/> but excluding effect from squeezing. Automatically recalculated each time <see cref="P:Dawnsbury.Core.Creatures.Parts.Space.Size"/> changes.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Creatures.Parts.Space.SizeInSquares">
             <summary>
             Gets the actual width of this creature, in squares. A Medium creature is 1 square, a Large creature is 2 squares, a Huge creature is 3 squares and a Gargantuan creature is 4 squares. A squeezing creature has size 1 less.
+            Automatically recalculated when the creature's size changes or when it squeezes or unsqueezes.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Creatures.Parts.Space.ActualSize">
@@ -3321,6 +3793,12 @@
             Changes both the rules-based size of this creature and the actual size of this creature to the new size. Returns true if the size change succeeded.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Creatures.Parts.Space.NaturalReachModification">
+            <summary>
+            If not 0, then this creature's natural reach is modified by this number of squares. For example, if this is 1 and the creature is Medium,
+            then this creature's natural reach becomes 2 (10 feet).
+            </summary>
+        </member>
         <member name="T:Dawnsbury.Core.Creatures.Parts.WeaknessAndResistance">
             <summary>
             Represents this creature's current weaknesses, resistances, immunities, hardness and their current state.
@@ -3332,20 +3810,45 @@
             Gets the creature that owns this object.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Creatures.Parts.WeaknessAndResistance.Weaknesses">
+            <summary>
+            This creature currently has these weaknesses. [Ephemeral]
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Parts.WeaknessAndResistance.Resistances">
+            <summary>
+            This creature currently has these resistances. [Ephemeral]
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Parts.WeaknessAndResistance.Immunities">
+            <summary>
+            This creature is currently immune to these damage types. [Ephemeral]
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Parts.WeaknessAndResistance.OtherImmunities">
+            <summary>
+            Additional strings to place into the immunities section. [Ephemeral]
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Creatures.Parts.WeaknessAndResistance.Hardness">
+            <summary>
+            This creature prevents this amount of damage from all sources. [Permanent]
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.Creatures.Parts.WeaknessAndResistance.ImmunityToCriticalHits">
             <summary>
-            This creature is immune to critical hits. [persistent status]
+            This creature is immune to critical hits. [Permanent]
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Creatures.Parts.WeaknessAndResistance.ImmunityToForcedMovement">
             <summary>
-            This creature is immune to being pushed, pulled or slid. [persistent status]
+            This creature is immune to being pushed, pulled or slid. [Permanent]
             </summary>
         </member>
-        <member name="M:Dawnsbury.Core.Creatures.Parts.WeaknessAndResistance.GetAndApplyResistance(Dawnsbury.Core.CombatActions.CombatAction,Dawnsbury.Core.Mechanics.Damage.KindedDamage,System.Int32,Dawnsbury.Core.Mechanics.Damage.DamageEvent)">
+        <member name="M:Dawnsbury.Core.Creatures.Parts.WeaknessAndResistance.GetAndApplyResistanceWithName(Dawnsbury.Core.CombatActions.CombatAction,Dawnsbury.Core.Mechanics.Damage.KindedDamage,System.Int32,Dawnsbury.Core.Mechanics.Damage.DamageEvent)">
             <summary>
-            Applies resistance to the given DAMAGE KIND so that it doesn't apply to future damage events in the same action, up to an amount equal to MAXIMUM USEFUL RESISTANCE.
-            Returns the amount of resistance that was actually applied.
+            Applies damage resistance to damage from this damage type, remembers it, and returns the amount of resistance applied, as well as the name
+            of the resistance applied.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Creatures.Parts.WeaknessAndResistance.WhatDamageKindIsBestAgainstMe(System.Collections.Generic.IList{Dawnsbury.Core.Mechanics.Enumerations.DamageKind})">
@@ -3383,7 +3886,8 @@
         </member>
         <member name="P:Dawnsbury.Core.Creatures.Spellcasting.PrimarySpellcastingSource">
             <summary>
-            Gets the primary spellcasting source of this creature. You should probably not used this property. It exists mostly to account for old save files, which store used up resources globally for a creature instead of per class.
+            Gets the primary spellcasting source of this creature, if any. You should probably not use this property. It exists mostly to account for old save files, which store used up resources
+            globally for a creature instead of per class.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Creatures.Spellcasting.GetSourceByOrigin(Dawnsbury.Core.Mechanics.Enumerations.Trait)">
@@ -3481,6 +3985,11 @@
             Gets or sets additional metadata for the pathfinding solution.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Intelligence.PathfindingDescription.AlternateTileOfOrigin">
+            <summary>
+            If not null, then pathfinding will begin from this tile instead of from wherever the moving creature is actually standing.
+            </summary>
+        </member>
         <member name="F:Dawnsbury.Core.Intelligence.Tactic.Standard">
             <summary>
             The creature chooses the best combat action, preferring to attack twice and move once, and the creature makes use of flanking.
@@ -3528,6 +4037,26 @@
             Represents a flat numerical modifier to a numerical value. 
             </summary>
         </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Core.BonusCalculationReason.AttackRoll">
+            <summary>
+            These bonuses are collected because you're making an attack roll.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Core.BonusCalculationReason.SkillCheck">
+            <summary>
+            These bonuses are collected because you're making a skill check.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Core.BonusCalculationReason.Defense">
+            <summary>
+            These bonuses are collected because you're defending against an action by another creature.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Core.BonusCalculationReason.Damage">
+            <summary>
+            These bonuses are collected because you're dealing damage.
+            </summary>
+        </member>
         <member name="T:Dawnsbury.Core.Mechanics.Core.CalculatedActiveRoll">
             <summary>
             A calculated active roll represents an attack roll, a skill check roll, or other roll that the owner of
@@ -3567,6 +4096,11 @@
         <member name="P:Dawnsbury.Core.Mechanics.Core.CheckBreakdownResult.NaturalCheckResult">
             <summary>
             Gets the check result without applying Greater Juggernaut, Greater Resolve or Improved Evasion.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Core.CheckBreakdownResult.ResultForcedWithoutRolling">
+            <summary>
+            If true, then this result was achieved without rolling any dice.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Core.CheckBreakdownResult.GetCircumstanceBonusThresholdNeededToDowngrade">
@@ -3611,6 +4145,17 @@
         <member name="P:Dawnsbury.Core.Mechanics.Core.SavingThrow.BonusToSave">
             <summary>
             When this ACTION is cast by CASTER against a TARGET, and that target makes a saving throw against it, the target gets this bonus on its save (or no bonus if null is returned). Nullable. 
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Core.SavingThrow.WorsenByOneStep">
+            <summary>
+            When this ACTION is cast by CASTER against a TARGET, and that target makes a saving throw against it, their save is worsen by one step if this returns a string explaining why. If null is returned, then the result will not be adjusted. Nullable. 
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Core.SavingThrow.AdjustSavingThrowCheckResult">
+            <summary>
+            When this ACTION is cast against a TARGET and would result in a saving throw result of ORIGINAL RESULT, it results in the returned result instead. Use for
+            spells such as Litany against Wrath and wrathful creatures.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Core.SpellSavingThrow.WithVisualOnly">
@@ -3744,6 +4289,11 @@
             Indicates whether a critical hit should multiply this damage and a save should halve it.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Damage.KindedDamage.IsTrueSplashDamage">
+            <summary>
+            Indicates whether this damage is splash damage for the purposes for troop and swarm weaknesses.
+            </summary>
+        </member>
         <member name="M:Dawnsbury.Core.Mechanics.Damage.KindedDamage.AddPostCriticalDamage(Dawnsbury.Core.Roller.DiceFormula)">
             <summary>
             Adds extra damage to be dealt only if the damage instance comes from a critical hit (on an attack) or a critical failure (on a save).
@@ -3790,6 +4340,11 @@
             This weapon must be wielded in both hands to be usable.
             </summary>
         </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.Finesse">
+            <summary>
+            You can add your Dexterity bonus instead of Strength bonus to your attack rolls with this weapon.
+            </summary>
+        </member>
         <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.Basic">
             <summary>
             A combat action with this trait doesn't show up in the rules block under the "OFFENSE" section. Usually, you want to add this trait to all combat actions
@@ -3821,6 +4376,11 @@
         <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.VerbalOnly">
             <summary>
             Even though this spell costs 2 or more actions, it doesn't have a somatic component and isn't manipulate.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.Crossbow">
+            <summary>
+            This is a general trait representing crossbows, including light and heavy crossbow, hand crossbow and repeating crossbow.
             </summary>
         </member>
         <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.Worn">
@@ -3958,7 +4518,7 @@
         </member>
         <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.SpecialAbility">
             <summary>
-            This action should be shown in the OFFENSE block even though it technically also counts as a spell.
+            This action should be shown in the OFFENSE block even though it technically also counts as a spell or a Strike.
             </summary>
         </member>
         <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.NonSummonable">
@@ -4056,6 +4616,11 @@
             This spell or impulses doesn't have any increased effects when heightened.
             </summary>
         </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.Long">
+            <summary>
+            This creature's reach is 5 feet less than normal.
+            </summary>
+        </member>
         <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.DoNotShowInContextMenu">
             <summary>
             A combat action with this trait will not appear in context menu options when clicking on a creature.
@@ -4148,6 +4713,97 @@
             the item "starts with."
             </summary>
         </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.Zone">
+            <summary>
+            This spell or effect creates a zone or comes from a zone. If it deals damage, that damage counts as area damage.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.WarMaskFeature">
+            <summary>
+            Attach this trait to QEffects from the Orc Warmask feat line so they can be disabled by effects that can dispel the mask./>.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.ImpossibleThroughConfusion">
+            <summary>
+            This combat action CANNOT be used when the owning creature is confused, even though it might normally be usable.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.DoesNotCountAsPrimaryCastingOfSpell">
+            <summary>
+            This combat action, even though it has the "Spell" trait, doesn't actually represent the initial casting of a spell and so isn't targetable by stuff like Counterspell, prevented by a polymorph or such. It's also not subject to being stupefied.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.BasicStrike">
+            <summary>
+            This is a basic Strike or thrown Strike, not a modified Strike such as with Lunge or Power Attack.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.FerrousForm">
+            <summary>
+            Used for innate spells granted by the Ferrous Form spell.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.FromFlurryOfBlows">
+            <summary>
+            This Strike is part of a monk's Flurry of Blows.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.ThisNaturalAttackDealsNoDamage">
+            <summary>
+            This is a natural weapon item or a Strike from it that doesn't deal damage and instead has some other effect (such as web, which immobilizes).
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.DoNotEndTurnAutomaticallyIfThisFreeActionIsAvailable">
+            <summary>
+            If you have an action with this trait among your generated possibilities and it costs 0 actions, then Dawnsbury Days should not end your turn
+            automatically, even if you have the setting enabled.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.ItemWithVariableGrip">
+            <summary>
+            An item that has this can be held in one or two hands, even if it doesn't have a Two-Hand traits. 
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitAttributes.TraitAttribute.HumanizedName">
+            <summary>
+            See <see cref="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.HumanizedName"/>.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitAttributes.TraitAttribute.RulesText">
+            <summary>
+            See <see cref="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.RulesText"/>.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitAttributes.TraitAttribute.RelevantForShortBlock">
+            <summary>
+            See <see cref="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.RelevantForShortBlock"/>.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitAttributes.TraitAttribute.RelevantForItemBlock">
+            <summary>
+            See <see cref="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.RelevantForItemBlock"/>.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitAttributes.TraitAttribute.RelevantOnlyForClass">
+            <summary>
+            See <see cref="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.RelevantOnlyForClass"/>.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitAttributes.TraitAttribute.BackgroundColor">
+            <summary>
+            See <see cref="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.BackgroundColor"/>.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitAttributes.TraitAttribute.WhiteForeground">
+            <summary>
+            See <see cref="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.WhiteForeground"/>.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitAttributes.TraitAttribute.IsFeatOnly">
+            <summary>
+            See <see cref="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.IsFeatOnlyTrait"/>.
+            </summary>
+        </member>
         <member name="T:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties">
             <summary>
             Contains additional information about a trait.
@@ -4198,9 +4854,30 @@
             If not <see cref="F:Dawnsbury.Core.Mechanics.Enumerations.Trait.None"/>, then this trait only shows up on combat actions that are owned by a member of this class (e.g. school traits for the wizard, or Concentrate for the barbarian).
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.WhiteForeground">
+            <summary>
+            If true, then the text will be white instead of black.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.BackgroundColor">
+            <summary>
+            Background color of this trait (or <see cref="P:Microsoft.Xna.Framework.Color.Transparent"/> for the default color).
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.IsFeatOnlyTrait">
+            <summary>
+            This trait, when placed on an ancestry or class, applies only to that "feat" and not to the resulting creature. Use for traits that identify the source
+            of the content, such as "Mod" or "Non-OGL".
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.RelevantForItemBlock">
             <summary>
             If true, then this trait's full description will be shown also on an item's rules block.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.UsesStandardColor">
+            <summary>
+            If this is true, then this trait always uses the basic trait background color appropriate for the color scheme.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.#ctor(System.String,System.Boolean,System.String,System.Boolean)">
@@ -4211,6 +4888,18 @@
             <param name="relevant">If true, then this trait will be shown to the player as normal. If false, then this is a hidden technical trait.</param>
             <param name="rulesText">Some traits are displayed in stat blocks, especially item traits of weapons and armors, and this text is the text that's displayed. Most traits don't need any rules text description.</param>
             <param name="relevantForShortBlock">If true, then this trait will be shown to the player also when it's a trait attached to a combat action. This is usually for traits like "agile" or "sweep".</param>
+        </member>
+        <member name="M:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties.#ctor(System.String,System.Boolean,System.String,System.Boolean,Microsoft.Xna.Framework.Color,System.Boolean,System.Boolean)">
+            <summary>
+            Initializes a new instance of <see cref="T:Dawnsbury.Core.Mechanics.Enumerations.TraitProperties"/>.
+            </summary>
+            <param name="humanizedName">The human-readable name of this trait.</param>
+            <param name="relevant">If true, then this trait will be shown to the player as normal. If false, then this is a hidden technical trait.</param>
+            <param name="rulesText">Some traits are displayed in stat blocks, especially item traits of weapons and armors, and this text is the text that's displayed. Most traits don't need any rules text description.</param>
+            <param name="relevantForShortBlock">If true, then this trait will be shown to the player also when it's a trait attached to a combat action. This is usually for traits like "agile" or "sweep".</param>
+            <param name="backgroundColor">Background color of this trait (or <see cref="P:Microsoft.Xna.Framework.Color.Transparent"/> for the default color).</param>
+            <param name="whiteForeground">If true, then the text will be white instead of black.</param>
+            <param name="isFeatOnly">This trait, when placed on an ancestry or class, applies only to that "feat" and not to the resulting creature. Use for traits that identify the source of the content, such as "Mod" or "Non-OGL".</param>
         </member>
         <member name="T:Dawnsbury.Core.Mechanics.Enumerations.DamageKindAnonymousExtensions">
             <summary>
@@ -5686,6 +6375,15 @@
             <param name="source">The creature which created this QEffect, usually the caster of the spell. Some qeffects have no source.</param>
             <param name="illustration">Icon of this QEffect.</param>
         </member>
+        <member name="M:Dawnsbury.Core.Mechanics.QEffect.#ctor(System.String,System.String,Dawnsbury.Display.Illustrations.Illustration)">
+            <summary>
+            Initializes a new standard QEffect that lasts forever and is displayed as icon on the creature token. You should probably use a `.WithExpiration[...]` method afterwards,
+            such as <see cref="M:Dawnsbury.Core.Mechanics.QEffect.WithExpirationEphemeral"/>.
+            </summary>
+            <param name="name">Name shown as a tooltip and also shown as an overhead flyout when the creature first receives this QEffect.</param>
+            <param name="description">Description shown on the tooltip.</param>
+            <param name="illustration">Icon of this QEffect.</param>
+        </member>
         <member name="M:Dawnsbury.Core.Mechanics.QEffect.#ctor(Dawnsbury.Core.Mechanics.ExpirationCondition)">
             <summary>
             Initializes a technical QEffect which has no icon, no name and no text and lasts until <paramref name="ephemeralCondition"/>, which is usually <see cref="F:Dawnsbury.Core.Mechanics.ExpirationCondition.Ephemeral"/>.
@@ -5705,6 +6403,11 @@
             </summary>
             <param name="assisted">Should the DC of the flat check be reduced to 10 because you're receiving a particularly appropriate type of help?</param>
         </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.BansPersistentDamageRecovery">
+            <summary>
+            Triggers when you would roll a check to get rid of persistent damage identified by THE SECOND QEFFECT that deals DAMAGE KIND damage, and should return true if this check should be prevented.
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.Dismissable">
             <summary>
             Can be dismissed as an action.
@@ -5717,9 +6420,7 @@
         </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.PreventDeathDueToDyingReaction">
             <summary>
-            Triggers when you would die due to becoming dying 4 (or more, if you have Diehard etc.). Collects reactions. When a reaction is executed, it should modify the Dying QEffect within the DEATH EVENT, and it should
-            set the death event's PreventDeath flag to true to flag the death as prevented. The reaction must do both of these things for the whole thing to work, or else this must just immediately trigger again or you might
-            die anyway.
+            Triggers when you would die due to becoming dying 4 (or more, if you have Diehard etc.) or due to dropping to 0 HP and being a monster. Collects reactions. When a reaction is executed, it should modify the Dying QEffect within the DEATH EVENT, and it should set the death event's PreventDeath flag to true to flag the death as prevented. The reaction must do both of these things for the whole thing to work, or else this must just immediately trigger again or you might die anyway.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.PreventDeathDueToDyingAsync">
@@ -5827,6 +6528,12 @@
             If you return null, no new possibility is added to the section. Possibilities are regenerated at each state-check.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.ProvideBonusRaiseShieldPossibility">
+            <summary>
+            While you are wielding a SHIELD, this returns an additional possibility that should be added to the "Raise shield" submenu, e.g. Devoted Guardian. If you return null,
+            no new possibility will be added. If no effects add any possibility, then there will be no submenu and only a simple "Raise shield" action possibility.
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.ProvideActionsIntoPossibilitySection">
             <summary>
             If the given POSSIBILITY SECTION should contain additional actions, then this returns additional actions that you can perform. They will be added into that section. See also <see cref="P:Dawnsbury.Core.Mechanics.QEffect.ProvideActionIntoPossibilitySection"/>,
@@ -5866,9 +6573,19 @@
             Happens just after you (as ATTACKER) use the COMBAT ACTION to deal at least 1 damage to TARGET . 
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouDealDamageQ">
+            <summary>
+            Happens just after you (as ATTACKER) use the COMBAT ACTION to deal at least 1 damage to TARGET. Unlike <see cref="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouDealDamage"/>, this event also includes this QEffect. 
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouDealDamageAgainstPrimaryTarget">
             <summary>
             Happens just after you use a COMBAT ACTION as the ATTACKER against a TARGET who is one of the main targets of the combat action with the main roll result CHECK RESULT and you deal at least 1 point of damage (details in DAMAGE EVENT) to the target.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouDealDamageAgainstPrimaryTargetQ">
+            <summary>
+            Happens just after you use a COMBAT ACTION as the ATTACKER against a TARGET who is one of the main targets of the combat action with the main roll result CHECK RESULT and you deal at least 1 point of damage (details in DAMAGE EVENT) to the target. Unlike <see cref="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouDealDamageAgainstPrimaryTarget"/>, this event also includes this QEffect. 
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouDealDamageOfKind">
@@ -6039,6 +6756,11 @@
             This happens after you take a COMBAT ACTION.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouTakeActionReaction">
+            <summary>
+            This happens after you take a COMBAT ACTION.
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouExpendSpellcastingResources">
             <summary>
             This happens after you expend spellcasting resources to cast a SPELL (this happens before the spell takes effect).
@@ -6049,9 +6771,26 @@
             This happens after you resolve the effect of your COMBAT ACTION against a TARGET CREATURE, with CHECK RESULT on the main active roll or save. This event will trigger for each target of the action.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouTakeActionAgainstTargetReaction">
+            <summary>
+            This happens after you resolve the effect of your COMBAT ACTION against a TARGET CREATURE, with CHECK RESULT on the main active roll or save. This event will trigger for each target of the action and collects reactions.
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouAreTargeted">
             <summary>
             This happens after the COMBAT ACTION that includes you as a target resolves.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouAreTargetedReaction">
+            <summary>
+            This happens after the COMBAT ACTION that includes you as a target resolves, with the main roll's result being CHECK RESULT against you (if no roll was made against, this will be "Failure"). Collects reactions.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.BeforeBonusesAreFlattened">
+            <summary>
+            Triggers whenever YOUR BONUSES are collected because you make an ATTACK ROLL, SKILL CHECK, because you USE A DEFENSE, or because you DEAL DAMAGE, with respect to a COMBAT ACTION against a DEFENDER. For an attack roll, the combat action
+            is the attack, and the defender is the target. For a skill check, the combat action is the action forcing the skill check, and the defender is the target, if any. For defense, the combat action is the attack or spell you're defending against,
+            and the defender is the owner of this QEffect. For damage, the combat action is the action that caused the damage event, if any, and the defender is the recipient of the damage.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouTakeDamage">
@@ -6083,6 +6822,12 @@
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.WhenProvoked">
             <summary>
             Triggers when a nearby enemy provokes an attack of opportunity by using a COMBAT ACTION.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.WhenProvokedReactions">
+            <summary>
+            Triggers when a nearby enemy potentially provokes an attack of opportunity by using a COMBAT ACTION. You must still verify yourself whether the
+            potentially provoking action matches your attack of opportunity trigger. Collects reactions.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.ImmuneToCondition">
@@ -6118,7 +6863,12 @@
         </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.ProvideStrikeModifier">
             <summary>
-            Returns the combat action that's like a Strike that you can perform for the given ITEM.
+            Returns the combat action that's like a Strike that you can perform for the given ITEM. Use this when your QEffect should only create one non-thrown Strike.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.ProvideStrikeModifierIncludingForThrownStrike">
+            <summary>
+            Returns the combat action that's like a Strike that you can perform for the given ITEM. The boolean signifies whether the Strike should be a thrown Strike. Use this when your QEffect can create both a thrown Strike and a non-thrown Strike (or only a thrown Strike).
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.ProvideStrikeModifierAsPossibility">
@@ -6479,6 +7229,56 @@
             use the rules text "The spell ignores up to 5 points of the target's resistance to fire." etc.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.YourShieldBlockWorksAlsoAgainst">
+            <summary>
+            Whenever a creature who is protected by a shield you raised (usually that's you yourself) is dealt DAMAGE EVENT, and the damage doesn't come
+            from a physical attack, should your Shield Block reaction trigger anyway? (Use this e.g. for the Druid's Necromantic Deflection
+            which allows you to shield block all necromancy effects, including non-physical ones.)
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.FixedDC">
+            <summary>
+            If not -1, then this effect gives an ability with a fixed, non-spell-based save DC, whether it's active or passive, and that ability has this DC. Adjustments and difficulty may alter this DC. As such,
+            this effect must always refer to this number when creating combat actions and rolling the save instead of using the fixed DC number directly.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.UsedUpPermanently">
+            <summary>
+            This does nothing on its own, but you can set this flag to keep track of whether a once-per-encounter ability was used up already.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.AdjustEachPossibility">
+            <summary>
+            Whenever your possibilities are regenerated, this runs against each regenerated possibility and allows you to modify those possibilities. It runs recursively for possibilities within possibilities. This feature
+            is in development, and does not yet properly react to all possibilities. Currently, it only works for possibilities that come from <see cref="P:Dawnsbury.Core.Mechanics.QEffect.ProvideMainAction"/> and <see cref="P:Dawnsbury.Core.Mechanics.QEffect.ProvideContextualAction"/> and
+            for spells cast directly.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouWinCombatInCampaignMode">
+            <summary>
+            Triggers in story mode only, just after the "You have won!" message appears on screen, and after heroes' character sheets have been updated with the post-combat results. You can use this
+            to adjust the hero's character sheet or the campaign. This only triggers if the player has won, not if they lost. 
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.YouAreAboutToExitASquareDuringLongMovementReactions">
+            <summary>
+            Triggers just before you move from one position to the adjacent one during a LONG MOVEMENT from your ORIGINAL POSITION into a NEW POSITION,
+            such as a Stride or a Crawl. Doesn't trigger if the movement doesn't provoke reactions. Collects reactions.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.AfterYouMoveOneSquare">
+            <summary>
+            Triggers after you move from one position to the adjacent one, as part of a COMBAT ACTION (nullable!), using MOVEMENT STYLE (nullable!) from
+            your ORIGINAL POSITION into your NEW POSITION. Triggers for essentially all moves. If the movement style is null, you probably shouldn't interact
+            with the movement: It's generally a technical movement such as being shunted off, or a part of a cutscene.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.QEffect.Supereffect">
+            <summary>
+            References the QEffect that caused this QEffect to exist. This is usually null. It's a rarely used property meant for specific use cases: If a creature is grappled,
+            the spawned "grabbed" or "restrained" conditions will have the parent "grappled" condition as their supereffect. 
+            </summary>
+        </member>
         <member name="M:Dawnsbury.Core.Mechanics.QEffect.AddGrantingOfTechnical(System.Func{Dawnsbury.Core.Creatures.Creature,System.Boolean},System.Action{Dawnsbury.Core.Mechanics.QEffect})">
             <summary>
             Adds a state-check action to this QEffect which grants an ephemeral technical QEffect to some or all creatures on the battlefield.
@@ -6492,6 +7292,23 @@
             </summary>
             <param name="shouldApplyToCreature">Filter for which creatures should be given the technical QEffect, taking the ORIGIN QEFFECT and the TARGET CREATURE.</param>
             <param name="adjustTechnicalEffect">Set up the properties for the technical QEffect.</param>
+        </member>
+        <member name="M:Dawnsbury.Core.Mechanics.QEffect.AddGrantingOfTechnical(System.Func{Dawnsbury.Core.Mechanics.QEffect,Dawnsbury.Core.Creatures.Creature,System.Boolean},System.Action{Dawnsbury.Core.Mechanics.QEffect,Dawnsbury.Core.Mechanics.QEffect})">
+            <summary>
+            Adds a state-check action to this QEffect which grants an ephemeral technical QEffect to some or all creatures on the battlefield.
+            </summary>
+            <param name="shouldApplyToCreature">Filter for which creatures should be given the technical QEffect, taking the ORIGIN QEFFECT and the TARGET CREATURE.</param>
+            <param name="adjustTechnicalEffect">Set up the properties for the technical QEffect. The first QEffect is the ORIGIN QEFFECT, and the second is the GRANTED TECHNICAL QEFFECT.</param>
+        </member>
+        <member name="M:Dawnsbury.Core.Mechanics.QEffect.ExpireAndDemandNewStateCheck">
+            <summary>
+            Sets this QEffect to expire as soon as possible, and if we're in the middle of a state-check, a new state-check is immediately scheduled.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Mechanics.QEffect.WithTrait(Dawnsbury.Core.Mechanics.Enumerations.Trait)">
+            <summary>
+            Adds an extra trait to this QEffect, then returns itself. QEffects don't normally have traits, so this method is only very rarely useful.
+            </summary>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.QEffect.PersistentDamage(Dawnsbury.Core.Roller.DiceFormula,Dawnsbury.Core.Mechanics.Enumerations.DamageKind)">
             <summary>
@@ -6516,7 +7333,7 @@
         </member>
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.WhenYouAcquireThis">
             <summary>
-            This triggeres immediately after a creature acquires this QEffect.
+            This triggeres immediately as a creature acquires this QEffect. The QEffect is already assigned to the creature, but the overhead hasn't flown out yet.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.QEffect.Stunned">
@@ -6527,6 +7344,19 @@
         <member name="P:Dawnsbury.Core.Mechanics.QEffect.ReferencedSpell">
             <summary>
             If this effect is a <see cref="F:Dawnsbury.Core.Mechanics.QEffectId.Sustaining"/>, then this is the spell that it sustains.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Mechanics.QEffect.Tremorsense(System.String,System.Func{Dawnsbury.Core.Creatures.Creature,System.Int32})">
+            <summary>
+            When you have tremorsense, all enemy creatures within range automatically become detected.
+            </summary>
+            <param name="description">Description of this QEffect. It will be create as innate.</param>
+            <param name="rangeFormula">Determines the range of YOUR tremorsense.</param>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.QEffectId.RaisingAShield">
+            <summary>
+            This effect represents that the owner is raising a shield and benefitting from its +2 to AC. If this effect's tag is not null, then it is an <see cref="T:Dawnsbury.Core.Mechanics.Treasure.Item"/> that is the physical shield
+            that is being raised. If it is null, then it is a fictitious or magical shield effect being raised.
             </summary>
         </member>
         <member name="F:Dawnsbury.Core.Mechanics.QEffectId.Slowed">
@@ -6668,7 +7498,7 @@
         </member>
         <member name="F:Dawnsbury.Core.Mechanics.QEffectId.FogVision">
             <summary>
-            The effect owner ignores effects that would give them a circumstance penalty to Speed; and they automatically succeed on all attempts to Escape.
+            The effect owner can see normally through foggy terrain.
             </summary>
         </member>
         <member name="F:Dawnsbury.Core.Mechanics.QEffectId.IsAstralWalking">
@@ -6756,6 +7586,11 @@
             A creature with this qEffect treats the effect's source as if they were hidden
             </summary>
         </member>
+        <member name="F:Dawnsbury.Core.Mechanics.QEffectId.CannotSeeSourceExceptAsConcealed">
+            <summary>
+            A creature with this qEffect treats the effect's source as if they were concealed
+            </summary>
+        </member>
         <member name="F:Dawnsbury.Core.Mechanics.QEffectId.HalfSpeed">
             <summary>
             A creature with this qEffect will have their speed halved.
@@ -6771,9 +7606,66 @@
             You can use the sneak action even while observed.
             </summary>
         </member>
+        <member name="F:Dawnsbury.Core.Mechanics.QEffectId.OrchardsEnduranceEffect">
+            <summary>
+            You roll flat checks to recover from persistent damage twice and take the higher result.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.QEffectId.Disappearance">
+            <summary>
+            Invisible creatures with this QEffect are also immune to detection via Tremorsense.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.QEffectId.SinkInWater">
+            <summary>
+            Nullifies the owner's swim speed.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.QEffectId.DealtDamageThisTurn">
+            <summary>
+            Used by a specific enemy who also has Cry of Destruction.
+            </summary>
+        </member>
+        <member name="T:Dawnsbury.Core.Mechanics.ReactiveAttacks.AttackOfOpportunityMechanics">
+            <summary>
+            Describes the name and specific rules of this particular variant of an attack of opportunity or similar type of reaction.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.ReactiveAttacks.AttackOfOpportunityMechanics.OverheadName">
+            <summary>
+            Text to display over the token of the reacting creature ("*attack of opportunity*").
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.ReactiveAttacks.AttackOfOpportunityMechanics.Name">
+            <summary>
+            Name of the reaction, for display in the statblock.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.ReactiveAttacks.AttackOfOpportunityMechanics.Description">
+            <summary>
+            Description of the reaction, for display in the statblock.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.ReactiveAttacks.AttackOfOpportunityMechanics.RestrictToOnlyAgainstWhom">
+            <summary>
+            If not null, then the attack of opportunity will only be offered against a CREATURE if this method returns true for that creature.
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.Mechanics.ReactiveAttacks.AttackOfOpportunityMechanics.StandStill">
             <summary>
-            This is a variant on attack-of-opportunity which only triggers in response to move actions, and which disrupts move actions if hitting critically. 
+            If true, then this is a variant on attack-of-opportunity which only triggers in response to move actions, and which disrupts move actions if hitting critically. Do not use in conjuction with changes to the <see cref="P:Dawnsbury.Core.Mechanics.ReactiveAttacks.AttackOfOpportunityMechanics.Provokes"/> property.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.ReactiveAttacks.AttackOfOpportunityMechanics.Provokes">
+            <summary>
+            An action other than movement provokes if this returns true. Usually, this is "if it's ranged attack, manipulate action, or a Trait.Provokes action".
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.ReactiveAttacks.AttackOfOpportunityMechanics.AdditionalEffectOnTarget">
+            <summary>
+            If a creature with this ATTACK-OF-OPPORTUNITY-QEFFECT with these MECHANICS responds to a PROVOKING ACTION by making
+            an ATTACK ACTION against a PROVOKING CREATURE, and that attack action has a result of CHECK RESULT,
+            then this happens as an additional effect. By default, this disrupts manipulate actions on a critical hit.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Mechanics.ReactiveAttacks.AttackOfOpportunityMechanics.StrikeAndReactionTraits">
@@ -6785,7 +7677,7 @@
             <summary>
             Creates an effect that means you are holding your breath. 
             </summary>
-            <param name="self">The creature holding its breath that will own this QEffect.</param>
+            <param name="self">Means nothing (deprecated). You can put null here.</param>
             <param name="deadly">Whether the creature becomes suffocating when it loses the last air.</param>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Rules.DeathRules.ShouldDieImmediately(Dawnsbury.Core.Creatures.Creature)">
@@ -6803,6 +7695,14 @@
             <summary>
             Returns true if CREATURE is currently Hidden from all enemies and at least one enemy exists.
             </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Mechanics.Rules.HiddenRules.DetermineConcealmentCheckDC(Dawnsbury.Core.CombatActions.CombatAction,Dawnsbury.Core.Creatures.Creature)">
+            <summary>
+            Returns the concealment check DC that would apply to this action against this target. Used for tooltips only.
+            </summary>
+            <remarks>
+            If you make any changes here, you must also make corresponding changes in <see cref="M:Dawnsbury.Core.CombatActions.CombatActionExecution.CheckForMissChance(Dawnsbury.Core.Creatures.Creature,System.Text.StringBuilder)"/>.
+            </remarks>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Rules.StrikeRules.DeterminePrimaryWeaponDamageKind(Dawnsbury.Core.CombatActions.CombatAction,Dawnsbury.Core.Creatures.Creature)">
             <summary>
@@ -6850,6 +7750,16 @@
             Avoid setting this directly. Instead use <see cref="M:Dawnsbury.Core.Mechanics.Targeting.ChosenTargets.CreateSingleTarget(Dawnsbury.Core.Creatures.Creature)"/>.
             </summary>
         </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Targeting.ChosenTargets.CreaturesInCenterSquares">
+            <summary>
+            Creatures within the highlighted 'inner radius' of certain burst area targets, that experience a stronger effect of such a spell.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Core.Mechanics.Targeting.ChosenTargets.CenterTiles">
+            <summary>
+            Tiles within the highlighted 'inner radius' of certain burst area targets, that experience a stronger effect of such a spell.
+            </summary>
+        </member>
         <member name="F:Dawnsbury.Core.Mechanics.Targeting.ChosenTargets.CheckResults">
             <summary>
             Gets the result of the main check roll for each target of this action. If no main check roll happened for a creature (e.g. because the creature is exempted from the spell), then there is no record
@@ -6860,6 +7770,17 @@
             <summary>
             As <see cref="F:Dawnsbury.Core.Mechanics.Targeting.ChosenTargets.CheckResults"/>, except with results not modified by Greater Juggernaut, Greater Resolve or Improved Evasion. Prefer using <see cref="M:Dawnsbury.Core.Mechanics.Targeting.ChosenTargets.GetNaturalResultFor(Dawnsbury.Core.Creatures.Creature)"/>, please. This
             dictionary might not always have a value.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Targeting.ChosenTargets.ChosenPointOfOrigin">
+            <summary>
+            If the combat action is a <see cref="T:Dawnsbury.Core.Mechanics.Targeting.Targets.BurstAreaTarget"/> target action, then this is the rules coordinates of the center of the burst.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Targeting.ChosenTargets.AllChosenPointsOfOrigin">
+            <summary>
+            If the combat action is a <see cref="T:Dawnsbury.Core.Mechanics.Targeting.Targets.MultipleIndependentTargetsTarget"/> target action with multiple <see cref="T:Dawnsbury.Core.Mechanics.Targeting.Targets.BurstAreaTarget"/> targets inside, then
+            this is a list of the rules coordinates of the centers of all of those bursts.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Targeting.ChosenTargets.GetResultFor(Dawnsbury.Core.Creatures.Creature)">
@@ -6944,22 +7865,22 @@
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Targeting.Target.AdjacentCreature(System.Func{Dawnsbury.Core.Mechanics.Targeting.Target,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Creatures.Creature,System.Single})">
             <summary>
-            This action targets a single adjacent creature, ally or enemy, but not self.
+            This action targets a single adjacent creature, ally or enemy, within your natural reach, but not yourself.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Targeting.Target.AdjacentCreatureOrSelf(System.Func{Dawnsbury.Core.Mechanics.Targeting.Target,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Creatures.Creature,System.Single})">
             <summary>
-            This action targets a single adjacent creature, ally or enemy, or self.
+            This action targets a single creature, ally or enemy, within your natural reach, or yourself.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Targeting.Target.AdjacentFriend(System.Func{Dawnsbury.Core.Mechanics.Targeting.Target,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Creatures.Creature,System.Single})">
             <summary>
-            This action targets a single adjacent ally, but not self.
+            This action targets a single ally within your natural reach, but not yourself.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Targeting.Target.AdjacentFriendOrSelf(System.Func{Dawnsbury.Core.Mechanics.Targeting.Target,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Creatures.Creature,System.Single})">
             <summary>
-            This action targets a single adjacent ally or self.
+            This action targets a single ally within your natural reach or yourself.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Targeting.Target.Ranged(System.Int32,System.Func{Dawnsbury.Core.Mechanics.Targeting.Target,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Creatures.Creature,System.Single})">
@@ -6982,9 +7903,20 @@
             This action targets a single enemy creature within DISTANCE squares. You don't need to have line-of-effect. 
             </summary>
         </member>
+        <member name="M:Dawnsbury.Core.Mechanics.Targeting.Target.Any">
+            <summary>
+            This action targets a single creature on the map. You don't need to have line-of-effect.  
+            </summary>
+        </member>
         <member name="M:Dawnsbury.Core.Mechanics.Targeting.Target.MultipleCreatureTargets(Dawnsbury.Core.Mechanics.Targeting.Targets.CreatureTarget[])">
             <summary>
             This action targets a number of creatures equal to the number of targets supplied, in order.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Mechanics.Targeting.Target.MultipleCreatureTargets(System.Int32,System.Func{Dawnsbury.Core.Mechanics.Targeting.Targets.CreatureTarget})">
+            <summary>
+            This action targets between 1 and NUMBER OF TARGET targets, each of which follows the restrictions in TARGET TEMPLATE. You must create a separate Target object in each call
+            to target template, do not reuse the target. Each of the targets must be distinict, and animation will be simultaneous.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Targeting.Target.MultipleIndependentTargets(Dawnsbury.Core.Mechanics.Targeting.Targets.AreaTarget[])">
@@ -7074,12 +8006,38 @@
             This action targets a single tile within RANGE squares that you can see and that is genuinely empty and where you're allowed to end your turn.
             </summary>
         </member>
+        <member name="M:Dawnsbury.Core.Mechanics.Targeting.Target.TileYouCanSeeAndTeleportTo(System.Func{Dawnsbury.Core.Creatures.Creature,System.Int32})">
+            <summary>
+            This action targets a single tile within RANGE squares that you can see and that is genuinely empty and where you're allowed to end your turn. The range is calculated on the fly for each square.
+            </summary>
+        </member>
         <member name="M:Dawnsbury.Core.Mechanics.Targeting.Target.LeapTarget(System.Int32)">
             <summary>
             This action targets a single tile within LEAP DISTANCE square that you have a clear shot to and where you can end your turn.
             </summary>
         </member>
-        <member name="M:Dawnsbury.Core.Mechanics.Targeting.Targets.BurstAreaTarget.WithHighlightCentre(System.Int32)">
+        <member name="P:Dawnsbury.Core.Mechanics.Targeting.Targets.AreaTarget.AdditionalRequirementOnAreaCaster">
+            <summary>
+            Gets or sets an additional requirement on the caster to cast this action. You probably want to use <see cref="M:Dawnsbury.Core.Mechanics.Targeting.Targets.AreaTarget.WithAdditionalRequirementOnCaster(System.Func{Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Possibilities.Usability})"/> which is additive, whereas setting this directly
+            overwrites previous requirements. Do not use <see cref="P:Dawnsbury.Core.Possibilities.Usability.IsCreatureSpecific"/>=true usabilities here, because this is executed only before the target is even known.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Mechanics.Targeting.Targets.AreaTarget.WithAdditionalRequirementOnCaster(System.Func{Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Possibilities.Usability})">
+            <summary>
+            Adds an additional requirement that a caster must satisfy to cast this action. Do not use <see cref="P:Dawnsbury.Core.Possibilities.Usability.IsCreatureSpecific"/>=true usabilities here, because this is executed only before the target is even known.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Targeting.Targets.BurstAreaTarget.CenterPointGoodness">
+            <summary>
+            If this is not null, then it overrides the normal goodness and judges each tile instead of each creature.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Targeting.Targets.BurstAreaTarget.OverriddenDetermineCenterPointByEnemy">
+            <summary>
+            If this is not null, then computer-controlled enemies will consider casting this spell against the returned point instead of at each enemy.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Mechanics.Targeting.Targets.BurstAreaTarget.WithStrongerEffectAgainstCenter(System.Int32)">
             <summary>
             Will cause the inner RADIUS of the burst to be highlighted in orange to indicated an enhanced effect for those caught in the ability's epicentre.
             </summary>
@@ -7106,6 +8064,12 @@
             This method is useful for special cases like targets inside a multi-targeted action, like the xorn's Claw Frenzy.
             </summary>
             <param name="howMuchDamageEquivalent">Equivalent of damage dealt for a successful hit, such as "3.5" if this deals 1d6 damage on a success.</param>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Targeting.Targets.EmanationTarget.Targeted">
+            <summary>
+            This emanation represents the individual targeting of creatures. It is subject to Reach Spell, it is affected by concealment,
+            and it shows animation and applies the effect only to the targets and their space, not to all squares.
+            </summary>
         </member>
         <member name="T:Dawnsbury.Core.Mechanics.Targeting.Targets.GeneratedTargetInSequence">
             <summary>
@@ -7152,6 +8116,11 @@
             If true, then in addition to highlighting each selected target tile, a path will be traced through the tiles in order from the caster's location.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Targeting.Targets.MultipleCreatureTargetsTarget.AdditionalRestrictionsOnEachTarget">
+            <summary>
+            When a CASTER has already targeted PREVIOUS CREATURES, is it permissible for them to still target ANOTHER creature?
+            </summary>
+        </member>
         <member name="M:Dawnsbury.Core.Mechanics.Targeting.Targets.MultipleCreatureTargetsTarget.WithAdditionalRestrictionsOnEachTarget(System.Func{Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Creatures.Creature[],Dawnsbury.Core.Creatures.Creature,System.Boolean})">
             <summary>
             Adds an additional restriction that the CASTER, having already targeted CREATURES with this action,
@@ -7164,6 +8133,12 @@
             If true, then you can always cast an action with this target, even if there are no valid targets (in which case the attempt will fail later).
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Targeting.Targets.SelfTarget.AdditionalRestriction">
+            <summary>
+            Gets or sets the additional restriction on casting this spell. When setting, you probably want to use <see cref="M:Dawnsbury.Core.Mechanics.Targeting.Targets.SelfTarget.WithAdditionalRestriction(System.Func{Dawnsbury.Core.Creatures.Creature,System.String})"/> which is additive in nature, whereas setting this
+            directly overwrites all previous restrictions.
+            </summary>
+        </member>
         <member name="M:Dawnsbury.Core.Mechanics.Targeting.Targets.SelfTarget.WithAdditionalRestriction(System.Func{Dawnsbury.Core.Creatures.Creature,System.String})">
             <summary>
             Adds an additional restriction to when you can use this action.
@@ -7174,6 +8149,16 @@
             <summary>
             This constructor create a step-by-step target that can only target non-rough terrtain, with a max tile distance equal to STEP DISTANCE
             </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Mechanics.Targeting.Targets.TileTarget.WithTooltip(System.Func{Dawnsbury.Core.Mechanics.Targeting.Targets.TileTarget,Dawnsbury.Core.Tiles.Tile,System.String})">
+            <summary>
+            When you're casting an action with this target, and the player mouses over a TILE that's a valid target, then the returned tooltip will be shown.
+            The tooltip will be generated once for each tile, at the time the player is first presented with options. Note that there may often be many tiles available to choose from
+            — you may want to consider performance and try to keep the generator method to constant time. If the generator method returns null, the basic text
+            "Choose this tile as the target." will appear as a tooltip. If you use this method, then tooltips will be displayed on tiles. If you don't, they won't, not even the
+            basic text.
+            </summary>
+            <param name="tooltipGenerator">Producer that creates a tooltip for the given target tile.</param>
         </member>
         <member name="P:Dawnsbury.Core.Mechanics.Targeting.Targets.TileTarget.YouCanAlwaysBegin">
             <summary>
@@ -7262,6 +8247,12 @@
         <member name="P:Dawnsbury.Core.Mechanics.Treasure.Item.MagicalStaffProperties">
             <summary>
             If not null, then this item is a magical staff with properties defined by this value.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Treasure.Item.HasLimitedEffectOnlyFor">
+            <summary>
+            If this is not-null and return a non-null string, then an icon showing that the object has limited value for that character shows up with that string as its tooltip. For example, for oracular crown, if you're
+            not an oracle, this could be "You get the +2 item bonus to Religion checks, but you're not an oracle so can't use this item's ability." 
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Mechanics.Treasure.Item.CannotDrinkBecause">
@@ -7445,6 +8436,11 @@
             Applies the RUNE onto the EQUIPMENT.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Treasure.RuneProperties.UnapplyRuneFromItem">
+            <summary>
+            Unapplies the RUNE from the EQUIPMENT. This only works for material runes.
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.Mechanics.Treasure.RuneProperties.FundamentalLevel">
             <summary>
             If this is a fundamental rune, then this is "1" for the basic rune, "2" for the middle rune and "3" for the best rune.
@@ -7454,6 +8450,17 @@
             <summary>
             If this is not null, then this RUNESTONE can be applied to an ITEM only if this method returns null
             (the first parameter is the runestone; the second is the item). If this method doesn't return null, then it returns the reason why the runestone can't be applied to the item.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Treasure.RuneProperties.UpgradesFrom">
+            <summary>
+            This rune is an upgraded version of the <see cref="P:Dawnsbury.Core.Mechanics.Treasure.RuneProperties.UpgradesFrom"/> rune. This means that you can drag-and-drop the upgraded version from the shop onto an item enchanted with this rune, and
+            upgrade it that way by paying the cost difference.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Mechanics.Treasure.RuneProperties.MaterialMaximumLevel">
+            <summary>
+            If this is a material, then this is the maximum level that the item may be for the material to still work.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Mechanics.Treasure.RuneProperties.WithCanBeAppliedTo(System.Func{Dawnsbury.Core.Mechanics.Treasure.Item,Dawnsbury.Core.Mechanics.Treasure.Item,System.String})">
@@ -8207,6 +9214,11 @@
             Gets the creature who made the roll (if only one hero rolled); or the creature whose roll counted (if all heroes rolled and the best one counted).
             </summary>
         </member>
+        <member name="F:Dawnsbury.Core.Possibilities.Chains.RootPossibilityChain.Root">
+            <summary>
+            All possibility chains begin with "Root"
+            </summary>
+        </member>
         <member name="M:Dawnsbury.Core.Possibilities.Possibilities.Grapple(Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Creatures.Creature,Dawnsbury.Core.Mechanics.Core.CheckResult)">
             <summary>
             Performs the results of a grab or grapple action of GRAPPLER onto TARGET with CHECK RESULT. On a failure, this may cause an existing grapple to end. 
@@ -8230,6 +9242,16 @@
         <member name="P:Dawnsbury.Core.Possibilities.SpellVariant.GoodnessModifier">
             <summary>
             If not null, then if an AI considers casting this variant with usefulness USEFULNESS, then this variant is instead considered to have the returned usefulness from this method.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Possibilities.SpellVariant.WithAdditionalTrait(Dawnsbury.Core.Mechanics.Enumerations.Trait)">
+            <summary>
+            This variant also confers an extra trait to the spell, which you can read while executing its effect in <see cref="P:Dawnsbury.Core.Possibilities.SpellVariant.AdditionalTrait"/>.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Possibilities.SpellVariant.WithAdditionalTraits(Dawnsbury.Core.Mechanics.Enumerations.Trait[])">
+            <summary>
+            This variant also confers some extra traits to the spell, which you can read while executing its effect in <see cref="P:Dawnsbury.Core.Possibilities.SpellVariant.AdditionalTraits"/>.
             </summary>
         </member>
         <member name="M:Dawnsbury.Core.Possibilities.SpellVariant.WithGoodness(System.Func{Dawnsbury.Core.Intelligence.AI,System.Single,System.Single})">
@@ -8907,6 +9929,12 @@
             Returns the current campaign run, if any.
             </summary>
         </member>
+        <member name="P:Dawnsbury.Core.TBattle.RoundNumber">
+            <summary>
+            The number of the current round. It's 0 during the opening cutscene, and it's 1 during the first round of combat,
+            just after start-of-combat events and as the first creature takes its turn.
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.TBattle.CreatureControllingInitiative">
             <summary>
             The active creature; or, if the currently active creature is a minion, then this is the minion's master.
@@ -8955,6 +9983,11 @@
         <member name="P:Dawnsbury.Core.Tiles.Coverlines.TilesToTiles">
             <summary>
             If the path from the tile ORIGIN-X and ORIGIN-Y to TARGET-X and TARGET-Y is blocked or partially blocked by a strong obstacle, this contains information on how much it's blocked from the best possible corner. 
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Core.Tiles.Coverlines.OpenDoor(Dawnsbury.Core.Tiles.Tile)">
+            <summary>
+            Marks the door or secret door at this tile as "open" and thus allowing line-of-sight. This is a performance-intensive operation.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Tiles.CoverlinesMapCache.CornersToCorners">
@@ -9133,6 +10166,16 @@
             Consider using Creature.Neighbours.NeighbourTilesAndSelfTiles instead to take larger creatures into account.
             </summary>
         </member>
+        <member name="F:Dawnsbury.Core.Tiles.Overhead.YDisplacement">
+            <summary>
+            This overhead should move this many pixels TOWARDS THE BOTTOM compared to its default position above the tile. This will almost always be negative.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Core.Tiles.Tile.AdditionalOccupants">
+            <summary>
+            Gets the list of creatures that are temporarily passing over this square but can't stay here when the current action ends.
+            </summary>
+        </member>
         <member name="P:Dawnsbury.Core.Tiles.Tile.IsFree">
             <summary>
             Indicates if the tile is empty and doesn't block movement of anyone or anything, and there isn't even any unconscious creature.
@@ -9179,6 +10222,11 @@
             <param name="logDetails">If <paramref name="log"/> and this is not null, then this is the text of the tooltip that appears when you mouse over the combat log line.</param>
             <param name="traits">If <paramref name="log"/> and this is not null, then these are the traits displayed in the tooltip when you move over the combat log line.</param>
             <param name="displacedToTheRight">This overhead should be displayed on top of the tile intersection to the right of this tile, not on top of this tile itself.</param>
+        </member>
+        <member name="P:Dawnsbury.Core.Tiles.Tile.Breakable">
+            <summary>
+            This tile can be broken down during gameplay, resulting in line-of-sight.
+            </summary>
         </member>
         <member name="F:Dawnsbury.Core.Tiles.TileInIteration.Visible">
             <summary>
@@ -9257,7 +10305,8 @@
         </member>
         <member name="P:Dawnsbury.Core.Tiles.TileQEffect.ExpiresAt">
             <summary>
-            Determines when TileQEffect expires. Not all expiration conditions make sense for a tile.
+            Determines when TileQEffect expires. Only <see cref="F:Dawnsbury.Core.Mechanics.ExpirationCondition.Never"/>, <see cref="F:Dawnsbury.Core.Mechanics.ExpirationCondition.Ephemeral"/> and <see cref="F:Dawnsbury.Core.Mechanics.ExpirationCondition.Immediately"/> work for TileQEffects.
+            If you want a different duration, you must use a regular QEffect, or have this TileQEffect be produced by a zone, and then you can give that zone's controller QEffect a different duration.
             </summary>
         </member>
         <member name="P:Dawnsbury.Core.Tiles.TileQEffect.TransformsTileIntoHazardousTerrain">
@@ -9319,6 +10368,11 @@
         <member name="M:Dawnsbury.DawnsburyProgram.Main(System.String[])">
             <summary>
             The main entry point for the application.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Delegates.SmartCombineDelegatesCoalesceUsability``1(System.Func{``0,Dawnsbury.Core.Possibilities.Usability},System.Func{``0,Dawnsbury.Core.Possibilities.Usability})">
+            <summary>
+            NOTE: This only works with NotUsable, not with NotUsableOnThisCreature.
             </summary>
         </member>
         <member name="T:Dawnsbury.Display.Controls.Listbox.ShopListboxItem">
@@ -9425,6 +10479,16 @@
         </member>
         <member name="P:Dawnsbury.Display.Illustrations.DirectPathIllustration.Filename">
             <summary>Absolute path to an image file.</summary>
+        </member>
+        <member name="T:Dawnsbury.Display.Illustrations.EtherealJauntIllustration">
+            <summary>
+            Represents an illustration that is drawn by supplying a tint color to an existing Illustration
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Display.Illustrations.EtherealJauntIllustration.#ctor(Dawnsbury.Display.Illustrations.Illustration,Microsoft.Xna.Framework.Color)">
+            <summary>
+            Represents an illustration that is drawn by supplying a tint color to an existing Illustration
+            </summary>
         </member>
         <member name="T:Dawnsbury.Display.Illustrations.Illustration">
             <summary>
@@ -9625,6 +10689,11 @@
         <member name="F:Dawnsbury.Display.Text.Writer.Data.Color">
             <summary>
             What color are we currently using to write.
+            </summary>
+        </member>
+        <member name="F:Dawnsbury.Display.Text.Writer.Data.PreviousColor">
+            <summary>
+            What color we were using to write prior to entering this special tooltippable-txt.
             </summary>
         </member>
         <member name="F:Dawnsbury.Display.Text.Writer.Data.MaximumWidthEncountered">
@@ -9832,6 +10901,13 @@
             Gets the %APPDATA%/Dawnsbury folder.
             </summary>
         </member>
+        <member name="P:Dawnsbury.IO.PlayerProfile.PlayerProfileVersion">
+            <summary>
+            If this is 1, it means the player profile was created before June 2026.
+            If this is 2, it means the player profile was created after parchment theme became default.
+            If this is 3, it means the player profile was converted from 1 to 3, switching to parchment theme, in August 2026.
+            </summary>
+        </member>
         <member name="T:Dawnsbury.IO.RelevantForActionReplayAttribute">
             <summary>
             This property of <see cref="T:Dawnsbury.IO.PlayerProfile"/> should be saved into mid-encounter save files to be reused for action replay of the encounter.
@@ -9878,6 +10954,12 @@
         <member name="T:Dawnsbury.Modding.ModManager">
             <summary>
             Contains static methods that perform common tasks that mods might want to do.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Modding.ModManager.ModBeingLoadedTrait">
+            <summary>
+            Returns the "Mod" trait corresponding to the mod being loaded right now. You can only use this in your main mod load method, and not afterwards. In particular, you can't use it lambda functions executed from actions, QEffects, etc. If you
+            want to do this, then first store the value of this trait somewhere into a static variable in your main mod load method, then refer to that stored value instead. If no mod is currently being loaded, this returns null.  
             </summary>
         </member>
         <member name="P:Dawnsbury.Modding.ModManager.ModBeingLoaded">
@@ -10137,6 +11219,95 @@
             <param name="idBeingReplaced">An ID of a tile that's mrerely an alias of another ID. For example, "Grass2".</param>
             <param name="replacementId">An ID of a tile that contains actual gameplay information, for example, "Grass1."</param>
         </member>
+        <member name="M:Dawnsbury.Modding.ModManager.RegisterItemNameReplacement(System.String,Dawnsbury.Core.Mechanics.Treasure.ItemName)">
+            <summary>
+            Registers a rule that whenever the game attempts to deserialize the DEPRECATED MODDED ITEM NAME, it instead deserializes the item as the REPLACEMENT ITEM NAME. This is meant for use by the base game
+            and by mods to allow modded items that have since been implemented in the base game to safely transition to the base game without being destroyed in existing character sheets.
+            </summary>
+            <param name="deprecatedModdedItemName">The original modded technical name of the item as it was created by the mod, e.g. 'TeamPlus.BarbarianPlus.BestialMutagenLesser'.</param>
+            <param name="replacementItemName">The replacement base game <see cref="T:Dawnsbury.Core.Mechanics.Treasure.ItemName"/> that should be used instead, e.g. 'ItemName.BestialMutagenLesser'.</param>
+        </member>
+        <member name="M:Dawnsbury.Modding.ModManager.RegisterFeatNameReplacement(System.String,Dawnsbury.Core.CharacterBuilder.Feats.FeatName)">
+            <summary>
+            Registers a rule that whenever the game attempts to deserialize the DEPRECATED FEAT NAME, it instead deserializes the feat as the REPLACEMENT FEAT NAME.
+            This is meant for use by the base game and by mods to allow modded items feats have since been implemented in the base game to safely
+            transition to the base game without being destroyed in existing character sheets.
+            </summary>
+            <param name="deprecatedModdedFeatName">The original modded technical name of the feat as it was created by the mod,
+            e.g. 'MoreDedications.Whirlwind Strike'.</param>
+            <param name="replacementFeatName">The replacement base game or different modded <see cref="T:Dawnsbury.Core.CharacterBuilder.Feats.FeatName"/> that should be used instead, e.g. 'FeatName..WhirlwindStrike'.</param>
+        </member>
+        <member name="M:Dawnsbury.Modding.ModManager.RegisterExtraPregen(System.String,System.Int32,System.String)">
+            <summary>
+            Registers a new pregen, usually for a class your mod is adding, to be added to the Pregens section of the character library. The pregen will be created
+            the first time the player loads your mod that calls this method, will be reset and updated each time you increase the pregen iteration or change the pregen
+            identifier, and will be deleted if the player loads the game without your mod calling RegisterExtraPregen.
+            </summary>
+            <param name="pregenIdentifier">Technical identifier of this pregen. This should usually be the same as your class trait (e.g. "Portalist").</param>
+            <param name="pregenIteration">Start at "1". When you make a substantial change to your pregen such that you want any changes the player made to the pregen on their computer deleted and replaced with your next version of the pregen, increases this number.</param>
+            <param name="serializedCharacterSheet">Serialized text representing the pregen CharacterSheet, starting with the opening brace ('{') and ending with the closing brace. You can extract this string from your characterLibrary.json file or use ordinary_magician's "Character Importer &amp; Exporter" mod to create it. Do not attempt to create the character sheet on-the-fly or to deserialize it. At the time your mod method runs, Dawnsbury Days isn't yet fully initialized and character sheet deserialization might not succeed yet.</param>
+        </member>
+        <member name="M:Dawnsbury.Modding.ModManager.RegisterExtraPregen(System.String,System.Int32,System.Func{Dawnsbury.Core.CharacterBuilder.CharacterSheet})">
+            <summary>
+            Registers a new pregen, usually for a class your mod is adding, to be added to the Pregens section of the character library. The pregen will be created
+            the first time the player loads your mod that calls this method, will be reset and updated each time you increase the pregen iteration or change the pregen
+            identifier, and will be deleted if the player loads the game without your mod calling RegisterExtraPregen.
+            </summary>
+            <param name="pregenIdentifier">Technical identifier of this pregen. This should usually be the same as your class trait (e.g. "Portalist").</param>
+            <param name="pregenIteration">Start at "1". When you make a substantial change to your pregen such that you want any changes the player made to the pregen on their computer deleted and replaced with your next version of the pregen, increases this number.</param>
+            <param name="pregenProducer">A function that creates a new complete CharacterSheet for the pregen, probably by deserializing it from the file. You MUST always create a brand new object when this producer method is called and must not reuse the same character sheet, because the method might be called multiple times in the course of Dawnsbury Days execution. You also MUST NOT create the CharacterSheet earlier than when the producer method is called, because the rules engine may not be fully initialized before. For most use cases, you're perhaps better off using the other overload where you supply the serialized text. If this returns null, then no pregen will be created.</param>
+        </member>
+        <member name="T:Dawnsbury.Modding.ModManager.Frontend">
+            <summary>
+            Contains static methods that you can use to interface with the game's display system outside the rules engine. In this class, the "phase stack" refers to the stack of screens displayed on
+            the screen. Usually, the bottommost screen is the <see cref="T:Dawnsbury.Phases.Menus.MainMenuPhase"/>, then <see cref="T:Dawnsbury.Phases.Menus.StoryMode.StoryModePhase"/>, then e.g. <see cref="T:Dawnsbury.Phases.Ingame.BattlePhase"/>.
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Modding.ModManager.Frontend.RegisterAtEndOfDrawInPhase``1(System.Action{``0})">
+            <summary>
+            Registers a block of code to run at the end of each draw iteration after <typeparamref name="TPhase"/> draws itself. You can use this to, e.g. add an extra overlay on top of the game.
+            </summary>
+            <param name="code">Code block to run in the draw loop, after the GAME PHASE (e.g. BattlePhase) is drawn.</param>
+            <typeparam name="TPhase">The code block should run at the end of draw of what game phase?</typeparam>
+        </member>
+        <member name="M:Dawnsbury.Modding.ModManager.Frontend.RegisterAtEndOfDrawFrame(System.Action)">
+            <summary>
+            Registers a block of code to run at the end of each draw iteration, after all phases on the phase stack have been drawn.
+            </summary>
+            <param name="code">A block of code to run at the end of each draw iteration, after all phases on the phase stack have been drawn.</param>
+        </member>
+        <member name="M:Dawnsbury.Modding.ModManager.Frontend.RegisterAtEndOfUpdateInPhase``1(System.Action{``0})">
+            <summary>
+            Registers a block of code to run at the end of each update iteration after <typeparamref name="TPhase"/>, if it's the topmost phase on the pahse stack.
+            You can use this to, e.g. monitor for extra keystrokes.
+            </summary>
+            <param name="code">Code block to run in the update loop, after the GAME PHASE (e.g. BattlePhase) is updated if it's the topmost phase.</param>
+            <typeparam name="TPhase">The code block should run when what phase is the topmost phase?</typeparam>
+        </member>
+        <member name="M:Dawnsbury.Modding.ModManager.Frontend.RegisterAtEndOfUpdateFrame(System.Action)">
+            <summary>
+            Registers a block of code to run at the end of each update iteration, regardless of which game phase is at the top of the phase stack. 
+            </summary>
+            <param name="code">A block of code to run at the end of each update iteration, regardless of which game phase is at the top of the phase stack.</param>
+        </member>
+        <member name="M:Dawnsbury.Modding.ModManager.Frontend.RegisterMainMenuRightSideButton(System.Action{Microsoft.Xna.Framework.Rectangle},System.Action,System.String)">
+            <summary>
+            Registers a new button to display on the right side of the main menu, above the Discord and Steam Workshop buttons.
+            </summary>
+            <param name="drawButtonContents">In this code block, draw the contents of the button into the RECTANGLE. You'll probably want to use code similar to this:
+            <code>
+            Primitives.DrawImage(Assets.TextureFromName(IllustrationName.Patreon), new Rectangle(r.X + 10 + 20, r.Y + 20, r.Height - 40, r.Height - 40), scale: true);
+            Writer.DrawString("Patreon", new Rectangle(r.X + r.Height + 30, r.Y, r.Width - r.Height - 30, r.Height), alignment: Writer.TextAlignment.Left, font: BitmapFontGroup.Mia48Font);
+            </code>
+            </param>
+            <param name="onClick">What should happen when the player clicks the button?</param>
+            <param name="tooltip">When should be displayed in the bottom left corner of the screen when the player hovers their mouse over the button.</param>
+        </member>
+        <member name="T:Dawnsbury.Modding.ModManager.Specific">
+            <summary>
+            Contains static methods that you can use to interface with very specific extension points within the rules system, such as the mechanism of raising shields.
+            </summary>
+        </member>
         <member name="M:Dawnsbury.Modding.ModManager.ToStringOrTechnical``1(``0)">
             <summary>
             Converts an enum to a string that can be used to represent it in serialized contexts, such as in FeatNames or ItemNames. For base game FeatName and ItemName instances,
@@ -10237,6 +11408,26 @@
         <member name="T:Dawnsbury.Phases.Ingame.BattlePhase">
             <summary>
             This is the main in-battle in-game screen, which performs the draw/update loop during encounters and cutscenes.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Phases.Ingame.BattlePhase.StandardTilesize">
+            <summary>
+            The width of a tile, in pixels on the standard 2560x1440 resolution. Normally, this is 100. 
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Phases.Ingame.BattlePhase.Tilesize">
+            <summary>
+            The actual width of a tile, in native pixels on the current resolution. On the standard 2560x1440, this is the same as <see cref="P:Dawnsbury.Phases.Ingame.BattlePhase.StandardTilesize"/>. This value is updated at every iteration of <see cref="M:Dawnsbury.Phases.Ingame.BattlePhase.Draw(Microsoft.Xna.Framework.Graphics.SpriteBatch,Microsoft.Xna.Framework.Game,System.Single)"/>. 
+            </summary>
+        </member>
+        <member name="M:Dawnsbury.Phases.Ingame.IGameLoopCallback.AfterCreaturePossibilitiesRegenerated(Dawnsbury.Core.Creatures.Creature)">
+            <summary>
+            Call this after you generated possibilities for a non-active creature that should now make a choice.
+            </summary>
+        </member>
+        <member name="P:Dawnsbury.Phases.Ingame.OpenBottomBar.PossibilityChain">
+            <summary>
+            Gets or sets the possibility chain that leads here, without the final separator.
             </summary>
         </member>
         <member name="P:Dawnsbury.Phases.Ingame.OpenBottomBar.StartX">

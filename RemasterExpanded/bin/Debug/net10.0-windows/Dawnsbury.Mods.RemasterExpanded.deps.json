@@ -9,15 +9,17 @@
       "Dawnsbury.Mods.RemasterExpanded/1.0.0": {
         "dependencies": {
           "Lib.Harmony": "2.4.2",
-          "System.Text.Json": "10.0.5",
           "Common": "1.0.0.0",
-          "Dawnsbury Days": "4.26.0.0",
+          "Dawnsbury Days": "4.39.0.0",
           "Dawnsbury.Mods.DawnniExpanded": "1.0.0.0",
           "Dawnsbury.Mods.LoresAndWeaknesses": "1.0.0.0",
+          "Dawnsbury.Mods.MoreBasicActions": "1.0.0.0",
           "Dawnsbury.Mods.Remaster.FeatsDb": "1.0.0.0",
           "Dawnsbury.Mods.Remaster.Spellbook": "1.0.0.0",
           "ExplorationActivities": "1.0.0.0",
+          "HereThereBeDragons": "1.0.0.0",
           "MonoGame.Framework": "3.8.4.1",
+          "PhantomSentine.Feats.GranduerChampion": "1.0.0.0",
           "PsychicExpanded": "1.0.0.0",
           "SpellsAndSpellhearts": "1.0.0.0",
           "SpiritDamage": "1.0.0.0"
@@ -34,14 +36,6 @@
           }
         }
       },
-      "System.Text.Json/10.0.5": {
-        "runtime": {
-          "lib/net10.0/System.Text.Json.dll": {
-            "assemblyVersion": "10.0.0.0",
-            "fileVersion": "10.0.526.15411"
-          }
-        }
-      },
       "Common/1.0.0.0": {
         "runtime": {
           "Common.dll": {
@@ -50,11 +44,11 @@
           }
         }
       },
-      "Dawnsbury Days/4.26.0.0": {
+      "Dawnsbury Days/4.39.0.0": {
         "runtime": {
           "Dawnsbury Days.dll": {
-            "assemblyVersion": "4.26.0.0",
-            "fileVersion": "4.26.0.0"
+            "assemblyVersion": "4.39.0.0",
+            "fileVersion": "4.39.0.0"
           }
         }
       },
@@ -69,6 +63,14 @@
       "Dawnsbury.Mods.LoresAndWeaknesses/1.0.0.0": {
         "runtime": {
           "Dawnsbury.Mods.LoresAndWeaknesses.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "Dawnsbury.Mods.MoreBasicActions/1.0.0.0": {
+        "runtime": {
+          "Dawnsbury.Mods.MoreBasicActions.dll": {
             "assemblyVersion": "1.0.0.0",
             "fileVersion": "1.0.0.0"
           }
@@ -98,11 +100,27 @@
           }
         }
       },
+      "HereThereBeDragons/1.0.0.0": {
+        "runtime": {
+          "HereThereBeDragons.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
       "MonoGame.Framework/3.8.4.1": {
         "runtime": {
           "MonoGame.Framework.dll": {
             "assemblyVersion": "3.8.4.1",
             "fileVersion": "3.8.4.1"
+          }
+        }
+      },
+      "PhantomSentine.Feats.GranduerChampion/1.0.0.0": {
+        "runtime": {
+          "PhantomSentine.Feats.GranduerChampion.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
           }
         }
       },
@@ -184,14 +202,6 @@
           },
           "zh-Hant/System.Windows.Forms.resources.dll": {
             "locale": "zh-Hant"
-          }
-        }
-      },
-      "Steamworks.NET/2025.163.0.0": {
-        "runtime": {
-          "Steamworks.NET.dll": {
-            "assemblyVersion": "2025.163.0.0",
-            "fileVersion": "2025.163.0.0"
           }
         }
       },
@@ -421,14 +431,6 @@
           }
         }
       },
-      "RemasterExpanded/1.0.0.0": {
-        "runtime": {
-          "RemasterExpanded.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
-        }
-      },
       "System.Private.Windows.Core/10.0.0.0": {
         "runtime": {
           "System.Private.Windows.Core.dll": {
@@ -493,6 +495,14 @@
           }
         }
       },
+      "Steamworks.NET/2025.163.0.0": {
+        "runtime": {
+          "Steamworks.NET.dll": {
+            "assemblyVersion": "2025.163.0.0",
+            "fileVersion": "2025.163.0.0"
+          }
+        }
+      },
       "SharpDX.Direct3D9/4.0.1.0": {
         "runtime": {
           "SharpDX.Direct3D9.dll": {
@@ -506,22 +516,6 @@
           "SharpDX.Mathematics.dll": {
             "assemblyVersion": "4.0.1.0",
             "fileVersion": "4.0.1.0"
-          }
-        }
-      },
-      "MorePsychicConscious/1.0.0.0": {
-        "runtime": {
-          "MorePsychicConscious.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
-          }
-        }
-      },
-      "Dawnsbury.Mods.Classes.Witch/1.0.0.0": {
-        "runtime": {
-          "Dawnsbury.Mods.Classes.Witch.dll": {
-            "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.0"
           }
         }
       },
@@ -556,19 +550,12 @@
       "path": "lib.harmony/2.4.2",
       "hashPath": "lib.harmony.2.4.2.nupkg.sha512"
     },
-    "System.Text.Json/10.0.5": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-vW2zhkWziyfhoSXNf42mTWyilw+vfwBGOsODDsHSFtOIY6LCgfRVUyaAilLEL4Kc1fzhaxcep5pS0VWYPSDW0w==",
-      "path": "system.text.json/10.0.5",
-      "hashPath": "system.text.json.10.0.5.nupkg.sha512"
-    },
     "Common/1.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
-    "Dawnsbury Days/4.26.0.0": {
+    "Dawnsbury Days/4.39.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -579,6 +566,11 @@
       "sha512": ""
     },
     "Dawnsbury.Mods.LoresAndWeaknesses/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Dawnsbury.Mods.MoreBasicActions/1.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -598,7 +590,17 @@
       "serviceable": false,
       "sha512": ""
     },
+    "HereThereBeDragons/1.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
     "MonoGame.Framework/3.8.4.1": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "PhantomSentine.Feats.GranduerChampion/1.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -624,11 +626,6 @@
       "sha512": ""
     },
     "System.Windows.Forms/10.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Steamworks.NET/2025.163.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
@@ -723,11 +720,6 @@
       "serviceable": false,
       "sha512": ""
     },
-    "RemasterExpanded/1.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
     "System.Private.Windows.Core/10.0.0.0": {
       "type": "reference",
       "serviceable": false,
@@ -768,22 +760,17 @@
       "serviceable": false,
       "sha512": ""
     },
+    "Steamworks.NET/2025.163.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
     "SharpDX.Direct3D9/4.0.1.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""
     },
     "SharpDX.Mathematics/4.0.1.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "MorePsychicConscious/1.0.0.0": {
-      "type": "reference",
-      "serviceable": false,
-      "sha512": ""
-    },
-    "Dawnsbury.Mods.Classes.Witch/1.0.0.0": {
       "type": "reference",
       "serviceable": false,
       "sha512": ""

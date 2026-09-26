@@ -15,6 +15,7 @@ using Dawnsbury.Core.Mechanics;
 using Dawnsbury.Core.Mechanics.Core;
 using Dawnsbury.Core.Mechanics.Damage;
 using Dawnsbury.Core.Mechanics.Enumerations;
+using Dawnsbury.Core.Mechanics.Rules;
 using Dawnsbury.Core.Mechanics.Targeting;
 using Dawnsbury.Core.Mechanics.Targeting.TargetingRequirements;
 using Dawnsbury.Core.Mechanics.Targeting.Targets;
@@ -27,6 +28,7 @@ using Dawnsbury.Display.Illustrations;
 using Dawnsbury.Display.Text;
 using Dawnsbury.Modding;
 using Microsoft.Xna.Framework;
+using RemasterExpanded.MyArchetypes;
 using RemasterExpanded.Technical;
 using SpiritDamage;
 using static RemasterExpanded.ModData;
@@ -290,7 +292,7 @@ public abstract class NewSpells3rd : NewSpells
                                 12,
                                 tile =>
                                     owner?.HasLineOfEffectTo(tile) < CoverKind.Blocked
-                                    && owner?.DistanceTo(tile) <= 24
+                                    && owner.DistanceTo(tile) <= 24
                                     && !tile.CurrentlyBlocksLineOfEffect
                             ),
                             rank,
@@ -333,7 +335,7 @@ public abstract class NewSpells3rd : NewSpells
                                                                 if (Equals(q.Owner.Occupies, tile) &&
                                                                     action.HasTrait(Trait.Move))
                                                                 {
-                                                                    q.Owner.RemoveAllQEffects((QEffect qf) =>
+                                                                    q.Owner.RemoveAllQEffects(qf =>
                                                                         qf.Id == QEffectId.InterruptMovement
                                                                     );
                                                                     if (checkResult == CheckResult.Failure)
@@ -390,7 +392,7 @@ public abstract class NewSpells3rd : NewSpells
                                             Illustration = MIllustrations.CreateIllustration("WallOfWind"),
                                         };
                                         zone.ControllerQEffect.AddGrantingOfTechnical(
-                                            cr => true,
+                                            _ => true,
                                             tech =>
                                             {
                                                 tech.PreventTargetingBy = action =>
@@ -523,6 +525,148 @@ public abstract class NewSpells3rd : NewSpells
                                 target.AddQEffect(QEffect.Enfeebled(1).WithExpirationInOneRound(caster));
                             break;
                     }
+                });
+        });
+        ModManager.RegisterNewSpell("RendMagic", 3, (_, _, level, inCombat, _) =>
+        {
+            int heighten = level % 2 == 0 ? level - 1 : level;
+            return Spells.CreateModern(MIllustrations.CreateIllustration("RendMagic"), "Rend Magic",
+                    [Trait.Arcane, Trait.Force, Trait.Attack],
+                    "You spew forth pure magical energy down your arm before releasing it in a devastating attack.",
+                    $"Make a melee spell attack against the target's AC. If it hits, the target takes {S.HeightenedVariable(heighten, 3)}d10 force damage, then takes {S.HeightenedVariable((heighten - 1) / 2, 1)}d10 force damage each time it Casts a Spell for the rest of the encounter; on a critical hit, double the initial damage and the damage when the target casts spells. This spell ends immediately if the target ends its turn without Casting a Spell.",
+                    Target.Touch(), level, null)
+                .WithHeighteningNumerical(level, 3, inCombat, 2, "The initial force damage increases by 2d10, and the force damage taken whenever the target casts a spell increases by 1d10.")
+                .WithSoundEffect(SfxName.PhaseBolt)
+                .WithActionCost(2)
+                .WithEffectOnEachTarget(async (spell, caster, target, result) =>
+                {
+                    await CommonSpellEffects.DealAttackRollDamage(spell, caster, target, result, $"{heighten}d10", DamageKind.Force);
+                    if (result <= CheckResult.Failure)
+                        return;
+                    QEffect rend = new("Rend Magic", $"Each time you cast a spell, you will take {(result == CheckResult.CriticalSuccess ? "2(" : "")}{S.HeightenedVariable((heighten - 1) / 2, 1)}d10{(result == CheckResult.CriticalSuccess ? ")" : "")} force damage. This spell ends immediately if you end your turn without Casting a Spell.", ExpirationCondition.Never, caster,
+                        MIllustrations.CreateIllustration("RendMagic"))
+                    {
+                        AfterYouTakeAction = async (effect, action) =>
+                        {
+                            if (!action.HasTrait(Trait.Spell)) return;
+                            effect.CannotExpireThisTurn = true;
+                            await CommonSpellEffects.DealDirectDamage(new DamageEvent(spell, target, result,
+                            [
+                                new KindedDamage(DiceFormula.FromText($"{(heighten - 1) / 2}d10", spell.Name),
+                                    DamageKind.Force)
+                            ], result == CheckResult.CriticalSuccess));
+                        },
+                        EndOfYourTurnBeneficialEffect = async (qf, _) =>
+                        {
+                            if (qf.CannotExpireThisTurn)
+                                return;
+                            qf.ExpiresAt = ExpirationCondition.Immediately;
+                        }
+                    };
+                    target.AddQEffect(rend);
+                });
+        });
+        ModManager.RegisterNewSpell("LightningLasso", 3, (_, _, level, inCombat, _) =>
+        {
+            return Spells.CreateModern(MIllustrations.CreateIllustration("LightningLasso"), "Lightning Lasso",
+                    [Trait.Electricity, Trait.Arcane, Trait.Primal, Trait.SpellWithDuration],
+                    "You conjure a crackling lasso of pure electricity, hurling it at a creature to bind them in place.",
+                    "The target must attempt a Reflex save."+
+                    S.FourDegreesOfSuccess("The target is unaffected.", $"The target takes {S.HeightenedVariable(level -1, 2)}d12 electricity damage.", $"The target takes {S.HeightenedVariable(level -1, 2)}d12 electricity damage and is immobilized until the end of your next turn, but it can Escape. On subsequent turns, if the target is still immobilized by the lasso, you can Sustain the spell to deal {S.HeightenedVariable((level - 2) * 2, 2)} electricity damage and keep the target immobilized until the end of your next turn.", "As failure, but the target is also restrained."),
+                    Target.Ranged(6), level, SpellSavingThrow.Standard(Defense.Reflex))
+                .WithHeighteningNumerical(level, 3, inCombat, 1, "The initial electricity damage increases by 1d12, and the electricity damage dealt when you Sustain the spell increases by 2.")
+                .WithSoundEffect(SfxName.ElectricArc)
+                .WithActionCost(2)
+                .WithEffectOnEachTarget(async (spell, caster, target, result) =>
+                {
+                    if (result == CheckResult.CriticalSuccess)
+                        return;
+                    await CommonSpellEffects.DealBasicDamage(spell, caster, target, CheckResult.Failure,
+                        $"{level - 1}d12", DamageKind.Electricity);
+                    if (result == CheckResult.Success)
+                        return;
+                    QEffect lasso = new QEffect("Lightning Lasso", $"You are {(result == CheckResult.CriticalFailure ? "restrained" : "immobilized")}.", ExpirationCondition.ExpiresAtEndOfSourcesTurn, caster, spell.Illustration)
+                    {
+                        StateCheck = qf =>
+                        {
+                            qf.Owner.AddQEffect(result == CheckResult.CriticalFailure
+                                ? QEffect.Restrained(caster).WithExpirationEphemeral()
+                                : QEffect.Immobilized().WithExpirationEphemeral());
+                        },
+                        ProvideContextualAction = qf => new ActionPossibility(Possibilities.CreateEscapeAgainstEffect(qf.Owner, qf, "Lightning Lasso", spell.SpellcastingSource?.GetSpellSaveDC(spell) ?? 10)),
+                        CannotExpireThisTurn = true,
+                        CountsAsBeneficialToSource = true
+                    }.WithSourceAction(spell).WithDispellable(spell).WithSource(caster);
+                    target.AddQEffect(lasso);
+                    caster.AddQEffect(QEffect.Sustaining(spell, lasso, async qf =>
+                    {
+                        await CommonSpellEffects.DealDirectDamage(spell, qf.Owner, $"{(level - 2) * 2}", DamageKind.Electricity);
+                    }, $" Sustaining the effect deals {S.HeightenedVariable((level - 2) * 2, 2)} electricity damage to {target.Name} and keeps them immobilized until the end of your next turn."));
+
+                });
+        });
+        return;
+        ModManager.RegisterNewSpell("SkyglassPrison", 3, (_, _, level, inCombat, _) =>
+        {
+            return Spells.CreateModern(MIllustrations.CreateIllustration("SkyglassPrison"), "Skyglass Prison",
+                [Trait.Air, Trait.Arcane, Trait.Occult, Trait.Primal],
+                "The air around the target solidifies like glass, trapping the creature in a cage that perfectly encases them, making movement nearly impossible.",
+                $"The target makes a Fortitude save. The target becomes trapped in a cage that has AC 10, Hardness 5, and {S.HeightenedVariable(level * 10, 30)} Hit Points, and is immune to critical hits and precision damage. When a creature Escapes or the cage is destroyed, shards of hardened air cut the target creature, dealing {S.HeightenedVariable(level, 3)}d4 slashing damage. You can Dismiss this spell to destroy the cage." +
+                S.FourDegreesOfSuccess("The target is unaffected.", "The target is immobilized until it Escapes or until the cage is destroyed. The cage is automatically destroyed at the start of your next turn.", "The target is immobilized until it Escapes or until the cage is destroyed.", "The target is restrained until it Escapes or until the cage is destroyed."),
+                Target.Ranged(6).WithAdditionalConditionOnTargetCreature((_, enemy) => enemy.HasEffect(QEffectId.Incorporeal) ? Usability.NotUsableOnThisCreature("Cannot capture an incorporeal creature with a corporeal prison.") : Usability.Usable), level, SpellSavingThrow.Standard(Defense.Fortitude))
+                .WithActionCost(2)
+                .WithHeighteningNumerical(level, 3, inCombat, 1, "The cage's Hit Points increase by 10, and the slashing damage increases by 1d4.")
+                .WithEffectOnEachTarget(async (spell, caster, target, result) =>
+                {
+                    if (result ==  CheckResult.CriticalSuccess)
+                        return;
+                    QEffect cage = new("Skyglass Prison", $"You are {(result == CheckResult.CriticalFailure ? "restrained" : "immobilized")} until you Escape or until the cage is destroyed.{(result == CheckResult.Success ? $" The cage is automatically destroyed at the start of {caster.Name}'s next turn." : "")}", spell.Illustration)
+                    {
+                        StateCheck = qf => qf.Owner.AddQEffect(result == CheckResult.CriticalFailure ? QEffect.Restrained(caster).WithExpirationEphemeral() : QEffect.Immobilized().WithExpirationEphemeral()),
+                        WhenExpires = _ =>
+                        {
+                            if (!target.Alive)
+                                return;
+                            target.AddQEffect(new QEffect
+                            {
+                                StateCheckWithVisibleChanges = async qf =>
+                                {
+                                    await CommonSpellEffects.DealDirectDamage(spell,
+                                        DiceFormula.FromText($"{level}d4", spell.Name), target, CheckResult.Failure,
+                                        DamageKind.Slashing);
+                                    qf.ExpiresAt = ExpirationCondition.Immediately;
+                                }
+                            });
+                        },
+                        ProvideContextualAction = qf => new ActionPossibility(Possibilities.CreateEscapeAgainstEffect(target, qf, "Skyglass Prison", spell.SpellcastingSource?.GetSpellSaveDC(spell) ?? 10))
+                    };
+                    cage.AttackableShell = AttackableShellRules.CreateAttackableShell(target, "Skyglass Prison", 10, level * 10)
+                        .WithHardness(5)
+                        .WithImmunityToCriticalHits()
+                        .With(cr =>
+                        {
+                            cr.AddQEffect(QEffect.ObjectImmunities());
+                            cr.AddQEffect(QEffect.TraitImmunity(Trait.PrecisionDamage));
+                            cr.AddQEffect(new QEffect
+                            {
+                                WhenMonsterDies = _ => cage.ExpiresAt = ExpirationCondition.Immediately
+                            });
+                            cr.OwningFaction = caster.OwningFaction;
+                        });
+                    cage.WithSourceAction(spell).WithDispellable(spell)
+                        .WithExpirationOneRoundOrRestOfTheEncounter(caster, result != CheckResult.Success);
+                    target.AddQEffect(cage);
+                    caster.AddQEffect(new QEffect
+                    {
+                        Innate = false,
+                        WhenExpires = _ => cage.ExpiresAt = ExpirationCondition.Immediately,
+                        StateCheck = qf =>
+                        {
+                            if (target.HasEffect(cage))
+                                return;
+                            qf.ExpiresAt = ExpirationCondition.Immediately;
+                        }
+                    }.WithName("Skyglass Prison").WithDismissable());
                 });
         });
     }
