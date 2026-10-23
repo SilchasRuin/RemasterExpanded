@@ -1,3 +1,20 @@
+## Tweaks:
+- Adds a mod option to remaster hammer and flail crit specialization.
+- Universalist Wizards receive the Hand of the Apprentice spell at level 1.
+- Sorcerers gain Sorcerous Potency at level 1.
+- Gunslingers gain Slinger's Precision at level 1.
+- Remasters the [Oscillating Wave](https://2e.aonprd.com/ConsciousMinds.aspx?ID=9).
+- Adds Figment as a standard psychic cantrip to the [Tangible Dream](https://2e.aonprd.com/ConsciousMinds.aspx?ID=11).
+- Drakeheart mutagen adds a penalty to recall weakness.
+- Bestial mutagen remastered.
+- Champions and Clerics can choose to be sanctified.
+- Champions treat their deity's favored weapon as a martial weapon for proficiency.
+- [Champion is remastered](https://github.com/SilchasRuin/RemasterExpanded/blob/master/README.md#champion-remaster)
+- All classes can choose a deity.
+- The Armor Proficiency feat scales to expert at level 13.
+- [Magus is remastered](https://github.com/SilchasRuin/RemasterExpanded/blob/master/README.md#magus-remaster)
+- [The Oracle is remastered.](https://github.com/SilchasRuin/RemasterExpanded/blob/master/README.md#oracle-remastered)
+
 ## Archetypes
 * [Pirate](https://2e.aonprd.com/Archetypes.aspx?ID=258)
 * [Viking](https://2e.aonprd.com/Archetypes.aspx?ID=268)
