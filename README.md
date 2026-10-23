@@ -1,4 +1,4 @@
-### Archetypes
+## Archetypes
 * [Pirate](https://2e.aonprd.com/Archetypes.aspx?ID=258)
 * [Viking](https://2e.aonprd.com/Archetypes.aspx?ID=268)
 * [Viking Guard](https://2e.aonprd.com/Archetypes.aspx?ID=320)
@@ -7,7 +7,7 @@
 * [Eagle Knight](https://2e.aonprd.com/Archetypes.aspx?ID=314)
 * [Sister of the Golden Erinys](https://2e.aonprd.com/Archetypes.aspx?ID=380)
 
-### Miscellaneous Feats
+## Feats
 * [Robust Health](https://2e.aonprd.com/Feats.aspx?ID=6499)
 * [Advanced School Spell](https://2e.aonprd.com/Feats.aspx?ID=5036) Implemented with Remaster Feats and replaces the base game version.
 * [Experienced Tracker](https://2e.aonprd.com/Feats.aspx?ID=5146) With a Homebrew effect (+2 initiative when taking the Track exploration activity)
@@ -95,7 +95,7 @@
 * [Waters of Creation](https://2e.aonprd.com/Feats.aspx?ID=6073)
 * [Lighter than Air](https://2e.aonprd.com/Feats.aspx?ID=6078)
 
-### Additional Items
+## Additional Items
 * [Trusty Helmet](https://2e.aonprd.com/Equipment.aspx?ID=3983)
 * [Autoload Leathers](https://2e.aonprd.com/Equipment.aspx?ID=3803)
 * [Squires Tabard](https://2e.aonprd.com/Equipment.aspx?ID=3980)
@@ -117,7 +117,56 @@
 * [Deathbane Crescent](https://2e.aonprd.com/Equipment.aspx?ID=5150) Requires the Caster's Compendium Mod
 * Heavy Mail an item equivalent to [Chain Mail](https://2e.aonprd.com/Armor.aspx?ID=46) with an [Armored Skirt](https://2e.aonprd.com/Equipment.aspx?ID=514) equipped.
 
-### Deities
+## Spells
+
+### Cantrips
+- [Figment](https://2e.aonprd.com/Spells.aspx?ID=1528)
+- [Divine Lance](https://2e.aonprd.com/Spells.aspx?ID=1498) Remastered.
+- [Frostbite](https://2e.aonprd.com/Spells.aspx?ID=1539)
+- [Ignition](https://2e.aonprd.com/Spells.aspx?ID=1565)
+- [Vitality Lash](https://2e.aonprd.com/Spells.aspx?ID=1744)
+- [Void Warp](https://2e.aonprd.com/Spells.aspx?ID=1745)
+
+### Rank 1
+- [Liberating Command](https://2e.aonprd.com/Spells.aspx?ID=2354)
+- [Curse of Recoil](https://2e.aonprd.com/Spells.aspx?ID=2498)
+- [Befuddle](https://2e.aonprd.com/Spells.aspx?ID=2344)
+- [Summon Construct](https://2e.aonprd.com/Spells.aspx?ID=1696)
+- [Infuse Vitality](https://2e.aonprd.com/Spells.aspx?ID=1574)
+- [Thunderstrike](https://2e.aonprd.com/Spells.aspx?ID=1721)
+
+### Rank 2
+- [Albatross Curse](https://2e.aonprd.com/Spells.aspx?ID=1946)
+- [Hidebound](https://2e.aonprd.com/Spells.aspx?ID=1954)
+- [Pyrefowl Rebuke](https://2e.aonprd.com/Spells.aspx?ID=2520)
+- [Sticky Fire](https://2e.aonprd.com/Spells.aspx?ID=2517)
+- [Axes of Legend](https://2e.aonprd.com/Spells.aspx?ID=2308)
+- [The Queen's Rainbow](https://2e.aonprd.com/Spells.aspx?ID=2332)
+
+### Rank 3
+- [Croak Voice](https://2e.aonprd.com/Spells.aspx?ID=1951)
+- [Feet to Fins](https://2e.aonprd.com/Spells.aspx?ID=1525)
+- [Warding Aggression](https://2e.aonprd.com/Spells.aspx?ID=2860)
+- [Wall of Wind](https://2e.aonprd.com/Spells.aspx?ID=1753) Credit to Junabell
+- [Earthbind](https://2e.aonprd.com/Spells.aspx?ID=1506) with a homebrew effect
+- [Soul Cutter](https://2e.aonprd.com/Spells.aspx?ID=2821)
+
+### Rank 4
+- [Weapon Storm](https://2e.aonprd.com/Spells.aspx?ID=1758)
+- [Vision of Death](https://2e.aonprd.com/Spells.aspx?ID=1742)
+- [Ice Storm](https://2e.aonprd.com/Spells.aspx?ID=2001)
+- [Divine Wrath](https://2e.aonprd.com/Spells.aspx?ID=1499) Remastered
+- [Force Rain](https://2e.aonprd.com/Spells.aspx?ID=2709)
+- [Vital Beacon](https://2e.aonprd.com/Spells.aspx?ID=1743)
+
+### Rank 5
+- [Howling Blizzard](https://2e.aonprd.com/Spells.aspx?ID=1559)
+- [Shock and Awe](https://2e.aonprd.com/Spells.aspx?ID=2513)
+- [Invoke Spirits](https://2e.aonprd.com/Spells.aspx?ID=1578)
+- [Blinding Bottle](https://2e.aonprd.com/Spells.aspx?ID=2493)
+- [Grisly Growths](https://2e.aonprd.com/Spells.aspx?ID=1998)
+
+## Deities
 * Zarazrael  [based on](https://2e.aonprd.com/Deities.aspx?ID=481)
 * The World Serpent [based on](https://2e.aonprd.com/Deities.aspx?ID=459)
 * The Lost Lord [based on](https://2e.aonprd.com/Deities.aspx?ID=456)
@@ -126,7 +175,7 @@
 * The Pranksters [based on](https://2e.aonprd.com/Deities.aspx?ID=370)
 * The Sovereign Sword [based on](https://2e.aonprd.com/Deities.aspx?ID=699)
 
-### Differences from Tabletop:  
+## Differences from Tabletop:  
 * Pirate and Viking grant Maritime Lore, a lore focused on various water based creatures, instead of Sailing Lore.  
 * Pirate grants a bonus to Acrobatics checks and saving throws to Balance instead of ignoring difficult terrain and uneven ground.  
 * Viking grants a 10 foot bonus to speed while underwater instead of improving Swim checks.  
